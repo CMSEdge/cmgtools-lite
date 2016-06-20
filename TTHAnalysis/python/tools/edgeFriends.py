@@ -93,22 +93,21 @@ class edgeFriends:
                              'GenSusyMNeutralino', 'GenSusyMNeutralino2', 'GenSusyMNeutralino3', 'GenSusyMNeutralino4',
                              'GenSusyMChargino'  , 'GenSusyMChargino2']
 
-        self.triggerlist2015 = ['HLT_at51'      , 'HLT_at52'       , 'HLT_at53'       , 'HLT_at55'        , 'HLT_at57'     ,
-                                'HLT_DoubleEl'  , 'HLT_el17el12_dz', 'HLT_el23el12_dz', 'HLT_ele33ele33'  ,
-                                'HLT_DoubleMu'  , 'HLT_mu17mu8'    , 'HLT_mu17mu8_dz' , 'HLT_mu17tkmu8_dz', 'HLT_mu27tkmu8',
-                                'HLT_MuEG'      , 'HLT_mu17el12'   , 'HLT_mu30ele30'  , 'HLT_mu8el17'     , 'HLT_mu8el23'  ,
-                                'HLT_pfht200'   , 'HLT_pfht250'    , 'HLT_pfht300'    , 'HLT_pfht350'     , 'HLT_pfht400'  , 
-                                'HLT_pfht475'   , 'HLT_pfht600'    , 'HLT_pfht800'    , 'HLT_pfht900'     ,
-                                'HLT_DoubleElHT', 'HLT_DoubleMuHT' , 'HLT_MuEGHT'     , 
-                                'HLT_HTJet'     , 'HLT_HTMET'      , 
-                                'HLT_SingleEl'  , 'HLT_SingleMu']
+        self.triggerlist = ['HLT_mu17mu8',
+                            'HLT_mu17mu8_dz',
+                            'HLT_mu17tkmu8_dz',
+                            'HLT_mu17el12',
+                            'HLT_el17el12_dz',
+                            'HLT_el23el12_dz',
+                            'HLT_mu8el17',
+                            'HLT_mu8el23',
+                            'HLT_mu30tkmu11_noniso',
+                            'HLT_mu30el30_noniso',
+                            'HLT_doubleele33_noniso',
+                            'HLT_htall',
+                            'HLT_atall',
+                            'HLT_htmet' ]
 
-        self.triggerlist = ['HLT_DoubleEl'  , #('HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ', 'HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ')
-                            'HLT_DoubleMu'  , #('HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ', 'HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ') 
-                            'HLT_MuEG'      , #('HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL', 'HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL', 'HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL', 'HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL')
-                            'HLT_SingleMu'  , #('HLT_IsoMu24_eta2p1', 'HLT_IsoTkMu24_eta2p1', 'HLT_IsoMu18', 'HLT_IsoMu20', 'HLT_IsoTkMu20', 'HLT_IsoMu27', 'HLT_IsoTkMu27')
-                            'HLT_SingleEl'    #('HLT_Ele23_WPLoose_Gsf', 'HLT_Ele23_CaloIdL_TrackIdL_IsoVL', 'HLT_Ele27_WPLoose_Gsf', 'HLT_Ele27_eta2p1_WPLoose_Gsf', 'HLT_Ele32_eta2p1_WPLoose_Gsf', 'HLT_Ele27_WP85_Gsf', 'HLT_Ele27_eta2p    1_WP75_Gsf', 'HLT_Ele32_eta2p1_WP75_Gsf')
-                            ]
         self.btagMediumCut = 0.800
         self.btagLooseCut  = 0.460
 
@@ -256,10 +255,10 @@ class edgeFriends:
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
         for trig in self.triggerlist:
-            if not isData:
-                trigret[trig] = -1
-            else:
-                trigret[trig] = (-1 if not hasattr(event, trig) else getattr(event, trig) )
+            ##if not isData:
+            ##    trigret[trig] = -1
+            ##else:
+            trigret[trig] = (-1 if not hasattr(event, trig) else getattr(event, trig) )
         t1 = time.time()
 
         ret['genWeight']          = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
