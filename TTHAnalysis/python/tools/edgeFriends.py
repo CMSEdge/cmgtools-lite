@@ -24,9 +24,12 @@ class edgeFriends:
         self.cleanJet = cleanJet
         #self.isMC = isMC
         ## with nvtx self.puFile = open("/afs/cern.ch/work/m/mdunser/public/puWeighting/puWeightsVinceLumi1p28.txt","r")
-        self.puFile = open("/afs/cern.ch/work/m/mdunser/public/puWeighting/puWeightsOfficialPrescription.txt","r")
-        self.pu_dict = eval(self.puFile.read())
-        self.puFile.close()
+        ##self.puFile = open("/afs/cern.ch/work/m/mdunser/public/puWeighting/puWeightsOfficialPrescription.txt","r")
+        ##self.pu_dict = eval(self.puFile.read())
+        ##self.puFile.close()
+        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
+        self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
+        self.puFile.Close()
         ## filter things
         ## =================
         self.beamHaloListFile = open("/afs/cern.ch/user/p/pablom/public/Filters_27_01_2016/csc2015.txt", "r")
@@ -74,7 +77,7 @@ class edgeFriends:
         ## =================
         ## pdf things
         ## =================
-        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version24_savingTheWorkspace_june2016.root")
+        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
         self.wspace = copy.deepcopy( self.an_file.Get('w') )
         # data
         for t in ['DA','MC']:
@@ -286,7 +289,8 @@ class edgeFriends:
         # ====================
         # do pileupReweighting
         # ====================
-        puWt = self.pu_dict[int(ntrue)] if not isData else 1.
+        #puWt = self.pu_dict[int(ntrue)] if not isData else 1.
+        puWt = self.puHist.GetBinContent(self.puHist.FindBin(ntrue)) if not isData else 1.
         #if puWt > 10: puWt = 10.
         ret["PileupW"] = puWt
         t21 = time.time()
