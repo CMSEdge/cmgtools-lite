@@ -30,28 +30,6 @@ class edgeFriends:
         self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
         self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puFile.Close()
-        ## filter things
-        ## =================
-        self.beamHaloListFile = open("/afs/cern.ch/user/p/pablom/public/Filters_27_01_2016/csc2015.txt", "r")
-        self.fourthBadEESuperCrystalFile = open("/afs/cern.ch/user/p/pablom/public/Filters_27_01_2016/ecalscn1043093.txt","r")
-        self.badResolutionTrackTaggerFile = open("/afs/cern.ch/user/p/pablom/public/Filters_27_01_2016/badResolutionTrack.txt","r")
-        self.badMuonTrackTaggerFile = open("/afs/cern.ch/user/p/pablom/public/Filters_27_01_2016/muonBadTrack.txt","r")
-        self.beamHaloSet = set()
-        self.fourthBadEESuperCrystalSet = set()
-        self.badResolutionTrackTaggerSet = set()
-        self.badMuonTrackTaggerSet = set()
-        for i in list(self.beamHaloListFile):
-            self.beamHaloSet.add(i.rstrip('\n'))
-        for i in list(self.fourthBadEESuperCrystalFile):
-            self.fourthBadEESuperCrystalSet.add(i.rstrip('\n'))
-        for i in list(self.badResolutionTrackTaggerFile):
-            self.badResolutionTrackTaggerSet.add(i.rstrip('\n'))
-        for i in list(self.badMuonTrackTaggerFile):
-            self.badMuonTrackTaggerSet.add(i.rstrip('\n'))
-        self.beamHaloListFile.close()
-        self.fourthBadEESuperCrystalFile.close()
-        self.badResolutionTrackTaggerFile.close()
-        self.badMuonTrackTaggerFile.close()
         ##B-tagging stuff
         self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2.csv")
         self.reader_heavy    = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "central")
@@ -200,9 +178,7 @@ class edgeFriends:
                     ("parPt" + label, "F"),
                     ("ortPt" + label, "F"),
                     ("dTheta" + label, "F"),
-                    ('hbheFilterIso' +label, 'I'),
-                    ('hbheFilterNew25ns' +label, 'I'),
-                    ('Flag_eeBadScFilter' +label, 'I'),
+                    ('passesFilters' +label, 'I'),
                     ('genWeight' +label, 'F'),
                  ]
         for trig in self.triggerlist:
@@ -265,9 +241,15 @@ class edgeFriends:
         t1 = time.time()
 
         ret['genWeight']          = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
-        ret['hbheFilterIso'     ] = ( 1  if not hasattr(event, 'hbheFilterIso'     ) else int(getattr(event, 'hbheFilterIso'     )) )
-        ret['hbheFilterNew25ns' ] = ( 1  if not hasattr(event, 'hbheFilterNew25ns' ) else int(getattr(event, 'hbheFilterNew25ns' )) )
-        ret['Flag_eeBadScFilter'] = ( 1  if not hasattr(event, 'Flag_eeBadScFilter') else int(getattr(event, 'Flag_eeBadScFilter')) )
+        ret['passesFilters'] = (event.Flag_HBHENoiseFilter and 
+                                event.Flag_HBHENoiseIsoFilter and 
+                                event.Flag_EcalDeadCellTriggerPrimitiveFilter and 
+                                event.Flag_goodVertices and 
+                                event.Flag_eeBadScFilter and 
+                                event.Flag_CSCTightHalo2015Filter and 
+                                event.Flag_METFilters)
+        if isData:
+            ret['passesFilters'] = 1
 
         ## this will be slow
         ## ret['isLefthanded' ] = 0
@@ -515,21 +497,6 @@ class edgeFriends:
         ret["st"] = met+lepret["Lep1_pt"+self.label]+lepret["Lep2_pt"+self.label]
         t9 = time.time()
 
-        ## beam halo filter list file:
-        ## do this only for data
-        if isData:
-            evt_str = '%d:%d:%d'%(event.run, event.lumi, event.evt)
-            if evt_str in self.beamHaloSet:
-                ret['nPairLep'] = -1
-            if evt_str in self.fourthBadEESuperCrystalSet:
-                ret['nPairLep'] = -1
-            if evt_str in self.badResolutionTrackTaggerSet:
-                ret['nPairLep'] = -1
-            if evt_str in self.badMuonTrackTaggerSet:
-                ret['nPairLep'] = -1
-        ## ====== done with beam halo and other filters check
-
-        
         ## get the SR id which is 1xx for central and 2xx for forward. the 10 digit is the number of 
         ## b-tags and the signle digit is the mll region going from 1-5
         isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
