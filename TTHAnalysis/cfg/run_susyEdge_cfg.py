@@ -35,7 +35,8 @@ ttHLepSkim.maxLeptons = 999
 #ttHLepSkim.idCut  = ""
 #ttHLepSkim.ptCuts = [10, 10]
 
-#runData = False
+runData = False
+runSMS = True
 
 # Run miniIso
 lepAna.doMiniIsolation = True
@@ -252,8 +253,6 @@ from CMGTools.HToZZ4L.tools.configTools import printSummary, configureSplittingF
 # Use the dropLHEweights option if you don't need the per-event LHE weights! It saves a lot of space.
 
 
-#selectedComponents = SMS_miniAODv2_T1tttt
-#susyCounter.SMS_varying_masses = ['genSusyMGluino','genSusyMNeutralino']
 
 selectedComponents = [TTJets_DiLepton, TTJets_DiLepton_ext, TTLep_pow_ext,
                       TBar_tWch, T_tWch,
@@ -261,9 +260,16 @@ selectedComponents = [TTJets_DiLepton, TTJets_DiLepton_ext, TTLep_pow_ext,
                       #DY1JetsToLL_M50_LO, DY2JetsToLL_M50_LO, DY3JetsToLL_M50_LO, DY4JetsToLL_M50_LO  ]
                       DYJetsToLL_M50_HT100to200_ext, DYJetsToLL_M50_HT200to400_ext, DYJetsToLL_M50_HT400to600_ext, DYJetsToLL_M50_HT600toInf, DYJetsToLL_M50_HT600toInf_ext,
                       ZZ, WZTo2L2Q, WZTo3LNu, WWTo2L2Nu, TTZToLLNuNu, TTWToLNu ]
+
 for comp in selectedComponents:
     comp.splitFactor = 100
     comp.fineSplitFactor = 1
+
+if runSMS:
+    selectedComponents = [SMS_T6bbllslepton_mSbottom800to950_mLSP150to900]
+    for comp in selectedComponents:
+        comp.splitFactor = 500
+        comp.fineSplitFactor = 1
                       
 
 if runData and not isTest: # For running on data
@@ -271,12 +277,13 @@ if runData and not isTest: # For running on data
     is50ns = False
     dataChunks = []
 
-    json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt' ## june 16, 2.6 fb-1
+    ## json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt' ## june 16, 2.6 fb-1
+    json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt' ## june 23, 4.0 fb-1
 
-    processing = "Run2016B-PromptReco-v1"; short = "Run2016B-PromptReco-v1"; run_ranges = []; useAAA=False;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
+    ## processing = "Run2016B-PromptReco-v1"; short = "Run2016B-PromptReco-v1"; run_ranges = [(271036,275125)]; useAAA=True;
+    ## dataChunks.append((json,processing,short,run_ranges,useAAA))
 
-    processing = "Run2016B-PromptReco-v2"; short = "Run2016B-PromptReco-v2"; run_ranges = []; useAAA=False;
+    processing = "Run2016B-PromptReco-v2"; short = "Run2016B-PromptReco-v2"; run_ranges = [(271036,275125)]; useAAA=True;
     dataChunks.append((json,processing,short,run_ranges,useAAA))
 
     compSelection = ""; compVeto = ""
@@ -312,7 +319,7 @@ if runData and not isTest: # For running on data
                                                  useAAA=useAAA)
                 print "Will process %s (%d files)" % (comp.name, len(comp.files))
     #            print "\ttrigger sel %s, veto %s" % (triggers, vetos)
-                comp.splitFactor = len(comp.files)/8
+                comp.splitFactor = len(comp.files)/4
                 comp.fineSplitFactor = 1
                 selectedComponents.append( comp )
             vetos += triggers
@@ -360,6 +367,13 @@ elif test == 'synch':
         comp.files = ['/afs/cern.ch/work/m/mdunser/public/synchFiles/files2016/doubleMuonFile.root']
         comp.splitFactor = 1
         comp.fineSplitFactor = 1
+elif test == 'testSignal':
+    selectedComponents = [SMS_T6bbllslepton_mSbottom400to575_mLSP150to550]
+    for comp in selectedComponents:
+        comp.splitFactor = 500
+        comp.fineSplitFactor = 1
+        comp.files = comp.files[:1]
+    susyCounter.SMS_varying_masses = ['genSusyMSbottom','genSusyMNeutralino2']
 elif test == '2':
     for comp in selectedComponents:
         comp.files = comp.files[:1]

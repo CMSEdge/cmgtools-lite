@@ -18,6 +18,9 @@ SMS_T2tt_mStop425_mLSP325,
 SMS_T2tt_mStop500_mLSP325,
 ]
 
+SMS_T6bbllslepton_mSbottom800to950_mLSP150to900 = kreator.makeMCComponent("SMS_T6bbllslepton_mSbottom800to950_mLSP150to900", "/SMS-T6bbllslepton_mSbottom-800To950_mLSP-150To900_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-pLHE_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "CMS", ".*root", 1.)
+SMS_T6bbllslepton_mSbottom400to575_mLSP150to550 = kreator.makeMCComponent("SMS_T6bbllslepton_mSbottom400to575_mLSP150to550", "/SMS-T6bbllslepton_mSbottom-400To575_mLSP-150To550_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring16MiniAODv2-pLHE_PUSpring16Fast_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/MINIAODSIM", "CMS", ".*root", 1.)
+
 ### ----------------------------- summary ----------------------------------------
 
 
