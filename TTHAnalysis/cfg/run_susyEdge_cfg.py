@@ -35,8 +35,9 @@ ttHLepSkim.maxLeptons = 999
 #ttHLepSkim.idCut  = ""
 #ttHLepSkim.ptCuts = [10, 10]
 
-runData = False
-runSMS = True
+runData = True
+runCrab = True
+runSMS = False
 
 # Run miniIso
 lepAna.doMiniIsolation = True
@@ -49,8 +50,8 @@ lepAna.doIsolationScan = False
 lepAna.loose_electron_id = "POG_MVA_ID_Spring15_NonTrig_VLooseIdEmu"
 isolation = "miniIso"
 
-jetAna.mcGT   = 'Spring16_25nsV3_MC'
-jetAna.dataGT = 'Spring16_25nsV3_DATA'
+jetAna.mcGT   = 'Spring16_25nsV6_MC'
+jetAna.dataGT = 'Spring16_25nsV6_DATA'
 jetAna.copyJetsByValue = True # do not remove this
 metAna.copyMETsByValue = True # do not remove this
 if not removeJecUncertainty:
@@ -179,6 +180,8 @@ if not runSMS:
     treeProducer.globalVariables.append(NTupleVariable("hbheFilterNew50ns", lambda ev: ev.hbheFilterNew50ns, int, help="new HBHE filter for 50 ns"))
     treeProducer.globalVariables.append(NTupleVariable("hbheFilterNew25ns", lambda ev: ev.hbheFilterNew25ns, int, help="new HBHE filter for 25 ns"))
     treeProducer.globalVariables.append(NTupleVariable("hbheFilterIso", lambda ev: ev.hbheFilterIso, int, help="HBHE iso-based noise filter"))
+    treeProducer.globalVariables.append(NTupleVariable("Flag_badChargedHadronFilter", lambda ev: ev.badChargedHadron, help="bad charged hadron filter decision"))
+    treeProducer.globalVariables.append(NTupleVariable("Flag_badMuonFilter", lambda ev: ev.badMuon, help="bad muon filter decision"))
 
 #additional MET quantities
 metAna.doTkMet = True
@@ -199,21 +202,26 @@ if not skipT1METCorr:
 #-------- SAMPLES AND TRIGGERS -----------
 
 
-from CMGTools.RootTools.samples.triggers_13TeV_Spring15 import *
+from CMGTools.RootTools.samples.triggers_13TeV_DATA2016 import *
 triggerFlagsAna.triggerBits = {
-    'mu17mu8' : triggers_mu17mu8,
-    'mu17mu8_dz' : triggers_mu17mu8_dz,
-    'mu17tkmu8_dz' : triggers_mu17tkmu8_dz,
-    'mu17el12' : triggers_mu17el12,
-    'el17el12_dz' : triggers_el17el12_dz,
-    'el23el12_dz' : triggers_el23el12_dz,
-    'mu8el17' : triggers_mu8el17,
-    'mu8el23' : triggers_mu8el23,
 
+    'mu17mu8'               :  triggers_mu17mu8       ,  # ['HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*']
+    'mu17mu8_dz'            :  triggers_mu17mu8_dz    ,  # ['HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*']
+    'mu17tkmu8'             :  triggers_mu17tkmu8     ,  # ['HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*']
+    'mu17tkmu8_dz'          :  triggers_mu17tkmu8_dz  ,  # ['HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*']
+    'mu17el12'              :  triggers_mu17el12      ,  # ['HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*']
+    'mu23el12'              :  triggers_mu23el12      ,  # ['HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*']
+    'mu23el8'               :  triggers_mu23el8       ,  # ['HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v*']
+    'mu27tkmu8'             :  triggers_mu27tkmu8     ,  # ['HLT_Mu27_TkMu8_v*']
+    'el17el12_dz'           :  triggers_el17el12_dz   ,  # ['HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*']
+    'el23el12_dz'           :  triggers_el23el12_dz   ,  # ['HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*']
+    'mu8el17'               :  triggers_mu8el17       ,  # ['HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*']
+    'mu8el23'               :  triggers_mu8el23       ,  # ['HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*']
+    'mu30tkmu11_noniso'     :  triggers_mu30tkmu11    ,  # ['HLT_Mu30_TkMu11_v*']
+    'mu30ele30_noniso'      :  triggers_mu30ele30     ,  # ['HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v*']
+    'doubleele33_noniso'    :  triggers_doubleele33   ,  # ['HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*']
+    'doubleele33_MW_noniso' :  triggers_doubleele33_MW,  # ['HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v*']
 
-    'mu30tkmu11_noniso' : triggers_mu30tkmu11,
-    'mu30el30_noniso'   : triggers_mu30ele30,
-    'doubleele33_noniso': triggers_doubleele33,
     ## combine HT triggers into one OR
     'htall': triggers_pfht200 + 
              triggers_pfht250 + 
@@ -254,19 +262,21 @@ from CMGTools.HToZZ4L.tools.configTools import printSummary, configureSplittingF
 
 
 
-selectedComponents = [TTJets_DiLepton, TTJets_DiLepton_ext, TTLep_pow_ext,
-                      TBar_tWch, T_tWch,
-                      DYJetsToLL_M10to50, DYJetsToLL_M50,
-                      #DY1JetsToLL_M50_LO, DY2JetsToLL_M50_LO, DY3JetsToLL_M50_LO, DY4JetsToLL_M50_LO  ]
-                      DYJetsToLL_M50_HT100to200_ext, DYJetsToLL_M50_HT200to400_ext, DYJetsToLL_M50_HT400to600_ext, DYJetsToLL_M50_HT600toInf, DYJetsToLL_M50_HT600toInf_ext,
-                      ZZ, WZTo2L2Q, WZTo3LNu, WWTo2L2Nu, TTZToLLNuNu, TTWToLNu ]
+selectedComponents = [##TTJets_DiLepton, TTJets_DiLepton_ext, TTLep_pow_ext,
+                      ##TBar_tWch, T_tWch,
+                      ##DYJetsToLL_M10to50, DYJetsToLL_M50,
+                      ###DY1JetsToLL_M50_LO, DY2JetsToLL_M50_LO, DY3JetsToLL_M50_LO, DY4JetsToLL_M50_LO  ]
+                      ##DYJetsToLL_M50_HT100to200_ext, DYJetsToLL_M50_HT200to400_ext, DYJetsToLL_M50_HT400to600_ext, DYJetsToLL_M50_HT600toInf, DYJetsToLL_M50_HT600toInf_ext,
+                      ##ZZ, WZTo2L2Q, WZTo3LNu, WWTo2L2Nu, TTZToLLNuNu, TTWToLNu ]
+                      TTZ_LO, TTW_LO]
 
 for comp in selectedComponents:
-    comp.splitFactor = 100
+    comp.splitFactor = 300
     comp.fineSplitFactor = 1
 
 if runSMS:
-    selectedComponents = [SMS_T6bbllslepton_mSbottom800to950_mLSP150to900]
+    selectedComponents = [SMS_T6bbllslepton_mSbottom400to575_mLSP150to550,
+                          SMS_T6bbllslepton_mSbottom800to950_mLSP150to900]
     for comp in selectedComponents:
         comp.splitFactor = 500
         comp.fineSplitFactor = 1
@@ -278,12 +288,15 @@ if runData and not isTest: # For running on data
     dataChunks = []
 
     ## json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt' ## june 16, 2.6 fb-1
-    json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt' ## june 23, 4.0 fb-1
+    ## json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-275125_13TeV_PromptReco_Collisions16_JSON.txt' ## june 23, 4.0 fb-1
+    import os
+    jsonfile = 'Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt'
+    json = os.environ['CMSSW_BASE']+'/src/CMGTools/TTHAnalysis/data/json/'+jsonfile
 
     ## processing = "Run2016B-PromptReco-v1"; short = "Run2016B-PromptReco-v1"; run_ranges = [(271036,275125)]; useAAA=True;
     ## dataChunks.append((json,processing,short,run_ranges,useAAA))
 
-    processing = "Run2016B-PromptReco-v2"; short = "Run2016B-PromptReco-v2"; run_ranges = [(271036,275125)]; useAAA=True;
+    processing = "Run2016B-PromptReco-v2"; short = "Run2016B-PromptReco-v2"; run_ranges = [(271036,276097)]; useAAA=True;
     dataChunks.append((json,processing,short,run_ranges,useAAA))
 
     compSelection = ""; compVeto = ""
@@ -390,14 +403,25 @@ elif test == '5':
         comp.splitFactor = 1
         comp.fineSplitFactor = 5
 elif test == '80X-data':
-    DoubleMuon = kreator.makeDataComponent("DoubleMuon_Run2016B", 
+    DoubleMuon_ReReco = kreator.makeDataComponent("DoubleMuon_Run2016B", 
                             "/DoubleMuon/Run2016B-PromptReco-v2/MINIAOD", "CMS", ".*root", 
                             run_range = (271036,274443), triggers = [] )
-    selectedComponents = [ DoubleMuon ]
+    DoubleMuon_ReReco.files = ['/afs/cern.ch/user/m/mdunser/edgeSW/rereco8013p1/CMSSW_8_0_13_patch1/src/rerecoDoubleMuon/RECO_RAW2DIGI_L1Reco_RECO_EI_PAT_inMINIAOD.root']
+    DoubleEG_ReReco = kreator.makeDataComponent("DoubleEG_Run2016B", 
+                            "/DoubleEG/Run2016B-PromptReco-v2/MINIAOD", "CMS", ".*root", 
+                            run_range = (271036,274443), triggers = [] )
+    DoubleEG_ReReco.files = ['/afs/cern.ch/user/m/mdunser/edgeSW/rereco8013p1/CMSSW_8_0_13_patch1/src/rerecoDoubleEG/RECO_RAW2DIGI_L1Reco_RECO_EI_PAT_inMINIAOD.root']
+    MuonEG_ReReco = kreator.makeDataComponent("MuonEG_Run2016B", 
+                            "/MuonEG/Run2016B-PromptReco-v2/MINIAOD", "CMS", ".*root", 
+                            run_range = (271036,274443), triggers = [] )
+    MuonEG_ReReco.files = ['/afs/cern.ch/user/m/mdunser/edgeSW/rereco8013p1/CMSSW_8_0_13_patch1/src/rerecoMuonEG/RECO_RAW2DIGI_L1Reco_RECO_EI_PAT_inMINIAOD.root']
+    selectedComponents = [ DoubleMuon_ReReco, DoubleEG_ReReco, MuonEG_ReReco ]
+    import os
+    jsonfile = 'Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt'
     for comp in selectedComponents:
-        comp.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-274443_13TeV_PromptReco_Collisions16_JSON.txt'
+        comp.json = os.environ['CMSSW_BASE']+'/src/CMGTools/TTHAnalysis/data/json/'+jsonfile
         comp.splitFactor = 1
-        comp.files = ['/afs/cern.ch/work/m/mdunser/public/synchFiles/files2016/doubleMuonFile.root']
+        #comp.files = ['/afs/cern.ch/user/m/mdunser/edgeSW/rereco8013p1/CMSSW_8_0_13_patch1/src/rerecoMuonEG/RECO_RAW2DIGI_L1Reco_RECO_EI_PAT_inMINIAOD.root']
 
 elif test != None:
     raise RuntimeError, "Unknown test %r" % test
@@ -448,7 +472,7 @@ output_service = cfg.Service(
     TFileService,
     'outputfile',
     name="outputfile",
-    fname='treeProducerSusyMultilepton/tree.root',
+    fname=('treeProducerSusyMultilepton/tree.root' if not runCrab else 'tree.root'),
     option='recreate'
     )    
 outputService.append(output_service)
