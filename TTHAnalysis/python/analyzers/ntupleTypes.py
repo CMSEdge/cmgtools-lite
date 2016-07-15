@@ -6,7 +6,7 @@ from PhysicsTools.HeppyCore.utils.deltar import deltaR
 
 from CMGTools.TTHAnalysis.signedSip import *
 from CMGTools.TTHAnalysis.tools.functionsTTH import _ttH_idEmu_cuts_E2_obj
-from CMGTools.TTHAnalysis.tools.leptonChoiceRA5 import _susy2lss_idEmu_cuts_obj,_susy2lss_idIsoEmu_cuts_obj
+## from CMGTools.TTHAnalysis.tools.leptonChoiceRA5 import _susy2lss_idEmu_cuts_obj,_susy2lss_idIsoEmu_cuts_obj
 
 ##------------------------------------------  
 ## LEPTON
@@ -25,6 +25,7 @@ leptonTypeSusy = NTupleObjectType("leptonSusy", baseObjectTypes = [ leptonType ]
     NTupleVariable("jetBTagCMVA", lambda lepton : lepton.jet.btag('pfCombinedMVABJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="CMA btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
     NTupleVariable("r9",      lambda lepton : lepton.full5x5_r9() if abs(lepton.pdgId()) == 11 else -99, help="SuperCluster 5x5 r9 variable, only for electrons; -99 for muons"),
+    NTupleVariable("ptErr",      lambda lepton : lepton.ptErr(), help="ptErr of lepton"),
 ])
 
 
@@ -42,8 +43,8 @@ leptonTypeSusyExtraLight = NTupleObjectType("leptonSusyExtraLight", baseObjectTy
     NTupleVariable("dr03TkSumPt", lambda lepton: lepton.dr03TkSumPt() if abs(lepton.pdgId())==11 else -999, help="Electron dr03TkSumPt isolation"),
     NTupleVariable("trackIso", lambda lepton :  lepton.trackIso() if abs(lepton.pdgId())==11 else -999, help="Electron trackIso (in cone of 0.4)"),
     NTupleVariable("idEmuTTH", lambda lepton: _ttH_idEmu_cuts_E2_obj(lepton), help="Electron pass trigger ID emulation cuts (TTH, E2)"),
-    NTupleVariable("idEmuRA5", lambda lepton: _susy2lss_idEmu_cuts_obj(lepton), help="Electron pass trigger ID emulation cuts (RA5)"),
-    NTupleVariable("idIsoEmuRA5", lambda lepton: _susy2lss_idIsoEmu_cuts_obj(lepton), help="Electron pass trigger ID+ISO emulation cuts (RA5)"),
+    ## NTupleVariable("idEmuRA5", lambda lepton: _susy2lss_idEmu_cuts_obj(lepton), help="Electron pass trigger ID emulation cuts (RA5)"),
+    ## NTupleVariable("idIsoEmuRA5", lambda lepton: _susy2lss_idIsoEmu_cuts_obj(lepton), help="Electron pass trigger ID+ISO emulation cuts (RA5)"),
     NTupleVariable("mcPrompt",    lambda x : x.mcMatchAny_gp.isPromptFinalState() if getattr(x,"mcMatchAny_gp",None) else 0, int, mcOnly=True, help="isPromptFinalState"),
     NTupleVariable("mcPromptTau", lambda x : x.mcMatchAny_gp.isDirectPromptTauDecayProductFinalState() if getattr(x,"mcMatchAny_gp",None) else 0, int, mcOnly=True, help="isDirectPromptTauDecayProductFinalState"),
     NTupleVariable("mcPromptGamma", lambda x : x.mcPho.isPromptFinalState() if getattr(x,"mcPho",None) else 0, int, mcOnly=True, help="Photon isPromptFinalState"),

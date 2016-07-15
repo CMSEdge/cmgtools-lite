@@ -56,9 +56,10 @@ class edgeFriends:
         ## pdf things
         ## =================
         self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
+        ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
         self.wspace = copy.deepcopy( self.an_file.Get('w') )
         # data
-        for t in ['DA','MC']:
+        for t in ['DA','MC']:#,'MC_SF']:
             for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldr','lepsDR_Edge'],['a3d','d3D_Edge'],['ldp','lepsDPhi_Edge']]:
                 print 'loading likelihoods for variable %s in %s'%(var[0],t)
                 setattr(self,'h_lh_ana_%s_%s' %(var[0],t), self.wspace.pdf('%s_analyticalPDF_%s'%(var[0],t)))
@@ -132,20 +133,32 @@ class edgeFriends:
                     ("lepsZPt"+label, "F"),
                     ("metl1DPhi"+label, "F"),
                     ("metl2DPhi"+label, "F"),
-                    ("met"+label, "F"), ("met_phi"+label, "F"), ("met_jecUp"+label, "F"), ("met_jecDn"+label, "F"),
+                    ("met"+label, "F"), ("met_phi"+label, "F"), ("met_jecUp"+label, "F"), ("met_jecDn"+label, "F"), ("met_raw"+label, "F"),
                     ("lepsDPhi"+label, "F"),
                     ("Lep1_pt"+label, "F"), 
                     ("Lep1_eta"+label, "F"), 
                     ("Lep1_phi"+label, "F"),
                     ("Lep1_miniRelIso"+label, "F"),
+                    ("Lep1_relIso03"+label, "F"),
+                    ("Lep1_relIso04"+label, "F"),
+                    ("Lep1_dxy"+label, "F"),
+                    ("Lep1_dz"+label, "F"),
+                    ("Lep1_sip3d"+label, "F"),
                     ("Lep1_pdgId"+label, "I"), 
+                    ("Lep1_tightCharge"+label, "F"), 
                     ("Lep1_mvaIdSpring15"+label, "F"),
                     ("Lep1_minTauDR"+label, "F"),
                     ("Lep2_pt"+label, "F"), 
                     ("Lep2_eta"+label, "F"),
                     ("Lep2_phi"+label, "F"),
                     ("Lep2_miniRelIso"+label, "F"),
+                    ("Lep2_relIso03"+label, "F"),
+                    ("Lep2_relIso04"+label, "F"),
+                    ("Lep2_dxy"+label, "F"),
+                    ("Lep2_dz"+label, "F"),
+                    ("Lep2_sip3d"+label, "F"),
                     ("Lep2_pdgId"+label, "I"),
+                    ("Lep2_tightCharge"+label, "F"),
                     ("Lep2_mvaIdSpring15"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
                     ("PileupW"+label, "F"), 
@@ -167,8 +180,15 @@ class edgeFriends:
                     ("lh_ana_ldr_mc"+label  , "F") ,
                     ("lh_ana_a3d_mc"+label  , "F") ,
                     ("lh_ana_ldp_mc"+label  , "F") ,
+                    ("lh_ana_zpt_mc_sf"+label  , "F") , 
+                    ("lh_ana_met_mc_sf"+label  , "F") , 
+                    ("lh_ana_mlb_mc_sf"+label  , "F") , 
+                    ("lh_ana_ldr_mc_sf"+label  , "F") ,
+                    ("lh_ana_a3d_mc_sf"+label  , "F") ,
+                    ("lh_ana_ldp_mc_sf"+label  , "F") ,
                     ("nll"+label, "F"), ("nll_jecUp"+label, "F"), ("nll_jecDn"+label, "F"),
                     ("nll_mc"+label, "F"), ("nll_mc_jecUp"+label, "F"), ("nll_mc_jecDn"+label, "F"),
+                    ("nll_mc_sf"+label, "F"),
                     ("weight_btagsf"+label  , "F") ,
                     ("weight_btagsf_heavy_UP"+label, "F") ,
                     ("weight_btagsf_heavy_DN"+label, "F") ,
@@ -222,7 +242,7 @@ class edgeFriends:
         ret = {}; jetret = {}; 
         lepret  = {}
         trigret = {}
-        ret['met'] = met; ret['met_phi'] = metphi;
+        ret['met'] = met; ret['met_phi'] = metphi; ret['met_raw'] = met_raw;
         ret['met_jecUp'] = event.met_jecUp_pt; ret['met_jecDn'] = event.met_jecDown_pt 
         ret['run'] = event.run
         ret['lumi'] = event.lumi
@@ -241,13 +261,15 @@ class edgeFriends:
         t1 = time.time()
 
         ret['genWeight']          = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
+        ## twiki:
+        ##Flag_HBHENoiseFilter:Flag_HBHENoiseIsoFilter:Flag_EcalDeadCellTriggerPrimitiveFilter:Flag_goodVertices:Flag_eeBadScFilter:Flag_globalTightHalo2016Filter:badMuon:badChargedhadron
         ret['passesFilters'] = (event.Flag_HBHENoiseFilter and 
                                 event.Flag_HBHENoiseIsoFilter and 
                                 event.Flag_EcalDeadCellTriggerPrimitiveFilter and 
                                 event.Flag_goodVertices and 
                                 event.Flag_eeBadScFilter and 
-                                event.Flag_CSCTightHalo2015Filter and 
-                                event.Flag_METFilters)
+                                event.Flag_CSCTightHalo2015Filter)# and 
+                                #event.Flag_METFilters)
         if isData:
             ret['passesFilters'] = 1
 
@@ -336,7 +358,7 @@ class edgeFriends:
         ltlvs = [l1, l2]
         lepvectors = []
 
-        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15'.split():
+        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -355,7 +377,7 @@ class edgeFriends:
                         tmp_dr = deltaR(lep, tau)
                         if tmp_dr < minDRTau:
                             minDRTau = tmp_dr
-                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15'.split():
+                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge'.split():
                     lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
                 lepvectors.append(lep)
                 lepret['metl'+str(lcount)+'DPhi'+self.label] = abs( deltaPhi( getattr(lep, 'phi'), metphi ))
@@ -505,9 +527,10 @@ class edgeFriends:
         if isBasicSREvent:
             srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
             ret["srID"] = srID
-            for t in  ['data','mc']:
-                if t == 'data': nam = 'DA'
-                else:           nam = 'MC'
+            for t in  ['data','mc']:#, 'mc_sf']:
+                if t == 'data'  : nam = 'DA'
+                if t == 'mc'    : nam = 'MC'
+                if t == 'mc_sf' : nam = 'MC_SF'
                 for u in ['_ana']:
                     for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],
                                 ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldr',ret['lepsDR'],'lepsDR_Edge'],
@@ -521,11 +544,12 @@ class edgeFriends:
                     if not ret["lh%s_zpt_%s"%(u,t)]: ret["lh%s_zpt_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_a3d_%s"%(u,t)]: ret["lh%s_a3d_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_ldp_%s"%(u,t)]: ret["lh%s_ldp_%s"%(u,t)] = 1e-50
-            ret['nll']    = -1.*math.log(ret["lh_ana_mlb_data"]*ret["lh_ana_met_data"]*ret["lh_ana_zpt_data"]*ret["lh_ana_ldp_data"])
-            ret['nll_mc'] = -1.*math.log(ret["lh_ana_mlb_mc"]  *ret["lh_ana_met_mc"]  *ret["lh_ana_zpt_mc"]  *ret["lh_ana_ldp_mc"]  )
+            ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
+            ret['nll_mc']    = -1.*math.log(ret["lh_ana_mlb_mc"]   *ret["lh_ana_met_mc"]   *ret["lh_ana_zpt_mc"]   *ret["lh_ana_ldp_mc"]   )
+            #ret['nll_mc_sf'] = -1.*math.log(ret["lh_ana_mlb_mc_sf"]*ret["lh_ana_met_mc_sf"]*ret["lh_ana_zpt_mc_sf"]*ret["lh_ana_ldp_mc_sf"])
         else:
             ret["srID"]      = -99
-            for t in ['data', 'mc']:
+            for t in ['data', 'mc']:#, 'mc_sf']:
                 for u in ['_ana']:
                     ret["lh%s_mlb_%s"%(u,t)] = -999.
                     ret["lh%s_ldr_%s"%(u,t)] = -999.
@@ -533,8 +557,9 @@ class edgeFriends:
                     ret["lh%s_zpt_%s"%(u,t)] = -999.
                     ret["lh%s_a3d_%s"%(u,t)] = -999.
                     ret["lh%s_ldp_%s"%(u,t)] = -999.
-            ret['nll']    = 0.
-            ret['nll_mc'] = 0.
+            ret['nll']       = 0.
+            ret['nll_mc']    = 0.
+            ret['nll_mc_sf'] = 0.
         t10 = time.time()
 
         ## print 'time from start to pre trigloaded: %.3f mus'%( (t01-t0)*1000000. )
