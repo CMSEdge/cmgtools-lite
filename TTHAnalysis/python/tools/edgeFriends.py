@@ -27,7 +27,8 @@ class edgeFriends:
         ##self.puFile = open("/afs/cern.ch/work/m/mdunser/public/puWeighting/puWeightsOfficialPrescription.txt","r")
         ##self.pu_dict = eval(self.puFile.read())
         ##self.puFile.close()
-        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
+        #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
+        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul17_nominalUpDown.root","READ")
         self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puFile.Close()
         ##B-tagging stuff
@@ -77,18 +78,25 @@ class edgeFriends:
 
         self.triggerlist = ['HLT_mu17mu8',
                             'HLT_mu17mu8_dz',
+                            'HLT_mu17tkmu8',
                             'HLT_mu17tkmu8_dz',
                             'HLT_mu17el12',
+                            'HLT_mu23el12',
+                            'HLT_mu23el8',
+                            'HLT_mu27tkmu8',
                             'HLT_el17el12_dz',
                             'HLT_el23el12_dz',
                             'HLT_mu8el17',
                             'HLT_mu8el23',
                             'HLT_mu30tkmu11_noniso',
-                            'HLT_mu30el30_noniso',
+                            'HLT_mu30ele30_noniso',
                             'HLT_doubleele33_noniso',
+                            'HLT_doubleele33_MW_noniso',
                             'HLT_htall',
                             'HLT_atall',
                             'HLT_htmet' ]
+
+
 
         self.btagMediumCut = 0.800
         self.btagLooseCut  = 0.460
@@ -147,6 +155,7 @@ class edgeFriends:
                     ("Lep1_pdgId"+label, "I"), 
                     ("Lep1_tightCharge"+label, "F"), 
                     ("Lep1_mvaIdSpring15"+label, "F"),
+                    ("Lep1_mcMatchId"+label, "F"),
                     ("Lep1_minTauDR"+label, "F"),
                     ("Lep2_pt"+label, "F"), 
                     ("Lep2_eta"+label, "F"),
@@ -160,6 +169,7 @@ class edgeFriends:
                     ("Lep2_pdgId"+label, "I"),
                     ("Lep2_tightCharge"+label, "F"),
                     ("Lep2_mvaIdSpring15"+label, "F"),
+                    ("Lep2_mcMatchId"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
                     ("PileupW"+label, "F"), 
                     ("min_mlb1"+label, "F"),
@@ -263,14 +273,17 @@ class edgeFriends:
         ret['genWeight']          = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
         ## twiki:
         ##Flag_HBHENoiseFilter:Flag_HBHENoiseIsoFilter:Flag_EcalDeadCellTriggerPrimitiveFilter:Flag_goodVertices:Flag_eeBadScFilter:Flag_globalTightHalo2016Filter:badMuon:badChargedhadron
-        ret['passesFilters'] = (event.Flag_HBHENoiseFilter and 
-                                event.Flag_HBHENoiseIsoFilter and 
-                                event.Flag_EcalDeadCellTriggerPrimitiveFilter and 
-                                event.Flag_goodVertices and 
-                                event.Flag_eeBadScFilter and 
-                                event.Flag_CSCTightHalo2015Filter)# and 
-                                #event.Flag_METFilters)
         if isData:
+            ret['passesFilters'] = int(event.Flag_HBHENoiseFilter > 0 and 
+                                    event.Flag_HBHENoiseIsoFilter > 0 and 
+                                    event.Flag_EcalDeadCellTriggerPrimitiveFilter > 0 and 
+                                    event.Flag_goodVertices > 0 and 
+                                    event.Flag_eeBadScFilter > 0 and 
+                                    event.Flag_globalTightHalo2016Filter > 0 and
+                                    event.Flag_badChargedHadronFilter > 0 and
+                                    event.Flag_badMuonFilter)# and 
+                                    #event.Flag_METFilters)
+        else:
             ret['passesFilters'] = 1
 
         ## this will be slow
@@ -358,7 +371,7 @@ class edgeFriends:
         ltlvs = [l1, l2]
         lepvectors = []
 
-        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge'.split():
+        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -377,7 +390,7 @@ class edgeFriends:
                         tmp_dr = deltaR(lep, tau)
                         if tmp_dr < minDRTau:
                             minDRTau = tmp_dr
-                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge'.split():
+                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
                     lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
                 lepvectors.append(lep)
                 lepret['metl'+str(lcount)+'DPhi'+self.label] = abs( deltaPhi( getattr(lep, 'phi'), metphi ))
