@@ -32,7 +32,7 @@ class edgeFriends:
         self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puFile.Close()
         ##B-tagging stuff
-        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2.csv")
+        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2_4invfb_systJuly15.csv")
         self.reader_heavy    = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "central")
         self.reader_heavy_UP = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "up")
         self.reader_heavy_DN = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "down")
@@ -48,7 +48,7 @@ class edgeFriends:
         self.reader_light_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "up")
         self.reader_light_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "down")
 
-        self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns.root")
+        self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns_16.root")
         self.h_btag_eff_b    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_b"   ))
         self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
         self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
