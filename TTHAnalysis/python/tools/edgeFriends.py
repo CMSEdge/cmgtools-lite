@@ -36,9 +36,9 @@ class edgeFriends:
         self.reader_heavy    = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "central")
         self.reader_heavy_UP = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "up")
         self.reader_heavy_DN = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "down")
-        self.reader_light    = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "central")
-        self.reader_light_UP = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "up")
-        self.reader_light_DN = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "down")
+        self.reader_light    = ROOT.BTagCalibrationReader(self.calib, 1, "incl"  , "central")
+        self.reader_light_UP = ROOT.BTagCalibrationReader(self.calib, 1, "incl"  , "up")
+        self.reader_light_DN = ROOT.BTagCalibrationReader(self.calib, 1, "incl"  , "down")
 
         self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_20_11_2015.csv")
         self.reader_heavyFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "central")
@@ -391,7 +391,10 @@ class edgeFriends:
                         if tmp_dr < minDRTau:
                             minDRTau = tmp_dr
                 for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
-                    lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
+                    if lfloat == 'mcMatchId' and isData:
+                        lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
+                    else:
+                        lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
                 lepvectors.append(lep)
                 lepret['metl'+str(lcount)+'DPhi'+self.label] = abs( deltaPhi( getattr(lep, 'phi'), metphi ))
                 lepret["Lep"+str(lcount)+"_"+"minTauDR"+self.label] = minDRTau
@@ -860,6 +863,17 @@ class edgeFriends:
 
         return [wtbtag, wtbtagUp_heavy, wtbtagUp_light, wtbtagDown_heavy, wtbtagDown_light]
 
+    def selfNewMediumMuonId(self, muon):
+        if not hasattr(muon, 'isGlobalMuon'):
+            return (muon.mediumMuonId == 1)
+        goodGlob = (muon.isGlobalMuon and 
+                    muon.globalTrackChi2 < 3 and
+                    muon.chi2LocalPosition < 12 and
+                    muon.trkKink < 20)
+        isMedium = (muon.innerTrackValidHitFraction > 0.49 and
+                    muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+        return isMedium
+        #muon.segmentCompatibility < 0.49: return False
 
     def _susyEdgeLoose(self, lep):
             if lep.pt <= 10.: return False
@@ -871,7 +885,8 @@ class edgeFriends:
             ## muons
             if abs(lep.pdgId) == 13:
               if lepeta > 2.4: return False
-              if lep.mediumMuonId != 1: return False
+              #if lep.mediumMuonId != 1: return False
+              if not self.selfNewMediumMuonId(lep): return False
             ## electrons
             if abs(lep.pdgId) == 11:
               if lepeta > 2.5: return False
@@ -883,6 +898,17 @@ class edgeFriends:
                 if lep.idEmuTTH == 0: return False
             return True
 
+def newMediumMuonId(muon):
+    if not hasattr(muon, 'isGlobalMuon'):
+        return (muon.mediumMuonId == 1)
+    goodGlob = (muon.isGlobalMuon and 
+                muon.globalTrackChi2 < 3 and
+                muon.chi2LocalPosition < 12 and
+                muon.trkKink < 20)
+    isMedium = (muon.innerTrackValidHitFraction > 0.49 and
+                muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+    return isMedium
+    #muon.segmentCompatibility < 0.49: return False
  
 def _susyEdgeTight(lep):
         if lep.pt <= 20.: return False
@@ -892,7 +918,8 @@ def _susyEdgeTight(lep):
         if abs(lep.dz ) > 0.10: return False
         if eta > 1.4 and eta < 1.6: return False
         if abs(lep.pdgId) == 13:
-          if lep.mediumMuonId != 1: return False
+          ## old medium ID if lep.mediumMuonId != 1: return False
+          if not newMediumMuonId(lep): return False
           if lep.miniRelIso > 0.2: return False
         #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
         if abs(lep.pdgId) == 11:
