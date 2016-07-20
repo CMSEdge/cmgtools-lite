@@ -56,7 +56,8 @@ class edgeFriends:
         ## =================
         ## pdf things
         ## =================
-        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
+        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version4_80X_2016Data_savingTheWorkspace_withSFPDFs_7p65invfb.root")
+        ## file used before topup to 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
         ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
         self.wspace = copy.deepcopy( self.an_file.Get('w') )
         # data
