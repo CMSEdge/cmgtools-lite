@@ -28,7 +28,7 @@ class edgeFriends:
         ##self.pu_dict = eval(self.puFile.read())
         ##self.puFile.close()
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
-        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul17_nominalUpDown.root","READ")
+        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul21_nominalUpDown.root","READ")
         self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puFile.Close()
         ##B-tagging stuff
@@ -56,7 +56,8 @@ class edgeFriends:
         ## =================
         ## pdf things
         ## =================
-        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version4_80X_2016Data_savingTheWorkspace_withSFPDFs_7p65invfb.root")
+        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version5_80X_2016Data_savingTheWorkspace_withSFPDFs_12p9invfb.root")
+        ## file for 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version4_80X_2016Data_savingTheWorkspace_withSFPDFs_7p65invfb.root")
         ## file used before topup to 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
         ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
         self.wspace = copy.deepcopy( self.an_file.Get('w') )
@@ -200,6 +201,7 @@ class edgeFriends:
                     ("nll"+label, "F"), ("nll_jecUp"+label, "F"), ("nll_jecDn"+label, "F"),
                     ("nll_mc"+label, "F"), ("nll_mc_jecUp"+label, "F"), ("nll_mc_jecDn"+label, "F"),
                     ("nll_mc_sf"+label, "F"),
+                    ("weight_trigger"+label  , "F") ,
                     ("weight_btagsf"+label  , "F") ,
                     ("weight_btagsf_heavy_UP"+label, "F") ,
                     ("weight_btagsf_heavy_DN"+label, "F") ,
@@ -487,6 +489,12 @@ class edgeFriends:
          
         t7 = time.time()
         [wtbtag, wtbtagUp_heavy, wtbtagUp_light, wtbtagDown_heavy, wtbtagDown_light] = (self.getWeightBtag(theJets) if not isData else [1., 1., 1., 1., 1.])
+
+        ret['weight_trigger'] = 1.
+        if not isData:
+            if abs(lepret["Lep1_pdgId"+self.label] * lepret["Lep2_pdgId"+self.label]) == 169: ret['weight_trigger'] = 0.94
+            if abs(lepret["Lep1_pdgId"+self.label] * lepret["Lep2_pdgId"+self.label]) == 143: ret['weight_trigger'] = 0.89
+            if abs(lepret["Lep1_pdgId"+self.label] * lepret["Lep2_pdgId"+self.label]) == 121: ret['weight_trigger'] = 0.97
 
         ret['weight_btagsf'] = wtbtag
         ret['weight_btagsf_heavy_UP'] = wtbtagUp_heavy
