@@ -324,7 +324,7 @@ class edgeFriends:
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
         self.isSMS =  (ret['GenSusyMScan1'] > 0)
-        print self.isSMS
+
         for trig in self.triggerlist:
             ##if not isData:
             ##    trigret[trig] = -1
