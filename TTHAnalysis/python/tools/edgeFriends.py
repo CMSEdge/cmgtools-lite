@@ -229,24 +229,32 @@ class edgeFriends:
                     ("min_mlb1"+label, "F"),
                     ("min_mlb2"+label, "F"),
                     ("sum_mlb"+label, "F"), 
+                    ("sum_mlb_jecUp"+label, "F"), 
+                    ("sum_mlb_jecDn"+label, "F"), 
                     ("st"+label,"F"), 
                     ("srID"+label, "I"), 
                     ("mt2"+label, "F"), ("mt2_jecUp"+label, "F"), ("mt2_jecDn"+label, "F"),
                     ("lh_ana_zpt_data"+label, "F") ,
                     ("lh_ana_a3d_data"+label, "F") ,
                     ("lh_ana_met_data"+label, "F") ,
-                    ("lh_ana_mlb_data"+label, "F") , 
+                    ("lh_ana_mlb_data"+label, "F") ,
+                    ("lh_ana_mlb_jecUp_data"+label, "F") , 
+                    ("lh_ana_mlb_jecDn_data"+label, "F") , 
                     ("lh_ana_ldr_data"+label, "F") ,
                     ("lh_ana_ldp_data"+label, "F") ,
                     ("lh_ana_zpt_mc"+label  , "F") , 
                     ("lh_ana_met_mc"+label  , "F") , 
                     ("lh_ana_mlb_mc"+label  , "F") , 
+                    ("lh_ana_mlb_jecUp_mc"+label  , "F") , 
+                    ("lh_ana_mlb_jecDn_mc"+label  , "F") , 
                     ("lh_ana_ldr_mc"+label  , "F") ,
                     ("lh_ana_a3d_mc"+label  , "F") ,
                     ("lh_ana_ldp_mc"+label  , "F") ,
                     ("lh_ana_zpt_mc_sf"+label  , "F") , 
                     ("lh_ana_met_mc_sf"+label  , "F") , 
                     ("lh_ana_mlb_mc_sf"+label  , "F") , 
+                    ("lh_ana_mlb_jecUp_mc_sf"+label  , "F") , 
+                    ("lh_ana_mlb_jecDn_mc_sf"+label  , "F") , 
                     ("lh_ana_ldr_mc_sf"+label  , "F") ,
                     ("lh_ana_a3d_mc_sf"+label  , "F") ,
                     ("lh_ana_ldp_mc_sf"+label  , "F") ,
@@ -536,6 +544,11 @@ class edgeFriends:
 
         theJets  = sorted(theJets , key = lambda j : j.pt, reverse = True)
         theBJets = sorted(theBJets, key = lambda j : j.pt, reverse = True)
+
+        theJets_jecUp  = sorted(theJets_jecUp , key = lambda j : j.pt, reverse = True)
+        theBJets_jecUp = sorted(theBJets_jecUp, key = lambda j : j.pt, reverse = True)
+        theJets_jecDn  = sorted(theJets_jecDn , key = lambda j : j.pt, reverse = True)
+        theBJets_jecDn = sorted(theBJets_jecDn, key = lambda j : j.pt, reverse = True)
         ret['lepsJZB_recoil'] = totalRecoil.Pt() - ret['lepsZPt']
         ret['bestMjj'] = self.getBestMjj(theJets)
         ret['minMjj']  = self.getMinMjj (theJets)
@@ -572,16 +585,21 @@ class edgeFriends:
         ##print 'njets: %.0d nbjets35medium: %.0d / %.0d'%(ret["nJet35"], len(theBJets), ret["nBJetMedium35"])
 	
         jet = ROOT.TLorentzVector()
-        min_mlb = 1e6
-        max_mlb = 1e6
-        _lmin, _jmin = -1, -1
-        _lmax, _jmax = -1, -1
+        min_mlb = 1e6; min_mlb_jecUp = 1e6; min_mlb_jecDn = 1e6
+        max_mlb = 1e6; max_mlb_jecUp = 1e6; max_mlb_jecDn = 1e6
+        _lmin, _jmin, _lmin_jecUp, _lmin_jecDn, _jmin_jecUp, _jmin_jecDn = -1, -1, -1, -1, -1, -1
+        _lmax, _jmax, _lmax_jecUp, _lmax_jecDn, _jmax_jecUp, _jmax_jecDn = -1, -1, -1, -1, -1, -1
         leplist = [l1, l2]
         ## DO MLB CALCULATION HERE
         # find the global minimum mlb (or mlj)
         # new mlb calculations
         jet1coll = (theBJets if len(theBJets) >= 1 else theJets)
         jet2coll = (theBJets if len(theBJets) >= 2 else theJets)
+
+        jet1coll_jecUp = (theBJets_jecUp if len(theBJets_jecUp) >= 1 else theJets_jecUp)
+        jet2coll_jecUp = (theBJets_jecUp if len(theBJets_jecUp) >= 2 else theJets_jecUp)
+        jet1coll_jecDn = (theBJets_jecDn if len(theBJets_jecDn) >= 1 else theJets_jecDn)
+        jet2coll_jecDn = (theBJets_jecDn if len(theBJets_jecDn) >= 2 else theJets_jecDn)
         if ret['nPairLep'] > 1:
             for _il,lep in enumerate(leplist):
                 for _ij,j in enumerate(jet1coll):
@@ -591,23 +609,69 @@ class edgeFriends:
                         min_mlb = tmp_mlb
                         _lmin = _il
                         _jmin = _ij
-            for _il,lep in enumerate(leplist):
-                if _il == _lmin: continue
-                for _ij,j in enumerate(jet2coll):
-                    if len(theBJets) == 1 and j.btagCSV >= self.btagMediumCut:
-                        continue
-                    if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
+
+                for _ij, j in enumerate(jet1coll_jecUp):
                     jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
                     tmp_mlb = (lep+jet).M()
-                    if tmp_mlb < max_mlb:
-                        max_mlb = tmp_mlb
-                        _lmax = _il
-                        _jmax = _ij
-        ##print '%15d : min_mlb : %15.2f max_mlb : %15.2f nb: %d nj: %d'%(event.evt, min_mlb, max_mlb, len(theBJets), len(theJets))
+                    if tmp_mlb < min_mlb_jecUp:
+                        min_mlb_jecUp = tmp_mlb
+                        _lmin_jecUp = _il
+                        _jmin_jecUp = _ij
+
+                for _ij, j in enumerate(jet1coll_jecDn):
+                    jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+                    tmp_mlb = (lep+jet).M()
+                    if tmp_mlb < min_mlb_jecDn:
+                        min_mlb_jecDn = tmp_mlb
+                        _lmin_jecDn = _il
+                        _jmin_jecDn = _ij
+
+            for _il,lep in enumerate(leplist):
+                if _il != _lmin:
+                    for _ij,j in enumerate(jet2coll):
+                        if len(theBJets) == 1 and j.btagCSV >= self.btagMediumCut:
+                            continue
+                        if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
+                        jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+                        tmp_mlb = (lep+jet).M()
+                        if tmp_mlb < max_mlb:
+                            max_mlb = tmp_mlb
+                            _lmax = _il
+                            _jmax = _ij
+                if _il != _lmin_jecUp:
+                    for _ij,j in enumerate(jet2coll_jecUp):
+                        if len(theBJets_jecUp) == 1 and j.btagCSV >= self.btagMediumCut: continue
+                        if (len(theBJets_jecUp) == 0 or len(theBJets_jecUp) >= 2) and _ij == _jmin_jecUp: continue
+                        jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+                        tmp_mlb = (lep+jet).M()
+                        if tmp_mlb < max_mlb_jecUp:
+                            max_mlb_jecUp = tmp_mlb
+                            _lmax_jecUp = _il
+                            _jmax_jecUp = _ij
+
+                if _il != _lmin_jecDn:
+                    for _ij,j in enumerate(jet2coll_jecDn):
+                        if len(theBJets_jecDn) == 1 and j.btagCSV >= self.btagMediumCut: continue
+                        if (len(theBJets_jecDn) == 0 or len(theBJets_jecDn) >= 2) and _ij == _jmin_jecDn: continue
+                        jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+                        tmp_mlb = (lep+jet).M()
+                        if tmp_mlb < max_mlb_jecDn:
+                            max_mlb_jecDn = tmp_mlb
+                            _lmax_jecDn = _il
+                            _jmax_jecDn = _ij            
             
         ret["min_mlb1"] = min_mlb if min_mlb < 1e6  else -1.
         ret["min_mlb2"] = max_mlb if max_mlb < 1e6  else -1.
+        min_mlb1_jecUp = min_mlb_jecUp if min_mlb_jecUp < 1e6  else -1.
+        min_mlb2_jecUp = max_mlb_jecUp if max_mlb_jecUp < 1e6  else -1.
+        min_mlb1_jecDn = min_mlb_jecDn if min_mlb_jecDn < 1e6  else -1.
+        min_mlb2_jecDn = max_mlb_jecDn if max_mlb_jecDn < 1e6  else -1.
+
         ret["sum_mlb"] = (ret["min_mlb1"] + ret["min_mlb2"]) if ret["min_mlb1"] > 0. and ret["min_mlb2"] > 0. else -1.
+        ret["sum_mlb_jecUp"] = (min_mlb1_jecUp  + min_mlb2_jecUp) if min_mlb1_jecUp > 0. and min_mlb2_jecUp > 0. else -1.
+        ret["sum_mlb_jecDn"] = (min_mlb1_jecDn  + min_mlb2_jecDn) if min_mlb1_jecDn > 0. and min_mlb2_jecDn > 0. else -1.
+
+        
         ret["st"] = met+lepret["Lep1_pt"+self.label]+lepret["Lep2_pt"+self.label]
         t9 = time.time()
 
@@ -616,6 +680,7 @@ class edgeFriends:
         isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
         isBasicSREvent = isBasicSREvent * (abs(lepret["Lep1_eta"+self.label] - 1.5) > 0.1 and abs(lepret["Lep2_eta"+self.label] - 1.5) > 0.1)
         isBasicSREvent = isBasicSREvent * (met > 150 and ret['nJetSel'] >= 2 ) ## adapting to 2016 selection
+        
         if isBasicSREvent:
             srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
             ret["srID"] = srID
@@ -624,21 +689,39 @@ class edgeFriends:
                 if t == 'mc'    : nam = 'MC'
                 if t == 'mc_sf' : nam = 'MC_SF'
                 for u in ['_ana']:
+                    
                     for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],
                                 ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldr',ret['lepsDR'],'lepsDR_Edge'],
                                 ['a3d',ret['d3D'],'d3D_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge']]:
+                                
+                        
                         self.wspace.var(var[2]).setVal(var[1])
                         ret["lh%s_%s_%s"%(u,var[0],t)] = getattr(self,'h_lh_ana_%s_%s'%(var[0],nam)).getVal(getattr(self,'obs_ana%s_%s'%(var[0],nam)))
-                    
+
+                    self.wspace.var('sum_mlb_Edge').setVal(ret['sum_mlb_jecUp'])
+                    ret["lh%s_mlb_jecUp_%s"%(u,t)] = getattr(self, 'h_lh_ana_mlb_%s'%nam).getVal(getattr(self,'obs_anamlb_%s'%nam))
+                    self.wspace.var('sum_mlb_Edge').setVal(ret['sum_mlb_jecDn'])
+                    ret["lh%s_mlb_jecDn_%s"%(u,t)] = getattr(self, 'h_lh_ana_mlb_%s'%nam).getVal(getattr(self,'obs_anamlb_%s'%nam))
+
                     if not ret["lh%s_mlb_%s"%(u,t)]: ret["lh%s_mlb_%s"%(u,t)] = 1e-50
+                    if not ret["lh%s_mlb_jecUp_%s"%(u,t)]: ret["lh%s_mlb_jecUp_%s"%(u,t)] = 1e-50
+                    if not ret["lh%s_mlb_jecDn_%s"%(u,t)]: ret["lh%s_mlb_jecDn_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_ldr_%s"%(u,t)]: ret["lh%s_ldr_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_met_%s"%(u,t)]: ret["lh%s_met_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_zpt_%s"%(u,t)]: ret["lh%s_zpt_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_a3d_%s"%(u,t)]: ret["lh%s_a3d_%s"%(u,t)] = 1e-50
                     if not ret["lh%s_ldp_%s"%(u,t)]: ret["lh%s_ldp_%s"%(u,t)] = 1e-50
+            
             ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
+            ret['nll_jecUp'] = -1.*math.log(ret["lh_ana_mlb_jecUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
+            ret['nll_jecDn'] = -1.*math.log(ret["lh_ana_mlb_jecDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
             ret['nll_mc']    = -1.*math.log(ret["lh_ana_mlb_mc"]   *ret["lh_ana_met_mc"]   *ret["lh_ana_zpt_mc"]   *ret["lh_ana_ldp_mc"]   )
             #ret['nll_mc_sf'] = -1.*math.log(ret["lh_ana_mlb_mc_sf"]*ret["lh_ana_met_mc_sf"]*ret["lh_ana_zpt_mc_sf"]*ret["lh_ana_ldp_mc_sf"])
+            # print 'min mlb', ret["sum_mlb"], ret["sum_mlb_jecUp"], ret["sum_mlb_jecDn"]
+            # print 'nll    ', ret['nll'], ret['nll_jecUp'], ret['nll_jecDn']
+            # print 'the bje', len(theBJets_jecUp), len(theBJets_jecUp), len(theBJets_jecDn)
+            # print 'jet min', _jmin, _jmin_jecUp, _jmin_jecDn
+            # print 'jet max', _jmax, _jmax_jecUp, _jmax_jecDn
         else:
             ret["srID"]      = -99
             for t in ['data', 'mc']:#, 'mc_sf']:
