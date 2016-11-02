@@ -53,6 +53,58 @@ class edgeFriends:
         self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
         self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
         self.f_btag_eff.Close()
+
+        # el sergio #######
+        fSFMuon_FullFast_ID  = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/FullSimFastSim/sf_mu_medium.root','read')
+        fSFMuon_FullFast_ISO = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/FullSimFastSim/sf_mu_mediumID_mini02.root','read')
+        fSFMuon_FullFast_IP  = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/FullSimFastSim/sf_mu_tightIP2D.root','read') 
+        fSFMuon_FullData_ID  = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/dataFullSim/TnP_MuonID_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root','read') 
+        fSFMuon_FullData_ISO = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/dataFullSim/TnP_MuonID_NUM_MiniIsoTight_DENOM_MediumID_VAR_map_pt_eta.root','read')
+        fSFMuon_FullData_IP  = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/dataFullSim/TnP_MuonID_NUM_TightIP2D_DENOM_MediumID_VAR_map_pt_eta.root','read')
+        fSFMuon_Tracking     = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/muons/ratios_early.root')
+
+        self.hMuonDataFull_ID  = copy.deepcopy(fSFMuon_FullData_ID .Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0"))
+        self.hMuonDataFull_ISO = copy.deepcopy(fSFMuon_FullData_ISO.Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_Medium2016_pass"))
+        self.hMuonDataFull_IP  = copy.deepcopy(fSFMuon_FullData_IP .Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_Medium2016_pass"))
+        self.hMuonFullFast_ID  = copy.deepcopy(fSFMuon_FullFast_ID .Get("histo2D"))
+        self.hMuonFullFast_ISO = copy.deepcopy(fSFMuon_FullFast_ISO.Get("histo2D"))
+        self.hMuonFullFast_IP  = copy.deepcopy(fSFMuon_FullFast_IP .Get("histo2D"))
+        self.hMuonTracking     = copy.deepcopy(fSFMuon_Tracking    .Get("ratio_eta"))
+
+        fSFMuon_FullFast_ID .Close()
+        fSFMuon_FullFast_ISO.Close()
+        fSFMuon_FullFast_IP .Close()
+        fSFMuon_FullData_ID .Close()
+        fSFMuon_FullData_ISO.Close()
+        fSFMuon_FullData_IP .Close()
+        fSFMuon_Tracking    .Close()
+
+        print 'muon', self.hMuonDataFull_ID, self.hMuonDataFull_ISO, self.hMuonDataFull_IP
+        print 'muon', self.hMuonFullFast_ID, self.hMuonFullFast_ISO, self.hMuonFullFast_IP
+        fSFElec_FullFast_ID  = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/electrons/FullFast/sf_el_tight2d3d.root') 
+        fSFElec_FullFast_ISO = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/electrons/FullFast/sf_el_mini01.root')
+        fSFElec_FullFast_IP  = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/electrons/FullFast/sf_el_inhit_eq0.root')  #IP in electrons is not IP but conversion veto (IP included in id scale factors)
+        fSFElec_FullData     = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/electrons/scaleFactors.root')  
+        fSFElec_Tracking     = ROOT.TFile('/afs/cern.ch/work/s/sesanche/public/SFs/forICHEP/electrons/egammaEffi.txt_SF2D.root')  
+
+        self.hElecDataFull_ID  = copy.deepcopy( fSFElec_FullData.Get("GsfElectronToTight2D3D"))
+        self.hElecDataFull_ISO = copy.deepcopy( fSFElec_FullData.Get("MVAVLooseElectronToMini"))
+        self.hElecDataFull_IP  = copy.deepcopy( fSFElec_FullData.Get("MVATightElectronToConvIHit0"))
+        self.hElecFullFast_ID  = copy.deepcopy( fSFElec_FullFast_ID .Get("histo2D"))
+        self.hElecFullFast_ISO = copy.deepcopy( fSFElec_FullFast_ISO.Get("histo2D"))
+        self.hElecFullFast_IP  = copy.deepcopy( fSFElec_FullFast_IP .Get("histo2D"))
+        self.hElecTracking     = copy.deepcopy( fSFElec_Tracking    .Get("EGamma_SF2D"))
+
+
+        fSFElec_FullFast_ID .Close()
+        fSFElec_FullFast_ISO.Close()
+        fSFElec_FullFast_IP .Close()
+        fSFElec_FullData    .Close()
+
+        print 'elec', self.hElecDataFull_ID, self.hElecDataFull_ISO, self.hElecDataFull_IP
+        print 'elec', self.hElecFullFast_ID, self.hElecFullFast_ISO, self.hElecFullFast_IP
+
+
         ## =================
         ## pdf things
         ## =================
@@ -213,6 +265,11 @@ class edgeFriends:
                     ("dTheta" + label, "F"),
                     ('passesFilters' +label, 'I'),
                     ('genWeight' +label, 'F'),
+                    ('weight_LepSF'+label,'F'),
+                    ('weight_LepSF_MuUp'+label,'F'),
+                    ('weight_LepSF_MuDn'+label,'F'),
+                    ('weight_LepSF_ElUp'+label,'F'),
+                    ('weight_LepSF_ElDn'+label,'F'),
                  ]
         for trig in self.triggerlist:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=trig)) )
@@ -266,6 +323,8 @@ class edgeFriends:
         ## copy the triggers, susy masses and filters!!
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
+        self.isSMS =  (ret['GenSusyMScan1'] > 0)
+
         for trig in self.triggerlist:
             ##if not isData:
             ##    trigret[trig] = -1
@@ -501,6 +560,14 @@ class edgeFriends:
         ret['weight_btagsf_heavy_DN'] = wtbtagDown_heavy
         ret['weight_btagsf_light_UP'] = wtbtagUp_light
         ret['weight_btagsf_light_DN'] = wtbtagDown_light
+                                               
+        [lep1SF, lep1SF_MuUp, lep1SF_MuDn, lep1SF_ElUp, lep1SF_ElDn] = (self.getLepSF(lepret["Lep1_eta"+self.label],lepret["Lep1_pt"+self.label],lepret["Lep1_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+        [lep2SF, lep2SF_MuUp, lep2SF_MuDn, lep2SF_ElUp, lep2SF_ElDn] = (self.getLepSF(lepret["Lep2_eta"+self.label],lepret["Lep2_pt"+self.label],lepret["Lep2_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+        ret['weight_LepSF']      = lep1SF      * lep2SF
+        ret['weight_LepSF_MuUp'] = lep1SF_MuUp * lep2SF_MuUp
+        ret['weight_LepSF_MuDn'] = lep1SF_MuDn * lep2SF_MuDn
+        ret['weight_LepSF_ElUp'] = lep1SF_ElUp * lep2SF_ElUp
+        ret['weight_LepSF_ElDn'] = lep1SF_ElDn * lep2SF_ElDn
         t8 = time.time()
         ##print 'njets: %.0d nbjets35medium: %.0d / %.0d'%(ret["nJet35"], len(theBJets), ret["nBJetMedium35"])
 	
@@ -907,6 +974,82 @@ class edgeFriends:
                 if lep.idEmuTTH == 0: return False
             return True
 
+    def getLepSF(self, eta, pt, id):
+        result = [1.,1.,1.,1.,1.]
+        if abs(id) == 11:
+            #electrones
+            pt  = min(199,pt)
+            sf1 = self.hElecDataFull_ID .GetBinContent(self.hElecDataFull_ID .FindBin(pt, abs(eta)))
+            sf2 = self.hElecDataFull_ISO.GetBinContent(self.hElecDataFull_ISO.FindBin(pt, abs(eta)))
+            sf3 = self.hElecDataFull_IP .GetBinContent(self.hElecDataFull_IP .FindBin(pt, abs(eta)))
+            sf7 = self.hElecTracking    .GetBinContent(self.hElecTracking    .FindBin(eta, pt)     ) 
+
+            sf1_e = self.hElecDataFull_ID .GetBinError(self.hElecDataFull_ID .FindBin(pt, abs(eta)))
+            sf2_e = self.hElecDataFull_ISO.GetBinError(self.hElecDataFull_ISO.FindBin(pt, abs(eta)))
+            sf3_e = self.hElecDataFull_IP .GetBinError(self.hElecDataFull_IP .FindBin(pt, abs(eta)))
+            sf7_e = self.hElecTracking    .GetBinError(self.hElecTracking    .FindBin(eta,pt)      )
+
+            # fullsim by defult
+            sf4 = 1.
+            sf5 = 1.
+            sf6 = 1.
+            sf4_e = 0.
+            sf5_e = 0.
+            sf6_e = 0.
+
+            # if fastsim
+            if self.isSMS:
+                sf4 = self.hElecFullFast_ID .GetBinContent(self.hElecFullFast_ID .FindBin(pt, abs(eta)))
+                sf5 = self.hElecFullFast_ISO.GetBinContent(self.hElecFullFast_ISO.FindBin(pt, abs(eta)))
+                sf6 = self.hElecFullFast_IP .GetBinContent(self.hElecFullFast_IP .FindBin(pt, abs(eta)))
+                sf4_e = 0.02 * sf4 # as prescribed in the twiki
+                sf5_e = 0.02 * sf5
+                sf6_e = 0.02 * sf6
+
+            elVar = sqrt( (sf1_e*sf2*sf3*sf4*sf5*sf6*sf7)**2 + (sf1*sf2_e*sf3*sf4*sf5*sf6*sf7)**2
+                          +(sf1*sf2*sf3_e*sf4*sf5*sf6*sf7)**2 +(sf1*sf2*sf3*sf4_e*sf5*sf6*sf7)**2
+                          +(sf1*sf2*sf3*sf4*sf5_e*sf6*sf7)**2 +(sf1*sf2*sf3*sf4*sf5*sf6_e*sf7)**2
+                          +(sf1*sf2*sf3*sf4*sf5*sf6*sf7_e)**2 )
+            elSF  = sf1*sf2*sf3*sf4*sf5*sf6*sf7
+
+            return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
+
+        else:
+            pt  = min(119, pt)
+            sf1 = self.hMuonDataFull_ID .GetBinContent(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
+            sf2 = self.hMuonDataFull_ISO.GetBinContent(self.hMuonDataFull_ISO.FindBin(pt, abs(eta)))
+            sf3 = self.hMuonDataFull_IP .GetBinContent(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
+#            sf7 = self.hMuonTracking    .GetBinContent(self.hMuonTracking    .FindBin(eta, pt)     )
+            sf7 = self.hMuonTracking    .Eval(eta)
+
+            sf1_e = self.hMuonDataFull_ID .GetBinError(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
+            sf2_e = self.hMuonDataFull_ISO.GetBinError(self.hMuonDataFull_ISO.FindBin(pt, abs(eta)))
+            sf3_e = self.hMuonDataFull_IP .GetBinError(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
+#            sf7_e = self.hMuonTracking    .Eval(eta)
+            sf7_e = 0
+            # fullsim by defult
+            sf4 = 1.
+            sf5 = 1.
+            sf6 = 1.
+            sf4_e = 0.
+            sf5_e = 0.
+            sf6_e = 0.
+            if self.isSMS:
+                sf4 = self.hMuonFullFast_ID .GetBinContent(self.hMuonFullFast_ID .FindBin(pt, abs(eta)))
+                sf5 = self.hMuonFullFast_ISO.GetBinContent(self.hMuonFullFast_ISO.FindBin(pt, abs(eta)))
+                sf6 = self.hMuonFullFast_IP .GetBinContent(self.hMuonFullFast_IP .FindBin(pt, abs(eta)))
+                sf4_e = 0.02 * sf4 # as prescribed in the twiki
+                sf5_e = 0.02 * sf5
+                sf6_e = 0.02 * sf6
+
+            muVar = sqrt( (sf1_e*sf2*sf3*sf4*sf5*sf6*sf7)**2 + (sf1*sf2_e*sf3*sf4*sf5*sf6*sf7)**2
+                          +(sf1*sf2*sf3_e*sf4*sf5*sf6*sf7)**2 +(sf1*sf2*sf3*sf4_e*sf5*sf6*sf7)**2
+                          +(sf1*sf2*sf3*sf4*sf5_e*sf6*sf7)**2 +(sf1*sf2*sf3*sf4*sf5*sf6_e*sf7)**2
+                          +(sf1*sf2*sf3*sf4*sf5*sf6*sf7_e)**2 )
+            muSF  = sf1*sf2*sf3*sf4*sf5*sf6*sf7
+            return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
+
+            
 def newMediumMuonId(muon):
     if not hasattr(muon, 'isGlobalMuon'):
         return (muon.mediumMuonId == 1)
