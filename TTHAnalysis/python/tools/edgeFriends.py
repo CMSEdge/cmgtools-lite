@@ -30,6 +30,8 @@ class edgeFriends:
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
         self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul21_nominalUpDown.root","READ")
         self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
+        self.puHist_Up =copy.deepcopy( self.puFile.Get('weightsUp') )
+        self.puHist_Dn =copy.deepcopy( self.puFile.Get('weightsDown') )
         self.puFile.Close()
         ##B-tagging stuff
         self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2_4invfb_systJuly15.csv")
@@ -225,7 +227,9 @@ class edgeFriends:
                     ("Lep2_mvaIdSpring15"+label, "F"),
                     ("Lep2_mcMatchId"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
-                    ("PileupW"+label, "F"), 
+                    ("PileupW"+label, "F"),
+                    ("PileupW_Up"+label, "F"),
+                    ("PileupW_Dn"+label, "F"), 
                     ("min_mlb1"+label, "F"),
                     ("min_mlb2"+label, "F"),
                     ("sum_mlb"+label, "F"), 
@@ -377,9 +381,13 @@ class edgeFriends:
         # do pileupReweighting
         # ====================
         #puWt = self.pu_dict[int(ntrue)] if not isData else 1.
-        puWt = self.puHist.GetBinContent(self.puHist.FindBin(ntrue)) if not isData else 1.
-        #if puWt > 10: puWt = 10.
+        puWt    = self.puHist.GetBinContent(self.puHist.FindBin(ntrue)) if not isData else 1.
+        puWt_up = self.puHist_Up.GetBinContent(self.puHist_Up.FindBin(ntrue)) if not isData else 1.
+        puWt_dn = self.puHist_Dn.GetBinContent(self.puHist_Dn.FindBin(ntrue)) if not isData else 1.
         ret["PileupW"] = puWt
+        ret["PileupW_Up"] = puWt_up
+        ret["PileupW_Dn"] = puWt_dn
+        
         t21 = time.time()
 
         # ===============================
