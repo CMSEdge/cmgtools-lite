@@ -32,22 +32,23 @@ class edgeFriends:
         self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puFile.Close()
         ##B-tagging stuff
-        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2_4invfb_systJuly15.csv")
-        self.reader_heavy    = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "central")
-        self.reader_heavy_UP = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "up")
-        self.reader_heavy_DN = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "down")
-        self.reader_light    = ROOT.BTagCalibrationReader(self.calib, 1, "incl"  , "central")
-        self.reader_light_UP = ROOT.BTagCalibrationReader(self.calib, 1, "incl"  , "up")
-        self.reader_light_DN = ROOT.BTagCalibrationReader(self.calib, 1, "incl"  , "down")
-
-        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_20_11_2015.csv")
-        self.reader_heavyFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "central")
-        self.reader_heavy_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "up")
-        self.reader_heavy_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "down")
-        self.reader_lightFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "central")
-        self.reader_light_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "up")
-        self.reader_light_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "down")
-
+        vector = ROOT.vector('string')()
+        vector.push_back("up")
+        vector.push_back("down")
+        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2_ichep.csv")
+        self.reader_heavy = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
+        self.reader_heavy.load(self.calib, 0, "comb") #0 means b-jets
+        self.reader_c = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
+        self.reader_c.load(self.calib, 1, "comb") #0 means b-jets
+        self.reader_light = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
+        self.reader_light.load(self.calib, 2, "incl") #0 means b-jets
+        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_14_7_2016.csv")
+        self.reader_heavy_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
+        self.reader_heavy_FASTSIM.load(self.calibFASTSIM, 0, "fastsim") #0 means b-jets
+        self.reader_c_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
+        self.reader_c_FASTSIM.load(self.calibFASTSIM, 1, "fastsim") #0 means b-jets
+        self.reader_light_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
+        self.reader_light_FASTSIM.load(self.calibFASTSIM, 2, "fastsim") #0 means b-jets
         self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns_16.root")
         self.h_btag_eff_b    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_b"   ))
         self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
@@ -130,27 +131,32 @@ class edgeFriends:
                              'GenSusyMNeutralino', 'GenSusyMNeutralino2', 'GenSusyMNeutralino3', 'GenSusyMNeutralino4',
                              'GenSusyMChargino'  , 'GenSusyMChargino2']
 
-        self.triggerlist = ['HLT_mu17mu8',
-                            'HLT_mu17mu8_dz',
-                            'HLT_mu17tkmu8',
-                            'HLT_mu17tkmu8_dz',
-                            'HLT_mu17el12',
-                            'HLT_mu23el12',
-                            'HLT_mu23el8',
-                            'HLT_mu27tkmu8',
-                            'HLT_el17el12_dz',
-                            'HLT_el23el12_dz',
-                            'HLT_mu8el17',
-                            'HLT_mu8el23',
-                            'HLT_mu30tkmu11_noniso',
-                            'HLT_mu30ele30_noniso',
-                            'HLT_doubleele33_noniso',
-                            'HLT_doubleele33_MW_noniso',
-                            'HLT_htall',
-                            'HLT_atall',
-                            'HLT_htmet' ]
-
-
+        self.triggerlist = ['HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v',
+                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v',
+                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v',
+                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v',
+                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v',
+                            'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v',
+                            'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v',
+                            'HLT_BIT_HLT_Mu27_TkMu8_v',
+                            'HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
+                            'HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
+                            'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v',
+                            'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v',
+                            'HLT_BIT_HLT_Mu30_TkMu11_v',
+                            'HLT_BIT_HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v',
+                            'HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v',
+                            'HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v',
+                            'HLT_BIT_HLT_PFHT200_v',
+                            'HLT_BIT_HLT_PFHT250_v',
+                            'HLT_BIT_HLT_PFHT300_v',
+                            'HLT_BIT_HLT_PFHT350_v',
+                            'HLT_BIT_HLT_PFHT400_v',
+                            'HLT_BIT_HLT_PFHT475_v',
+                            'HLT_BIT_HLT_PFHT600_v',
+                            'HLT_BIT_HLT_PFHT650_v',
+                            'HLT_BIT_HLT_PFHT800_v',
+                            'HLT_BIT_HLT_PFHT300_PFMET110_v' ]                           
 
         self.btagMediumCut = 0.800
         self.btagLooseCut  = 0.460
@@ -168,6 +174,8 @@ class edgeFriends:
                     ("minMjj"+label, "F"),
                     ("maxMjj"+label, "F"),
                     ("hardMjj"+label, "F"),
+                    ("dphiMjj"+label, "F"),
+                    ("drMjj"+label, "F"),
                     ("hardJJDphi"+label, "F"),
                     ("hardJJDR"+label, "F"),
                     ("j1MetDPhi"+label, "F"),
@@ -343,6 +351,7 @@ class edgeFriends:
                                     event.Flag_eeBadScFilter > 0 and 
                                     event.Flag_globalTightHalo2016Filter > 0 and
                                     event.Flag_badChargedHadronFilter > 0 and
+                                    event.Flag_CSCTightHalo2016Filter > 0 and
                                     event.Flag_badMuonFilter)# and 
                                     #event.Flag_METFilters)
         else:
@@ -538,6 +547,8 @@ class edgeFriends:
         theBJets = sorted(theBJets, key = lambda j : j.pt, reverse = True)
         ret['lepsJZB_recoil'] = totalRecoil.Pt() - ret['lepsZPt']
         ret['bestMjj'] = self.getBestMjj(theJets)
+        ret['dphiMjj'] = self.getDPhiMjj(theJets)
+        ret['drMjj'] = self.getDRMjj(theJets)
         ret['minMjj']  = self.getMinMjj (theJets)
         ret['maxMjj']  = self.getMaxMjj (theJets)
         ret['hardMjj'] = self.getHardMjj(theJets)
@@ -840,6 +851,42 @@ class edgeFriends:
             else:       retval = deltaR(jetsel[0], jetsel[1])
         return retval
 
+    def getDPhiMjj(self, jetsel):                                                               
+        if len(jetsel) < 2: return -99.
+        dphimjj = 1e6
+        dphi = 3.2
+        for jeti in jetsel:
+            for jetj in jetsel:
+                if jeti == jetj: continue
+                dphijets = abs(deltaPhi(jeti.phi, jetj.phi)) 
+                if dphijets < dphi:   
+                    dphi = dphijets
+                    jet1 = ROOT.TLorentzVector()
+                    jet1.SetPtEtaPhiM(jeti.pt, jeti.eta, jeti.phi, jeti.mass)
+                    jet2 = ROOT.TLorentzVector()
+                    jet2.SetPtEtaPhiM(jetj.pt, jetj.eta, jetj.phi, jetj.mass)
+                    dijetmass = (jet1+jet2).M()
+                    dphimjj = dijetmass
+        return dphimjj                                                                       
+
+    def getDRMjj(self, jetsel):                                                    
+        if len(jetsel) < 2: return -99.
+        drmjj = 1e6
+        dr = 1000
+        for jeti in jetsel:
+            for jetj in jetsel:
+                if jeti == jetj: continue
+                jet1 = ROOT.TLorentzVector()
+                jet1.SetPtEtaPhiM(jeti.pt, jeti.eta, jeti.phi, jeti.mass)
+                jet2 = ROOT.TLorentzVector()
+                jet2.SetPtEtaPhiM(jetj.pt, jetj.eta, jetj.phi, jetj.mass)
+                drjets = abs(deltaR(jeti, jetj)) 
+                if drjets < dr:   
+                    dr = drjets
+                    dijetmass = (jet1+jet2).M()
+                    drmjj = dijetmass
+        return drmjj  
+
    
     #############Pablin
     def get_SF_btag(self, pt, eta, mcFlavour):
@@ -852,19 +899,26 @@ class edgeFriends:
        eta_cutoff = min(2.39, abs(eta))
 
        if flavour == 2:
-          SF = self.reader_light.eval(flavour,eta_cutoff, pt_cutoff);
-          SFup = self.reader_light_UP.eval(flavour,eta_cutoff, pt_cutoff);
-          SFdown = self.reader_light_DN.eval(flavour,eta_cutoff, pt_cutoff);
-          SFcorr = self.reader_lightFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
-          SFupcorr = self.reader_light_UPFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
-          SFdowncorr = self.reader_light_DNFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
+          SF = self.reader_light.eval_auto_bounds("central", flavour, eta_cutoff, pt_cutoff)
+          SFup = self.reader_light.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
+          SFdown = self.reader_light.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
+          SFcorr = self.reader_light_FASTSIM.eval_auto_bounds("central", flavour, eta_cutoff, pt_cutoff)
+          SFupcorr = self.reader_light_FASTSIM.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
+          SFdowncorr = self.reader_light_FASTSIM.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
+       elif flavour == 1:
+          SF = self.reader_c.eval_auto_bounds("central", flavour, eta_cutoff, pt_cutoff)
+          SFup = self.reader_c.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
+          SFdown = self.reader_c.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
+          SFcorr = self.reader_c_FASTSIM.eval_auto_bounds("central", flavour, eta_cutoff, pt_cutoff)
+          SFupcorr = self.reader_c_FASTSIM.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
+          SFdowncorr = self.reader_c_FASTSIM.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
        else:
-          SF = self.reader_heavy.eval(flavour,eta_cutoff, pt_cutoff)
-          SFup  = self.reader_heavy_UP.eval(flavour,eta_cutoff, pt_cutoff)
-          SFdown = self.reader_heavy_DN.eval(flavour,eta_cutoff, pt_cutoff)
-          SFcorr = self.reader_heavyFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
-          SFupcorr  = self.reader_heavy_UPFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
-          SFdowncorr = self.reader_heavy_DNFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
+          SF = self.reader_heavy.eval_auto_bounds("central", flavour, eta_cutoff, pt_cutoff)
+          SFup = self.reader_heavy.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
+          SFdown = self.reader_heavy.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
+          SFcorr = self.reader_heavy_FASTSIM.eval_auto_bounds("central", flavour, eta_cutoff, pt_cutoff)
+          SFupcorr = self.reader_heavy_FASTSIM.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
+          SFdowncorr = self.reader_heavy_FASTSIM.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
 
        return [SF*SFcorr, SFup*SFupcorr, SFdown*SFdowncorr]
 
