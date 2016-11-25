@@ -204,6 +204,7 @@ class edgeFriends:
                     ("metl1DPhi"+label, "F"),
                     ("metl2DPhi"+label, "F"),
                     ("met"+label, "F"), ("met_phi"+label, "F"), ("met_jecUp"+label, "F"), ("met_jecDn"+label, "F"), ("met_raw"+label, "F"),
+                    ("genMet"+label, "F"), ("genMet_phi"+label,"F"),
                     ("lepsDPhi"+label, "F"),
                     ("Lep1_pt"+label, "F"), 
                     ("Lep1_eta"+label, "F"), 
@@ -313,6 +314,8 @@ class edgeFriends:
         jetsd_jecDn = [j for j in Collection(event,"DiscJet_jecDown","nDiscJet_jecDown")]
         #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
         (met, metphi)  = event.met_pt, event.met_phi
+        ret['genMet']  = event.met_genPt
+        ret['genMet_phi'] = event.met_genPt
         (met_raw, metphi_raw)  = event.met_rawPt, event.met_rawPhi
         isData = event.isData
         if not isData:
