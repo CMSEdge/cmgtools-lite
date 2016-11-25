@@ -278,7 +278,13 @@ class edgeFriends:
                     ('weight_LepSF_MuDn'+label,'F'),
                     ('weight_LepSF_ElUp'+label,'F'),
                     ('weight_LepSF_ElDn'+label,'F'),
+                    ('weight_FSlepSF'     +label,'F'),
+                    ('weight_FSlepSF_MuUp'+label,'F'),
+                    ('weight_FSlepSF_MuDn'+label,'F'),
+                    ('weight_FSlepSF_ElUp'+label,'F'),
+                    ('weight_FSlepSF_ElDn'+label,'F')
                  ]
+
         for trig in self.triggerlist:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=trig)) )
         for mass in self.susymasslist:
@@ -571,14 +577,28 @@ class edgeFriends:
         ret['weight_btagsf_heavy_DN'] = wtbtagDown_heavy
         ret['weight_btagsf_light_UP'] = wtbtagUp_light
         ret['weight_btagsf_light_DN'] = wtbtagDown_light
-                                               
+
+        # full sim/ data scale factors
         [lep1SF, lep1SF_MuUp, lep1SF_MuDn, lep1SF_ElUp, lep1SF_ElDn] = (self.getLepSF(lepret["Lep1_eta"+self.label],lepret["Lep1_pt"+self.label],lepret["Lep1_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
         [lep2SF, lep2SF_MuUp, lep2SF_MuDn, lep2SF_ElUp, lep2SF_ElDn] = (self.getLepSF(lepret["Lep2_eta"+self.label],lepret["Lep2_pt"+self.label],lepret["Lep2_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+        # fast sim / full sim scale factors
+        [FSlep1SF, FSlep1SF_MuUp, FSlep1SF_MuDn, FSlep1SF_ElUp, FSlep1SF_ElDn] = (self.getLepFastSIM(lepret["Lep1_eta"+self.label],lepret["Lep1_pt"+self.label],lepret["Lep1_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+        [FSlep2SF, FSlep2SF_MuUp, FSlep2SF_MuDn, FSlep2SF_ElUp, FSlep2SF_ElDn] = (self.getLepFastSIM(lepret["Lep2_eta"+self.label],lepret["Lep2_pt"+self.label],lepret["Lep2_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+
         ret['weight_LepSF']      = lep1SF      * lep2SF
         ret['weight_LepSF_MuUp'] = lep1SF_MuUp * lep2SF_MuUp
         ret['weight_LepSF_MuDn'] = lep1SF_MuDn * lep2SF_MuDn
         ret['weight_LepSF_ElUp'] = lep1SF_ElUp * lep2SF_ElUp
         ret['weight_LepSF_ElDn'] = lep1SF_ElDn * lep2SF_ElDn
+
+        ret['weight_FSlepSF'     ]    = FSlep1SF * FSlep2SF
+        ret['weight_FSlepSF_MuUp']    = FSlep1SF_MuUp * FSlep2SF_MuUp
+        ret['weight_FSlepSF_MuDn']    = FSlep1SF_MuDn * FSlep2SF_MuDn
+        ret['weight_FSlepSF_ElUp']    = FSlep1SF_ElUp * FSlep2SF_ElUp
+        ret['weight_FSlepSF_ElDn']    = FSlep1SF_ElDn * FSlep2SF_ElDn
+
+
+
         t8 = time.time()
         ##print 'njets: %.0d nbjets35medium: %.0d / %.0d'%(ret["nJet35"], len(theBJets), ret["nBJetMedium35"])
 	
@@ -1043,28 +1063,9 @@ class edgeFriends:
             sf3_e = self.hElecDataFull_IP .GetBinError(self.hElecDataFull_IP .FindBin(pt, abs(eta)))
             sf7_e = self.hElecTracking    .GetBinError(self.hElecTracking    .FindBin(eta,pt)      )
 
-            # fullsim by defult
-            sf4 = 1.
-            sf5 = 1.
-            sf6 = 1.
-            sf4_e = 0.
-            sf5_e = 0.
-            sf6_e = 0.
-
-            # if fastsim
-            if self.isSMS:
-                sf4 = self.hElecFullFast_ID .GetBinContent(self.hElecFullFast_ID .FindBin(pt, abs(eta)))
-                sf5 = self.hElecFullFast_ISO.GetBinContent(self.hElecFullFast_ISO.FindBin(pt, abs(eta)))
-                sf6 = self.hElecFullFast_IP .GetBinContent(self.hElecFullFast_IP .FindBin(pt, abs(eta)))
-                sf4_e = 0.02 * sf4 # as prescribed in the twiki
-                sf5_e = 0.02 * sf5
-                sf6_e = 0.02 * sf6
-
-            elVar = sqrt( (sf1_e*sf2*sf3*sf4*sf5*sf6*sf7)**2 + (sf1*sf2_e*sf3*sf4*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3_e*sf4*sf5*sf6*sf7)**2 +(sf1*sf2*sf3*sf4_e*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5_e*sf6*sf7)**2 +(sf1*sf2*sf3*sf4*sf5*sf6_e*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5*sf6*sf7_e)**2 )
-            elSF  = sf1*sf2*sf3*sf4*sf5*sf6*sf7
+            elVar = sqrt( (sf1_e*sf2*sf3*sf7)**2  + (sf1*sf2_e*sf3*sf7)**2
+                         +(sf1*sf2*sf3_e*sf7)**2  + (sf1*sf2*sf3*sf7_e)**2 )
+            elSF  = sf1*sf2*sf3*sf7
 
             return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
 
@@ -1073,7 +1074,6 @@ class edgeFriends:
             sf1 = self.hMuonDataFull_ID .GetBinContent(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
             sf2 = self.hMuonDataFull_ISO.GetBinContent(self.hMuonDataFull_ISO.FindBin(pt, abs(eta)))
             sf3 = self.hMuonDataFull_IP .GetBinContent(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
-#            sf7 = self.hMuonTracking    .GetBinContent(self.hMuonTracking    .FindBin(eta, pt)     )
             sf7 = self.hMuonTracking    .Eval(eta)
 
             sf1_e = self.hMuonDataFull_ID .GetBinError(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
@@ -1081,28 +1081,43 @@ class edgeFriends:
             sf3_e = self.hMuonDataFull_IP .GetBinError(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
 #            sf7_e = self.hMuonTracking    .Eval(eta)
             sf7_e = 0
-            # fullsim by defult
-            sf4 = 1.
-            sf5 = 1.
-            sf6 = 1.
-            sf4_e = 0.
-            sf5_e = 0.
-            sf6_e = 0.
-            if self.isSMS:
-                sf4 = self.hMuonFullFast_ID .GetBinContent(self.hMuonFullFast_ID .FindBin(pt, abs(eta)))
-                sf5 = self.hMuonFullFast_ISO.GetBinContent(self.hMuonFullFast_ISO.FindBin(pt, abs(eta)))
-                sf6 = self.hMuonFullFast_IP .GetBinContent(self.hMuonFullFast_IP .FindBin(pt, abs(eta)))
-                sf4_e = 0.02 * sf4 # as prescribed in the twiki
-                sf5_e = 0.02 * sf5
-                sf6_e = 0.02 * sf6
 
-            muVar = sqrt( (sf1_e*sf2*sf3*sf4*sf5*sf6*sf7)**2 + (sf1*sf2_e*sf3*sf4*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3_e*sf4*sf5*sf6*sf7)**2 +(sf1*sf2*sf3*sf4_e*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5_e*sf6*sf7)**2 +(sf1*sf2*sf3*sf4*sf5*sf6_e*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5*sf6*sf7_e)**2 )
-            muSF  = sf1*sf2*sf3*sf4*sf5*sf6*sf7
+            muVar = sqrt( (sf1_e*sf2*sf3*sf7)**2  + (sf1*sf2_e*sf3*sf7)**2
+                          +(sf1*sf2*sf3_e*sf7)**2 + (sf1*sf2*sf3*sf7_e)**2 )
+            muSF  = sf1*sf2*sf3*sf7
             return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
 
+    def getLepFastSIM(self, eta, pt, id):
+        result = [1.,1.,1.,1.,1.]
+        if not self.isSMS: return result
+        if abs(id) == 11:
+            #electrones
+            pt  = min(199,pt)
+
+            sf4 = self.hElecFullFast_ID .GetBinContent(self.hElecFullFast_ID .FindBin(pt, abs(eta)))
+            sf5 = self.hElecFullFast_ISO.GetBinContent(self.hElecFullFast_ISO.FindBin(pt, abs(eta)))
+            sf6 = self.hElecFullFast_IP .GetBinContent(self.hElecFullFast_IP .FindBin(pt, abs(eta)))
+            sf4_e = 0.02 * sf4 # as prescribed in the twiki
+            sf5_e = 0.02 * sf5
+            sf6_e = 0.02 * sf6
+
+            elVar = sqrt( (sf4_e*sf5*sf6)**2 +(sf4*sf5_e*sf6)**2 +(sf4*sf5*sf6_e)**2 )
+            elSF  = sf4*sf5*sf6
+
+            return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
+
+        else:
+            pt  = min(119, pt)
+            sf4 = self.hMuonFullFast_ID .GetBinContent(self.hMuonFullFast_ID .FindBin(pt, abs(eta)))
+            sf5 = self.hMuonFullFast_ISO.GetBinContent(self.hMuonFullFast_ISO.FindBin(pt, abs(eta)))
+            sf6 = self.hMuonFullFast_IP .GetBinContent(self.hMuonFullFast_IP .FindBin(pt, abs(eta)))
+            sf4_e = 0.02 * sf4 # as prescribed in the twiki
+            sf5_e = 0.02 * sf5
+            sf6_e = 0.02 * sf6
+
+            muVar = sqrt( (sf4_e*sf5*sf6)**2 + (sf4*sf5_e*sf6)**2 +(sf4*sf5*sf6_e)**2 )
+            muSF  = sf4*sf5*sf6
+            return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
             
 def newMediumMuonId(muon):
     if not hasattr(muon, 'isGlobalMuon'):
