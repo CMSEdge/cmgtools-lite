@@ -704,7 +704,7 @@ class edgeFriends:
         isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
         isBasicSREvent = isBasicSREvent * (abs(lepret["Lep1_eta"+self.label] - 1.5) > 0.1 and abs(lepret["Lep2_eta"+self.label] - 1.5) > 0.1)
         # corrected to check that it passes the baseline selection also considering jec and genMet variations
-        isBasicSReventWVariations = isBasicSREvent * ( (met > 150 and ret['nJetSel'] >= 2 ) or (met_jecUp > 150 and ret['nJetSel_jecUp'] >= 2) or (met_jecDn > 150 and ret['nJetSel_jecDn'] >= 2) or (genMet > 150 and ret['nJetSel'] >=2 ))
+        isBasicSReventWVariations = isBasicSREvent * ( (met > 150 and ret['nJetSel'] >= 2 ) or (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2) or (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2) or (ret['genMet'] > 150 and ret['nJetSel'] >=2 ))
 
         if isBasicSREvent:
             srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
@@ -742,10 +742,10 @@ class edgeFriends:
 
             ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met > 150 and ret['nJetSel'] >= 2 ) else 0.
             if not isData:
-                ret['nll_genMet']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_genMet_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
+                ret['nll_genMet']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_genMet_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['genMet'] > 150 and ret['nJetSel'] >= 2) else 0.
             else: ret['nll_genMet'] = -1
-            ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met_jecUp > 150 and ret['nJetSel_jecUp'] >= 2 ) else 0.
-            ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met_jecDn > 150 and ret['nJetSel_jecDn'] >= 2 ) else 0.
+            ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2 ) else 0.
+            ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2 ) else 0.
 
         else:
             ret["srID"]      = -99
