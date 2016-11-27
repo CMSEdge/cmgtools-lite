@@ -703,7 +703,9 @@ class edgeFriends:
         ## b-tags and the signle digit is the mll region going from 1-5
         isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
         isBasicSREvent = isBasicSREvent * (abs(lepret["Lep1_eta"+self.label] - 1.5) > 0.1 and abs(lepret["Lep2_eta"+self.label] - 1.5) > 0.1)
-        isBasicSREvent = isBasicSREvent * (met > 150 and ret['nJetSel'] >= 2 ) ## adapting to 2016 selection
+        # corrected to check that it passes the baseline selection also considering jec and genMet variations
+        isBasicSReventWVariations = isBasicSREvent * ( (met > 150 and ret['nJetSel'] >= 2 ) or (met_jecUp > 150 and ret['nJetSel_jecUp'] >= 2) or (met_jecDn > 150 and ret['nJetSel_jecDn'] >= 2) or (genMet > 150 and ret['nJetSel'] >=2 ))
+
         if isBasicSREvent:
             srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
             ret["srID"] = srID
@@ -738,12 +740,12 @@ class edgeFriends:
                 if not ret["lh_ana_%s_data"%var[0]]: ret["lh_ana_%s_data"%var[0]] = 1e-50
 
 
-            ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
+            ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met > 150 and ret['nJetSel'] >= 2 ) else 0.
             if not isData:
                 ret['nll_genMet']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_genMet_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
             else: ret['nll_genMet'] = -1
-            ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
-            ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
+            ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met_jecUp > 150 and ret['nJetSel_jecUp'] >= 2 ) else 0.
+            ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met_jecDn > 150 and ret['nJetSel_jecDn'] >= 2 ) else 0.
 
         else:
             ret["srID"]      = -99
@@ -758,6 +760,8 @@ class edgeFriends:
             ret['nll']       = 0.
             ret['nll_mc']    = 0.
             ret['nll_mc_sf'] = 0.
+            ret['nll_jecUp'] = 0.
+            ret['nll_jecDn'] = 0.
         t10 = time.time()
 
         ## print 'time from start to pre trigloaded: %.3f mus'%( (t01-t0)*1000000. )
