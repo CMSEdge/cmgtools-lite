@@ -734,7 +734,6 @@ class edgeFriends:
                 label = label if not label=='mlbDn' else 'mlb'
                 
                 self.wspace.var(var[2]).setVal(var[1])
-                print 'here', var[0]
                 ret["lh_ana_%s_data"%var[0]] = getattr(self,'h_lh_ana_%s_DA'%label).getVal(getattr(self,'obs_ana%s_DA'%label))
                 if not ret["lh_ana_%s_data"%var[0]]: ret["lh_ana_%s_data"%var[0]] = 1e-50
 
