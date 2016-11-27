@@ -115,8 +115,8 @@ class edgeFriends:
         ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
         self.wspace = copy.deepcopy( self.an_file.Get('w') )
         # data
-        for t in ['DA','MC']:#,'MC_SF']:
-            for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldr','lepsDR_Edge'],['a3d','d3D_Edge'],['ldp','lepsDPhi_Edge']]:
+        for t in ['DA']:#,'MC_SF']:
+            for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldp','lepsDPhi_Edge']]:
                 print 'loading likelihoods for variable %s in %s'%(var[0],t)
                 setattr(self,'h_lh_ana_%s_%s' %(var[0],t), self.wspace.pdf('%s_analyticalPDF_%s'%(var[0],t)))
                 setattr(self,'var_ana_%s_%s'  %(var[0],t), self.wspace.var(var[1]))
@@ -204,6 +204,7 @@ class edgeFriends:
                     ("metl1DPhi"+label, "F"),
                     ("metl2DPhi"+label, "F"),
                     ("met"+label, "F"), ("met_phi"+label, "F"), ("met_jecUp"+label, "F"), ("met_jecDn"+label, "F"), ("met_raw"+label, "F"),
+                    ("genMet"+label, "F"), ("genMet_phi"+label,"F"),
                     ("lepsDPhi"+label, "F"),
                     ("Lep1_pt"+label, "F"), 
                     ("Lep1_eta"+label, "F"), 
@@ -236,29 +237,39 @@ class edgeFriends:
                     ("PileupW"+label, "F"), 
                     ("min_mlb1"+label, "F"),
                     ("min_mlb2"+label, "F"),
+                    ("min_mlb1Up"+label, "F"),
+                    ("min_mlb2Up"+label, "F"),
+                    ("min_mlb1Dn"+label, "F"),
+                    ("min_mlb2Dn"+label, "F"),
                     ("sum_mlb"+label, "F"), 
+                    ("sum_mlbUp"+label, "F"),
+                    ("sum_mlbDn"+label, "F"),
                     ("st"+label,"F"), 
                     ("srID"+label, "I"), 
                     ("mt2"+label, "F"), ("mt2_jecUp"+label, "F"), ("mt2_jecDn"+label, "F"),
                     ("lh_ana_zpt_data"+label, "F") ,
-                    ("lh_ana_a3d_data"+label, "F") ,
+                    #("lh_ana_a3d_data"+label, "F") ,
                     ("lh_ana_met_data"+label, "F") ,
-                    ("lh_ana_mlb_data"+label, "F") , 
-                    ("lh_ana_ldr_data"+label, "F") ,
+                    ("lh_ana_genMet_data"+label, "F") ,
+                    ("lh_ana_mlb_data"+label, "F") ,
+                    ("lh_ana_mlbUp_data"+label, "F") ,
+                    ("lh_ana_mlbDn_data"+label, "F") , 
+                    #("lh_ana_ldr_data"+label, "F") ,
                     ("lh_ana_ldp_data"+label, "F") ,
-                    ("lh_ana_zpt_mc"+label  , "F") , 
-                    ("lh_ana_met_mc"+label  , "F") , 
-                    ("lh_ana_mlb_mc"+label  , "F") , 
-                    ("lh_ana_ldr_mc"+label  , "F") ,
-                    ("lh_ana_a3d_mc"+label  , "F") ,
-                    ("lh_ana_ldp_mc"+label  , "F") ,
-                    ("lh_ana_zpt_mc_sf"+label  , "F") , 
-                    ("lh_ana_met_mc_sf"+label  , "F") , 
-                    ("lh_ana_mlb_mc_sf"+label  , "F") , 
-                    ("lh_ana_ldr_mc_sf"+label  , "F") ,
-                    ("lh_ana_a3d_mc_sf"+label  , "F") ,
-                    ("lh_ana_ldp_mc_sf"+label  , "F") ,
+                    # ("lh_ana_zpt_mc"+label  , "F") , 
+                    # ("lh_ana_met_mc"+label  , "F") , 
+                    # ("lh_ana_mlb_mc"+label  , "F") , 
+                    # ("lh_ana_ldr_mc"+label  , "F") ,
+                    # ("lh_ana_a3d_mc"+label  , "F") ,
+                    # ("lh_ana_ldp_mc"+label  , "F") ,
+                    # ("lh_ana_zpt_mc_sf"+label  , "F") , 
+                    # ("lh_ana_met_mc_sf"+label  , "F") , 
+                    # ("lh_ana_mlb_mc_sf"+label  , "F") , 
+                    # ("lh_ana_ldr_mc_sf"+label  , "F") ,
+                    # ("lh_ana_a3d_mc_sf"+label  , "F") ,
+                    # ("lh_ana_ldp_mc_sf"+label  , "F") ,
                     ("nll"+label, "F"), ("nll_jecUp"+label, "F"), ("nll_jecDn"+label, "F"),
+                    ('nll_genMet'+label, "F"), 
                     ("nll_mc"+label, "F"), ("nll_mc_jecUp"+label, "F"), ("nll_mc_jecDn"+label, "F"),
                     ("nll_mc_sf"+label, "F"),
                     ("weight_trigger"+label  , "F") ,
@@ -278,7 +289,13 @@ class edgeFriends:
                     ('weight_LepSF_MuDn'+label,'F'),
                     ('weight_LepSF_ElUp'+label,'F'),
                     ('weight_LepSF_ElDn'+label,'F'),
+                    ('weight_FSlepSF'     +label,'F'),
+                    ('weight_FSlepSF_MuUp'+label,'F'),
+                    ('weight_FSlepSF_MuDn'+label,'F'),
+                    ('weight_FSlepSF_ElUp'+label,'F'),
+                    ('weight_FSlepSF_ElDn'+label,'F')
                  ]
+
         for trig in self.triggerlist:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=trig)) )
         for mass in self.susymasslist:
@@ -307,8 +324,11 @@ class edgeFriends:
         jetsd_jecDn = [j for j in Collection(event,"DiscJet_jecDown","nDiscJet_jecDown")]
         #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
         (met, metphi)  = event.met_pt, event.met_phi
-        (met_raw, metphi_raw)  = event.met_rawPt, event.met_rawPhi
         isData = event.isData
+            
+            
+        (met_raw, metphi_raw)  = event.met_rawPt, event.met_rawPhi
+
         if not isData:
             gentaus  = [t for t in Collection(event,"genTau","ngenTau")]
             ntrue = event.nTrueInt
@@ -322,6 +342,13 @@ class edgeFriends:
         trigret = {}
         ret['met'] = met; ret['met_phi'] = metphi; ret['met_raw'] = met_raw;
         ret['met_jecUp'] = event.met_jecUp_pt; ret['met_jecDn'] = event.met_jecDown_pt 
+        if not isData:
+            ret['genMet']  = event.met_genPt
+            ret['genMet_phi'] = event.met_genPt
+        else:
+            ret['genMet']     = -1
+            ret['genMet_phi'] = -1
+
         ret['run'] = event.run
         ret['lumi'] = event.lumi
         ret['evt'] = long(event.evt)
@@ -545,6 +572,9 @@ class edgeFriends:
 
         theJets  = sorted(theJets , key = lambda j : j.pt, reverse = True)
         theBJets = sorted(theBJets, key = lambda j : j.pt, reverse = True)
+        theJets_jecUp = sorted(theJets_jecUp , key = lambda j : j.pt, reverse = True)
+        theJets_jecDn = sorted(theJets_jecDn , key = lambda j : j.pt, reverse = True)
+
         ret['lepsJZB_recoil'] = totalRecoil.Pt() - ret['lepsZPt']
         ret['bestMjj'] = self.getBestMjj(theJets)
         ret['dphiMjj'] = self.getDPhiMjj(theJets)
@@ -571,14 +601,28 @@ class edgeFriends:
         ret['weight_btagsf_heavy_DN'] = wtbtagDown_heavy
         ret['weight_btagsf_light_UP'] = wtbtagUp_light
         ret['weight_btagsf_light_DN'] = wtbtagDown_light
-                                               
+
+        # full sim/ data scale factors
         [lep1SF, lep1SF_MuUp, lep1SF_MuDn, lep1SF_ElUp, lep1SF_ElDn] = (self.getLepSF(lepret["Lep1_eta"+self.label],lepret["Lep1_pt"+self.label],lepret["Lep1_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
         [lep2SF, lep2SF_MuUp, lep2SF_MuDn, lep2SF_ElUp, lep2SF_ElDn] = (self.getLepSF(lepret["Lep2_eta"+self.label],lepret["Lep2_pt"+self.label],lepret["Lep2_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+        # fast sim / full sim scale factors
+        [FSlep1SF, FSlep1SF_MuUp, FSlep1SF_MuDn, FSlep1SF_ElUp, FSlep1SF_ElDn] = (self.getLepFastSIM(lepret["Lep1_eta"+self.label],lepret["Lep1_pt"+self.label],lepret["Lep1_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+        [FSlep2SF, FSlep2SF_MuUp, FSlep2SF_MuDn, FSlep2SF_ElUp, FSlep2SF_ElDn] = (self.getLepFastSIM(lepret["Lep2_eta"+self.label],lepret["Lep2_pt"+self.label],lepret["Lep2_pdgId"+self.label]) if not isData else [1., 1.,1.,1.,1.])
+
         ret['weight_LepSF']      = lep1SF      * lep2SF
         ret['weight_LepSF_MuUp'] = lep1SF_MuUp * lep2SF_MuUp
         ret['weight_LepSF_MuDn'] = lep1SF_MuDn * lep2SF_MuDn
         ret['weight_LepSF_ElUp'] = lep1SF_ElUp * lep2SF_ElUp
         ret['weight_LepSF_ElDn'] = lep1SF_ElDn * lep2SF_ElDn
+
+        ret['weight_FSlepSF'     ]    = FSlep1SF * FSlep2SF
+        ret['weight_FSlepSF_MuUp']    = FSlep1SF_MuUp * FSlep2SF_MuUp
+        ret['weight_FSlepSF_MuDn']    = FSlep1SF_MuDn * FSlep2SF_MuDn
+        ret['weight_FSlepSF_ElUp']    = FSlep1SF_ElUp * FSlep2SF_ElUp
+        ret['weight_FSlepSF_ElDn']    = FSlep1SF_ElDn * FSlep2SF_ElDn
+
+
+
         t8 = time.time()
         ##print 'njets: %.0d nbjets35medium: %.0d / %.0d'%(ret["nJet35"], len(theBJets), ret["nBJetMedium35"])
 	
@@ -588,37 +632,70 @@ class edgeFriends:
         _lmin, _jmin = -1, -1
         _lmax, _jmax = -1, -1
         leplist = [l1, l2]
+
         ## DO MLB CALCULATION HERE
         # find the global minimum mlb (or mlj)
+        for jec in ['', 'Up' ,'Dn']:
+            theBJetsForMLB = theBJets if len(jec) == 0 else theBJets_jecUp if 'Up' in jec else theBJets_jecDn
+            theJetsForMLB  = theJets  if len(jec) == 0 else theJets_jecUp  if 'Up' in jec else theJets_jecDn
+            jet1coll = (theBJets if len(theBJetsForMLB) >= 1 else theJetsForMLB)
+            jet2coll = (theBJets if len(theBJetsForMLB) >= 2 else theJetsForMLB)
+            if ret['nPairLep'] > 1:
+                for _il,lep in enumerate(leplist):
+                    for _ij,j in enumerate(jet1coll):
+                        jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+                        tmp_mlb = (lep+jet).M()
+                        if tmp_mlb < min_mlb:
+                            min_mlb = tmp_mlb
+                            _lmin = _il
+                            _jmin = _ij
+                for _il,lep in enumerate(leplist):
+                    if _il == _lmin: continue
+                    for _ij,j in enumerate(jet2coll):
+                        if len(theBJets) == 1 and j.btagCSV >= self.btagMediumCut:
+                            continue
+                        if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
+                        jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+                        tmp_mlb = (lep+jet).M()
+                        if tmp_mlb < max_mlb:
+                            max_mlb = tmp_mlb
+                            _lmax = _il
+                            _jmax = _ij
+                    
+            ret["min_mlb1%s"%jec] = min_mlb if min_mlb < 1e6  else -1.
+            ret["min_mlb2%s"%jec] = max_mlb if max_mlb < 1e6  else -1.
+            ret["sum_mlb%s"%jec] = (ret["min_mlb1%s"%jec] + ret["min_mlb2%s"%jec]) if ret["min_mlb1%s"%jec] > 0. and ret["min_mlb2%s"%jec] > 0. else -1.
+        
+
         # new mlb calculations
-        jet1coll = (theBJets if len(theBJets) >= 1 else theJets)
-        jet2coll = (theBJets if len(theBJets) >= 2 else theJets)
-        if ret['nPairLep'] > 1:
-            for _il,lep in enumerate(leplist):
-                for _ij,j in enumerate(jet1coll):
-                    jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
-                    tmp_mlb = (lep+jet).M()
-                    if tmp_mlb < min_mlb:
-                        min_mlb = tmp_mlb
-                        _lmin = _il
-                        _jmin = _ij
-            for _il,lep in enumerate(leplist):
-                if _il == _lmin: continue
-                for _ij,j in enumerate(jet2coll):
-                    if len(theBJets) == 1 and j.btagCSV >= self.btagMediumCut:
-                        continue
-                    if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
-                    jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
-                    tmp_mlb = (lep+jet).M()
-                    if tmp_mlb < max_mlb:
-                        max_mlb = tmp_mlb
-                        _lmax = _il
-                        _jmax = _ij
-        ##print '%15d : min_mlb : %15.2f max_mlb : %15.2f nb: %d nj: %d'%(event.evt, min_mlb, max_mlb, len(theBJets), len(theJets))
+        # jet1coll = (theBJets if len(theBJets) >= 1 else theJets)
+        # jet2coll = (theBJets if len(theBJets) >= 2 else theJets)
+        # if ret['nPairLep'] > 1:
+        #     for _il,lep in enumerate(leplist):
+        #         for _ij,j in enumerate(jet1coll):
+        #             jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+        #             tmp_mlb = (lep+jet).M()
+        #             if tmp_mlb < min_mlb:
+        #                 min_mlb = tmp_mlb
+        #                 _lmin = _il
+        #                 _jmin = _ij
+        #     for _il,lep in enumerate(leplist):
+        #         if _il == _lmin: continue
+        #         for _ij,j in enumerate(jet2coll):
+        #             if len(theBJets) == 1 and j.btagCSV >= self.btagMediumCut:
+        #                 continue
+        #             if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
+        #             jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
+        #             tmp_mlb = (lep+jet).M()
+        #             if tmp_mlb < max_mlb:
+        #                 max_mlb = tmp_mlb
+        #                 _lmax = _il
+        #                 _jmax = _ij
+        # ##print '%15d : min_mlb : %15.2f max_mlb : %15.2f nb: %d nj: %d'%(event.evt, min_mlb, max_mlb, len(theBJets), len(theJets))
             
-        ret["min_mlb1"] = min_mlb if min_mlb < 1e6  else -1.
-        ret["min_mlb2"] = max_mlb if max_mlb < 1e6  else -1.
-        ret["sum_mlb"] = (ret["min_mlb1"] + ret["min_mlb2"]) if ret["min_mlb1"] > 0. and ret["min_mlb2"] > 0. else -1.
+        # ret["min_mlb1"] = min_mlb if min_mlb < 1e6  else -1.
+        # ret["min_mlb2"] = max_mlb if max_mlb < 1e6  else -1.
+        # ret["sum_mlb"] = (ret["min_mlb1"] + ret["min_mlb2"]) if ret["min_mlb1"] > 0. and ret["min_mlb2"] > 0. else -1.
         ret["st"] = met+lepret["Lep1_pt"+self.label]+lepret["Lep2_pt"+self.label]
         t9 = time.time()
 
@@ -626,43 +703,65 @@ class edgeFriends:
         ## b-tags and the signle digit is the mll region going from 1-5
         isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
         isBasicSREvent = isBasicSREvent * (abs(lepret["Lep1_eta"+self.label] - 1.5) > 0.1 and abs(lepret["Lep2_eta"+self.label] - 1.5) > 0.1)
-        isBasicSREvent = isBasicSREvent * (met > 150 and ret['nJetSel'] >= 2 ) ## adapting to 2016 selection
+        # corrected to check that it passes the baseline selection also considering jec and genMet variations
+        isBasicSReventWVariations = isBasicSREvent * ( (met > 150 and ret['nJetSel'] >= 2 ) or (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2) or (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2) or (ret['genMet'] > 150 and ret['nJetSel'] >=2 ))
+
         if isBasicSREvent:
             srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
             ret["srID"] = srID
-            for t in  ['data','mc']:#, 'mc_sf']:
-                if t == 'data'  : nam = 'DA'
-                if t == 'mc'    : nam = 'MC'
-                if t == 'mc_sf' : nam = 'MC_SF'
-                for u in ['_ana']:
-                    for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],
-                                ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldr',ret['lepsDR'],'lepsDR_Edge'],
-                                ['a3d',ret['d3D'],'d3D_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge']]:
-                        self.wspace.var(var[2]).setVal(var[1])
-                        ret["lh%s_%s_%s"%(u,var[0],t)] = getattr(self,'h_lh_ana_%s_%s'%(var[0],nam)).getVal(getattr(self,'obs_ana%s_%s'%(var[0],nam)))
+            # for t in  ['data','mc']:#, 'mc_sf']:
+            #     if t == 'data'  : nam = 'DA'
+            #     if t == 'mc'    : nam = 'MC'
+            #     if t == 'mc_sf' : nam = 'MC_SF'
+            #     for u in ['_ana']:
+            #         for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],
+            #                     ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldr',ret['lepsDR'],'lepsDR_Edge'],
+            #                     ['a3d',ret['d3D'],'d3D_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge']]:
+            #             self.wspace.var(var[2]).setVal(var[1])
+            #             ret["lh%s_%s_%s"%(u,var[0],t)] = getattr(self,'h_lh_ana_%s_%s'%(var[0],nam)).getVal(getattr(self,'obs_ana%s_%s'%(var[0],nam)))
                     
-                    if not ret["lh%s_mlb_%s"%(u,t)]: ret["lh%s_mlb_%s"%(u,t)] = 1e-50
-                    if not ret["lh%s_ldr_%s"%(u,t)]: ret["lh%s_ldr_%s"%(u,t)] = 1e-50
-                    if not ret["lh%s_met_%s"%(u,t)]: ret["lh%s_met_%s"%(u,t)] = 1e-50
-                    if not ret["lh%s_zpt_%s"%(u,t)]: ret["lh%s_zpt_%s"%(u,t)] = 1e-50
-                    if not ret["lh%s_a3d_%s"%(u,t)]: ret["lh%s_a3d_%s"%(u,t)] = 1e-50
-                    if not ret["lh%s_ldp_%s"%(u,t)]: ret["lh%s_ldp_%s"%(u,t)] = 1e-50
-            ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] )
-            ret['nll_mc']    = -1.*math.log(ret["lh_ana_mlb_mc"]   *ret["lh_ana_met_mc"]   *ret["lh_ana_zpt_mc"]   *ret["lh_ana_ldp_mc"]   )
-            #ret['nll_mc_sf'] = -1.*math.log(ret["lh_ana_mlb_mc_sf"]*ret["lh_ana_met_mc_sf"]*ret["lh_ana_zpt_mc_sf"]*ret["lh_ana_ldp_mc_sf"])
+            #         if not ret["lh%s_mlb_%s"%(u,t)]: ret["lh%s_mlb_%s"%(u,t)] = 1e-50
+            #         if not ret["lh%s_ldr_%s"%(u,t)]: ret["lh%s_ldr_%s"%(u,t)] = 1e-50
+            #         if not ret["lh%s_met_%s"%(u,t)]: ret["lh%s_met_%s"%(u,t)] = 1e-50
+            #         if not ret["lh%s_zpt_%s"%(u,t)]: ret["lh%s_zpt_%s"%(u,t)] = 1e-50
+            #         if not ret["lh%s_a3d_%s"%(u,t)]: ret["lh%s_a3d_%s"%(u,t)] = 1e-50
+            #         if not ret["lh%s_ldp_%s"%(u,t)]: ret["lh%s_ldp_%s"%(u,t)] = 1e-50
+
+            for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],['genMet',ret['genMet'], 'met_Edge'],
+                        ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge'], 
+                        ['mlbUp',ret['sum_mlbUp'],'sum_mlb_Edge'], ['mlbDn',ret['sum_mlbDn'],'sum_mlb_Edge']]:
+                if isData and var[0]=='genMet': continue
+                label = var[0] if not var[0]=='genMet' else 'met'
+                label = label if not label=='mlbUp' else 'mlb'
+                label = label if not label=='mlbDn' else 'mlb'
+                
+                self.wspace.var(var[2]).setVal(var[1])
+                ret["lh_ana_%s_data"%var[0]] = getattr(self,'h_lh_ana_%s_DA'%label).getVal(getattr(self,'obs_ana%s_DA'%label))
+                if not ret["lh_ana_%s_data"%var[0]]: ret["lh_ana_%s_data"%var[0]] = 1e-50
+
+
+            ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met > 150 and ret['nJetSel'] >= 2 ) else 0.
+            if not isData:
+                ret['nll_genMet']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_genMet_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['genMet'] > 150 and ret['nJetSel'] >= 2) else 0.
+            else: ret['nll_genMet'] = -1
+            ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2 ) else 0.
+            ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2 ) else 0.
+
         else:
             ret["srID"]      = -99
-            for t in ['data', 'mc']:#, 'mc_sf']:
+            for t in ['data']:#, 'mc_sf']:
                 for u in ['_ana']:
                     ret["lh%s_mlb_%s"%(u,t)] = -999.
-                    ret["lh%s_ldr_%s"%(u,t)] = -999.
+                    #ret["lh%s_ldr_%s"%(u,t)] = -999.
                     ret["lh%s_met_%s"%(u,t)] = -999.
                     ret["lh%s_zpt_%s"%(u,t)] = -999.
-                    ret["lh%s_a3d_%s"%(u,t)] = -999.
+                    #ret["lh%s_a3d_%s"%(u,t)] = -999.
                     ret["lh%s_ldp_%s"%(u,t)] = -999.
             ret['nll']       = 0.
             ret['nll_mc']    = 0.
             ret['nll_mc_sf'] = 0.
+            ret['nll_jecUp'] = 0.
+            ret['nll_jecDn'] = 0.
         t10 = time.time()
 
         ## print 'time from start to pre trigloaded: %.3f mus'%( (t01-t0)*1000000. )
@@ -1043,28 +1142,9 @@ class edgeFriends:
             sf3_e = self.hElecDataFull_IP .GetBinError(self.hElecDataFull_IP .FindBin(pt, abs(eta)))
             sf7_e = self.hElecTracking    .GetBinError(self.hElecTracking    .FindBin(eta,pt)      )
 
-            # fullsim by defult
-            sf4 = 1.
-            sf5 = 1.
-            sf6 = 1.
-            sf4_e = 0.
-            sf5_e = 0.
-            sf6_e = 0.
-
-            # if fastsim
-            if self.isSMS:
-                sf4 = self.hElecFullFast_ID .GetBinContent(self.hElecFullFast_ID .FindBin(pt, abs(eta)))
-                sf5 = self.hElecFullFast_ISO.GetBinContent(self.hElecFullFast_ISO.FindBin(pt, abs(eta)))
-                sf6 = self.hElecFullFast_IP .GetBinContent(self.hElecFullFast_IP .FindBin(pt, abs(eta)))
-                sf4_e = 0.02 * sf4 # as prescribed in the twiki
-                sf5_e = 0.02 * sf5
-                sf6_e = 0.02 * sf6
-
-            elVar = sqrt( (sf1_e*sf2*sf3*sf4*sf5*sf6*sf7)**2 + (sf1*sf2_e*sf3*sf4*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3_e*sf4*sf5*sf6*sf7)**2 +(sf1*sf2*sf3*sf4_e*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5_e*sf6*sf7)**2 +(sf1*sf2*sf3*sf4*sf5*sf6_e*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5*sf6*sf7_e)**2 )
-            elSF  = sf1*sf2*sf3*sf4*sf5*sf6*sf7
+            elVar = sqrt( (sf1_e*sf2*sf3*sf7)**2  + (sf1*sf2_e*sf3*sf7)**2
+                         +(sf1*sf2*sf3_e*sf7)**2  + (sf1*sf2*sf3*sf7_e)**2 )
+            elSF  = sf1*sf2*sf3*sf7
 
             return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
 
@@ -1073,7 +1153,6 @@ class edgeFriends:
             sf1 = self.hMuonDataFull_ID .GetBinContent(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
             sf2 = self.hMuonDataFull_ISO.GetBinContent(self.hMuonDataFull_ISO.FindBin(pt, abs(eta)))
             sf3 = self.hMuonDataFull_IP .GetBinContent(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
-#            sf7 = self.hMuonTracking    .GetBinContent(self.hMuonTracking    .FindBin(eta, pt)     )
             sf7 = self.hMuonTracking    .Eval(eta)
 
             sf1_e = self.hMuonDataFull_ID .GetBinError(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
@@ -1081,28 +1160,43 @@ class edgeFriends:
             sf3_e = self.hMuonDataFull_IP .GetBinError(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
 #            sf7_e = self.hMuonTracking    .Eval(eta)
             sf7_e = 0
-            # fullsim by defult
-            sf4 = 1.
-            sf5 = 1.
-            sf6 = 1.
-            sf4_e = 0.
-            sf5_e = 0.
-            sf6_e = 0.
-            if self.isSMS:
-                sf4 = self.hMuonFullFast_ID .GetBinContent(self.hMuonFullFast_ID .FindBin(pt, abs(eta)))
-                sf5 = self.hMuonFullFast_ISO.GetBinContent(self.hMuonFullFast_ISO.FindBin(pt, abs(eta)))
-                sf6 = self.hMuonFullFast_IP .GetBinContent(self.hMuonFullFast_IP .FindBin(pt, abs(eta)))
-                sf4_e = 0.02 * sf4 # as prescribed in the twiki
-                sf5_e = 0.02 * sf5
-                sf6_e = 0.02 * sf6
 
-            muVar = sqrt( (sf1_e*sf2*sf3*sf4*sf5*sf6*sf7)**2 + (sf1*sf2_e*sf3*sf4*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3_e*sf4*sf5*sf6*sf7)**2 +(sf1*sf2*sf3*sf4_e*sf5*sf6*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5_e*sf6*sf7)**2 +(sf1*sf2*sf3*sf4*sf5*sf6_e*sf7)**2
-                          +(sf1*sf2*sf3*sf4*sf5*sf6*sf7_e)**2 )
-            muSF  = sf1*sf2*sf3*sf4*sf5*sf6*sf7
+            muVar = sqrt( (sf1_e*sf2*sf3*sf7)**2  + (sf1*sf2_e*sf3*sf7)**2
+                          +(sf1*sf2*sf3_e*sf7)**2 + (sf1*sf2*sf3*sf7_e)**2 )
+            muSF  = sf1*sf2*sf3*sf7
             return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
 
+    def getLepFastSIM(self, eta, pt, id):
+        result = [1.,1.,1.,1.,1.]
+        if not self.isSMS: return result
+        if abs(id) == 11:
+            #electrones
+            pt  = min(199,pt)
+
+            sf4 = self.hElecFullFast_ID .GetBinContent(self.hElecFullFast_ID .FindBin(pt, abs(eta)))
+            sf5 = self.hElecFullFast_ISO.GetBinContent(self.hElecFullFast_ISO.FindBin(pt, abs(eta)))
+            sf6 = self.hElecFullFast_IP .GetBinContent(self.hElecFullFast_IP .FindBin(pt, abs(eta)))
+            sf4_e = 0.02 * sf4 # as prescribed in the twiki
+            sf5_e = 0.02 * sf5
+            sf6_e = 0.02 * sf6
+
+            elVar = sqrt( (sf4_e*sf5*sf6)**2 +(sf4*sf5_e*sf6)**2 +(sf4*sf5*sf6_e)**2 )
+            elSF  = sf4*sf5*sf6
+
+            return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
+
+        else:
+            pt  = min(119, pt)
+            sf4 = self.hMuonFullFast_ID .GetBinContent(self.hMuonFullFast_ID .FindBin(pt, abs(eta)))
+            sf5 = self.hMuonFullFast_ISO.GetBinContent(self.hMuonFullFast_ISO.FindBin(pt, abs(eta)))
+            sf6 = self.hMuonFullFast_IP .GetBinContent(self.hMuonFullFast_IP .FindBin(pt, abs(eta)))
+            sf4_e = 0.02 * sf4 # as prescribed in the twiki
+            sf5_e = 0.02 * sf5
+            sf6_e = 0.02 * sf6
+
+            muVar = sqrt( (sf4_e*sf5*sf6)**2 + (sf4*sf5_e*sf6)**2 +(sf4*sf5*sf6_e)**2 )
+            muSF  = sf4*sf5*sf6
+            return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
             
 def newMediumMuonId(muon):
     if not hasattr(muon, 'isGlobalMuon'):
