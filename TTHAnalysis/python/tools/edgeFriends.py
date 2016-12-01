@@ -174,7 +174,7 @@ class edgeFriends:
                     ("minMjj"+label, "F"),
                     ("maxMjj"+label, "F"),
                     ("hardMjj"+label, "F"),
-                    ("dphiMjj"+label, "F"),
+                    ("dphiMjj"+label, "F"), ("dphiMjj_jecUp"+label, "F"), ("dphiMjj_jecDn"+label, "F"),
                     ("drMjj"+label, "F"),
                     ("hardJJDphi"+label, "F"),
                     ("hardJJDR"+label, "F"),
@@ -641,6 +641,8 @@ class edgeFriends:
         ret['lepsJZB_recoil'] = totalRecoil.Pt() - ret['lepsZPt']
         ret['bestMjj'] = self.getBestMjj(theJets)
         ret['dphiMjj'] = self.getDPhiMjj(theJets)
+        ret['dphiMjj_jecUp'] = self.getDPhiMjj(theJets_jecUp)
+        ret['dphiMjj_jecDn'] = self.getDPhiMjj(theJets_jecDn)
         ret['drMjj'] = self.getDRMjj(theJets)
         ret['minMjj']  = self.getMinMjj (theJets)
         ret['maxMjj']  = self.getMaxMjj (theJets)
