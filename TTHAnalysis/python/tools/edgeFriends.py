@@ -247,6 +247,7 @@ class edgeFriends:
                     ("st"+label,"F"), 
                     ("srID"+label, "I"), 
                     ("mt2"+label, "F"), ("mt2_jecUp"+label, "F"), ("mt2_jecDn"+label, "F"),
+                    ("mt2bb"+label, "F"), ("mt2bb_jecUp"+label, "F"), ("mt2bb_jecDn"+label, "F"),
                     ("lh_ana_zpt_data"+label, "F") ,
                     #("lh_ana_a3d_data"+label, "F") ,
                     ("lh_ana_met_data"+label, "F") ,
@@ -293,7 +294,10 @@ class edgeFriends:
                     ('weight_FSlepSF_MuUp'+label,'F'),
                     ('weight_FSlepSF_MuDn'+label,'F'),
                     ('weight_FSlepSF_ElUp'+label,'F'),
-                    ('weight_FSlepSF_ElDn'+label,'F')
+                    ('weight_FSlepSF_ElDn'+label,'F'),
+                    ('mbb'+label, 'F'),
+                    ('mbb_jecUp'+label, 'F'),
+                    ('mbb_jecDn'+label, 'F'),
                  ]
 
         for trig in self.triggerlist:
@@ -314,6 +318,7 @@ class edgeFriends:
         return biglist
     def __call__(self,event):
         t0 = time.time()
+
         leps  = [l for l in Collection(event,"LepGood","nLepGood")]
         lepso = [l for l in Collection(event,"LepOther","nLepOther")]
         jetsc = [j for j in Collection(event,"Jet","nJet")]
@@ -325,7 +330,7 @@ class edgeFriends:
         #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
         (met, metphi)  = event.met_pt, event.met_phi
         isData = event.isData
-            
+        
             
         (met_raw, metphi_raw)  = event.met_rawPt, event.met_rawPhi
 
@@ -353,7 +358,6 @@ class edgeFriends:
         ret['lumi'] = event.lumi
         ret['evt'] = long(event.evt)
         ret['nVert'] = event.nVert
-        
         t01 = time.time()
         ## copy the triggers, susy masses and filters!!
         for mass in self.susymasslist:
@@ -413,6 +417,7 @@ class edgeFriends:
         # ===============================
         # new, simpler sorting of leptons
         # ===============================
+
         nLepLoose = 0
         for il,lep in enumerate(leps):
             if not self._susyEdgeLoose(lep): continue
@@ -503,31 +508,17 @@ class edgeFriends:
             ret['nPairLep'] = 0
         t4 = time.time()
 
-        mt2 = -1.; mt2_jecUp = -1.; mt2_jecDn = -1.
-        if ret['nPairLep'] == 2:
-            l1mt2 = ROOT.reco.Particle.LorentzVector(lepvectors[0].p4().Px(), lepvectors[0].p4().Py(),lepvectors[0].p4().Pz(),lepvectors[0].p4().Energy())
-            l2mt2 = ROOT.reco.Particle.LorentzVector(lepvectors[1].p4().Px(), lepvectors[1].p4().Py(),lepvectors[1].p4().Pz(),lepvectors[1].p4().Energy())
-            metp4obj = ROOT.reco.Particle.LorentzVector(met*cos(metphi),met*sin(metphi),0,met)
-            metp4obj_jecUp = ROOT.reco.Particle.LorentzVector(ret['met_jecUp']*cos(metphi),ret['met_jecUp']*sin(metphi),0,ret['met_jecUp'])
-            metp4obj_jecDn = ROOT.reco.Particle.LorentzVector(ret['met_jecDn']*cos(metphi),ret['met_jecDn']*sin(metphi),0,ret['met_jecDn'])
-            mt2       = computeMT2(l1mt2, l2mt2, metp4obj)
-            mt2_jecUp = computeMT2(l1mt2, l2mt2, metp4obj_jecUp)
-            mt2_jecDn = computeMT2(l1mt2, l2mt2, metp4obj_jecDn)
-            del metp4obj, metp4obj_jecUp, metp4obj_jecDn
-        ret['mt2'] = mt2
-        ret['mt2_jecUp'] = mt2_jecUp
-        ret['mt2_jecDn'] = mt2_jecDn
-        t5 = time.time()
-            
+
         ### Define jets
         ret["iJ"] = []
         jetsc       = self.setJetCollection(jetsc, lepst)      ; jetsd       = self.setJetCollection(jetsd, lepst);
         jetsc_jecUp = self.setJetCollection(jetsc_jecUp, lepst); jetsd_jecUp = self.setJetCollection(jetsd_jecUp, lepst);
         jetsc_jecDn = self.setJetCollection(jetsc_jecDn, lepst); jetsd_jecDn = self.setJetCollection(jetsd_jecDn, lepst);
 
-        (ret["iJ"]      , nb25      , nb35      , nl35      , n35      , ht35      , theJets      , theBJets      ) = self.countJets(jetsc      , jetsd      )
-        (ijlist_jecup   , nb25_jecUp, nb35_jecUp, nl35_jecUp, n35_jecUp, ht35_jecUp, theJets_jecUp, theBJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
-        (ijlist_jecdn   , nb25_jecDn, nb35_jecDn, nl35_jecDn, n35_jecDn, ht35_jecDn, theJets_jecDn, theBJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
+
+        (ret["iJ"]      , nb25      , nb35      , nl35      , n35      , ht35      , theJets      , theBJets      , ret['mbb']     , the25BJets) = self.countJets(jetsc      , jetsd      )
+        (ijlist_jecup   , nb25_jecUp, nb35_jecUp, nl35_jecUp, n35_jecUp, ht35_jecUp, theJets_jecUp, theBJets_jecUp, ret['mbb_jecUp'], the25BJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
+        (ijlist_jecdn   , nb25_jecDn, nb35_jecDn, nl35_jecDn, n35_jecDn, ht35_jecDn, theJets_jecDn, theBJets_jecDn, ret['mbb_jecDn'], the25BJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
 
         ret['nJet35']        = n35 ; ret['nJet35_jecUp']        = n35_jecUp ; ret['nJet35_jecDn']        = n35_jecDn
         ret['nBJetMedium25'] = nb25; ret['nBJetMedium25_jecUp'] = nb25_jecUp; ret['nBJetMedium25_jecDn'] = nb25_jecDn
@@ -536,9 +527,82 @@ class edgeFriends:
         ret["htJet35j"]      = ht35; ret["htJet35j_jecUp"]      = ht35_jecUp; ret["htJet35j_jecDn"]      = ht35_jecDn
 
         # 2. compute the jet list
+
         ret['nJetSel']       = len(ret["iJ"])
         ret['nJetSel_jecUp'] = len(ijlist_jecup)
         ret['nJetSel_jecDn'] = len(ijlist_jecdn)
+
+        mt2 = -1.; mt2_jecUp = -1.; mt2_jecDn = -1.
+        mt2bb = -1.; mt2bb_jecUp = -1.; mt2bb_jecDn = -1.
+        if ret['nPairLep'] == 2:
+            l1mt2 = ROOT.reco.Particle.LorentzVector(lepvectors[0].p4().Px(), lepvectors[0].p4().Py(),lepvectors[0].p4().Pz(),lepvectors[0].p4().Energy())
+            l2mt2 = ROOT.reco.Particle.LorentzVector(lepvectors[1].p4().Px(), lepvectors[1].p4().Py(),lepvectors[1].p4().Pz(),lepvectors[1].p4().Energy())
+            metp4obj = ROOT.reco.Particle.LorentzVector(met*cos(metphi),met*sin(metphi),0,met)
+            metp4obj_jecUp = ROOT.reco.Particle.LorentzVector(ret['met_jecUp']*cos(metphi),ret['met_jecUp']*sin(metphi),0,ret['met_jecUp'])
+            metp4obj_jecDn = ROOT.reco.Particle.LorentzVector(ret['met_jecDn']*cos(metphi),ret['met_jecDn']*sin(metphi),0,ret['met_jecDn'])
+
+            
+            mt2       = computeMT2(l1mt2, l2mt2, metp4obj)
+            mt2_jecUp = computeMT2(l1mt2, l2mt2, metp4obj_jecUp)
+            mt2_jecDn = computeMT2(l1mt2, l2mt2, metp4obj_jecDn)
+            if (ret['nBJetMedium25'] != 2): ret['mt2bb'] = -99
+            else: 
+                b1 = ROOT.TLorentzVector(); b2 = ROOT.TLorentzVector()
+                b1.SetPtEtaPhiM(the25BJets[0].pt, the25BJets[0].eta, the25BJets[0].phi, the25BJets[0].mass)
+                b2.SetPtEtaPhiM(the25BJets[1].pt, the25BJets[1].eta, the25BJets[1].phi, the25BJets[1].mass)
+                b10 = b1+lepvectors[0].p4(); b11 = b1+lepvectors[1].p4()
+                b20 = b2+lepvectors[0].p4(); b21 = b2+lepvectors[1].p4()
+                b10obj = ROOT.reco.Particle.LorentzVector(b10.Px(), b10.Py(), b10.Pz(), b10.E())
+                b20obj = ROOT.reco.Particle.LorentzVector(b20.Px(), b20.Py(), b20.Pz(), b20.E())
+                b11obj = ROOT.reco.Particle.LorentzVector(b11.Px(), b11.Py(), b11.Pz(), b11.E())
+                b21obj = ROOT.reco.Particle.LorentzVector(b21.Px(), b21.Py(), b21.Pz(), b21.E())
+                mt2bb_A = computeMT2(b10obj, b21obj, metp4obj)
+                mt2bb_B = computeMT2(b11obj, b20obj, metp4obj)
+                mt2bb   = min(mt2bb_A, mt2bb_B)
+                del b10obj, b11obj, b20obj, b21obj
+
+            if (ret['nBJetMedium25_jecUp'] != 2): ret['mt2bb_jecUp'] = -99
+            else: 
+                b1 = ROOT.TLorentzVector(); b2 = ROOT.TLorentzVector()
+                b1.SetPtEtaPhiM(the25BJets_jecUp[0].pt, the25BJets_jecUp[0].eta, the25BJets_jecUp[0].phi, the25BJets_jecUp[0].mass)
+                b2.SetPtEtaPhiM(the25BJets_jecUp[1].pt, the25BJets_jecUp[1].eta, the25BJets_jecUp[1].phi, the25BJets_jecUp[1].mass)
+                b10 = b1+lepvectors[0].p4(); b11 = b1+lepvectors[1].p4()
+                b20 = b2+lepvectors[0].p4(); b21 = b2+lepvectors[1].p4()
+                b10obj_jecUp = ROOT.reco.Particle.LorentzVector(b10.Px(), b10.Py(), b10.Pz(), b10.E())
+                b20obj_jecUp = ROOT.reco.Particle.LorentzVector(b20.Px(), b20.Py(), b20.Pz(), b20.E())
+                b11obj_jecUp = ROOT.reco.Particle.LorentzVector(b11.Px(), b11.Py(), b11.Pz(), b11.E())
+                b21obj_jecUp = ROOT.reco.Particle.LorentzVector(b21.Px(), b21.Py(), b21.Pz(), b21.E())
+                mt2bb_A = computeMT2(b10obj_jecUp, b21obj_jecUp, metp4obj_jecUp)
+                mt2bb_B = computeMT2(b11obj_jecUp, b20obj_jecUp, metp4obj_jecUp)
+                mt2bb_jecUp   = min(mt2bb_A, mt2bb_B)
+                del b10obj_jecUp, b11obj_jecUp, b20obj_jecUp, b21obj_jecUp
+
+            if (ret['nBJetMedium35_jecDn'] != 2): ret['mt2bb_jecDn'] = -99
+            else: 
+                b1 = ROOT.TLorentzVector(); b2 = ROOT.TLorentzVector()
+                b1.SetPtEtaPhiM(the25BJets_jecDn[0].pt, the25BJets_jecDn[0].eta, the25BJets_jecDn[0].phi, the25BJets_jecDn[0].mass)
+                b2.SetPtEtaPhiM(the25BJets_jecDn[1].pt, the25BJets_jecDn[1].eta, the25BJets_jecDn[1].phi, the25BJets_jecDn[1].mass)
+                b10 = b1+lepvectors[0].p4(); b11 = b1+lepvectors[1].p4()
+                b20 = b2+lepvectors[0].p4(); b21 = b2+lepvectors[1].p4()
+                b10obj_jecDn = ROOT.reco.Particle.LorentzVector(b10.Px(), b10.Py(), b10.Pz(), b10.E())
+                b20obj_jecDn = ROOT.reco.Particle.LorentzVector(b20.Px(), b20.Py(), b20.Pz(), b20.E())
+                b11obj_jecDn = ROOT.reco.Particle.LorentzVector(b11.Px(), b11.Py(), b11.Pz(), b11.E())
+                b21obj_jecDn = ROOT.reco.Particle.LorentzVector(b21.Px(), b21.Py(), b21.Pz(), b21.E())
+                mt2bb_A = computeMT2(b10obj_jecDn, b21obj_jecDn, metp4obj_jecDn)
+                mt2bb_B = computeMT2(b11obj_jecDn, b20obj_jecDn, metp4obj_jecDn)
+                mt2bb_jecDn   = min(mt2bb_A, mt2bb_B)
+                del b10obj_jecDn, b11obj_jecDn, b20obj_jecDn, b21obj_jecDn                
+
+            del metp4obj, metp4obj_jecUp, metp4obj_jecDn
+
+
+        ret['mt2'] = mt2
+        ret['mt2_jecUp'] = mt2_jecUp
+        ret['mt2_jecDn'] = mt2_jecDn
+        ret['mt2bb'] = mt2bb
+        ret['mt2bb_jecUp'] = mt2bb_jecUp
+        ret['mt2bb_jecDn'] = mt2bb_jecDn
+        t5 = time.time()
         
 
         # 3. sort the jets by pt
@@ -567,7 +631,6 @@ class edgeFriends:
             jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)
             totalRecoil = totalRecoil + jet
             
-
         ## compute mlb for the two lepton  
 
         theJets  = sorted(theJets , key = lambda j : j.pt, reverse = True)
@@ -625,14 +688,13 @@ class edgeFriends:
 
         t8 = time.time()
         ##print 'njets: %.0d nbjets35medium: %.0d / %.0d'%(ret["nJet35"], len(theBJets), ret["nBJetMedium35"])
-	
+
         jet = ROOT.TLorentzVector()
         min_mlb = 1e6
         max_mlb = 1e6
         _lmin, _jmin = -1, -1
         _lmax, _jmax = -1, -1
         leplist = [l1, l2]
-
         ## DO MLB CALCULATION HERE
         # find the global minimum mlb (or mlj)
         for jec in ['', 'Up' ,'Dn']:
@@ -666,7 +728,6 @@ class edgeFriends:
             ret["min_mlb2%s"%jec] = max_mlb if max_mlb < 1e6  else -1.
             ret["sum_mlb%s"%jec] = (ret["min_mlb1%s"%jec] + ret["min_mlb2%s"%jec]) if ret["min_mlb1%s"%jec] > 0. and ret["min_mlb2%s"%jec] > 0. else -1.
         
-
         # new mlb calculations
         # jet1coll = (theBJets if len(theBJets) >= 1 else theJets)
         # jet2coll = (theBJets if len(theBJets) >= 2 else theJets)
@@ -779,7 +840,6 @@ class edgeFriends:
         ## print 'time from prebtag to post btag   : %.3f mus'%( (t8 -t7)*1000000. )
         ## print 'time from post btag to poost mlbe: %.3f mus'%( (t9 -t8)*1000000. )
         ## print 'time from post mlb etc to post LH: %.3f mus'%( (t10-t9)*1000000. )
-        
         fullret = {}
         for k,v in ret.iteritems(): 
             fullret[k+self.label] = v
@@ -810,15 +870,15 @@ class edgeFriends:
 
     def countJets(self, coll1, coll2):
         nb25 = 0; nb25 = 0; nb35 = 0; ht35 = 0.; nl35 = 0; n35 = 0
-        thejets = []; thebjets = []
+        thejets = []; thebjets = []; thebjets25 = []
         retlist = []
         for ijc,j in enumerate(coll1):
             if not j._clean: continue
             bt = j.btagCSV
             pt = j.pt
-            if pt > 25 and bt > self.btagMediumCut: nb25 += 1
-            #if pt > 25 and bt > self.btagLooseCut : nl25 += 1
-            #if pt > 35 and bt > self.btagMediumCut: nb35 += 1
+            if pt > 25 and bt > self.btagMediumCut: 
+                nb25 += 1
+                thebjets25.append(j)
             if pt > 35:
                 thejets.append(j)
                 n35 += 1; ht35 += pt
@@ -832,7 +892,9 @@ class edgeFriends:
             if not j._clean: continue
             bt = j.btagCSV
             pt = j.pt
-            if pt > 25 and bt > self.btagMediumCut: nb25 += 1
+            if pt > 25 and bt > self.btagMediumCut: 
+                nb25 += 1
+                thebjets25.append(j)
             #if pt > 25 and bt > self.btagLooseCut : nl25 += 1
             #if pt > 35 and bt > self.btagMediumCut: nb35 += 1
             if pt > 35:
@@ -844,7 +906,13 @@ class edgeFriends:
                     thebjets.append(j)
                 if bt > self.btagLooseCut:
                     nl35 += 1
-        return retlist, nb25, nb35, nl35, n35, ht35, thejets, thebjets
+        if nb25 == 2: 
+            b1 = ROOT.TLorentzVector(); b2 = ROOT.TLorentzVector()
+            b1.SetPtEtaPhiM(thebjets25[0].pt, thebjets25[0].eta, thebjets25[0].phi, thebjets25[0].mass)
+            b2.SetPtEtaPhiM(thebjets25[1].pt, thebjets25[1].eta, thebjets25[1].phi, thebjets25[1].mass)
+            mbb = (b1+b2).M()
+        else: mbb = -99
+        return retlist, nb25, nb35, nl35, n35, ht35, thejets, thebjets, mbb, thebjets25
 
     def getMll_JZB(self, l1, l2, met, met_raw):
         metrecoil = (met + l1 + l2).Pt()
@@ -968,6 +1036,7 @@ class edgeFriends:
                     dphimjj = dijetmass
         return dphimjj                                                                       
 
+            
     def getDRMjj(self, jetsel):                                                    
         if len(jetsel) < 2: return -99.
         drmjj = 1e6
