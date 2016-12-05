@@ -1099,7 +1099,7 @@ class edgeFriends:
                     muon.globalTrackChi2 < 3 and
                     muon.chi2LocalPosition < 12 and
                     muon.trkKink < 20)
-        isMedium = (muon.innerTrackValidHitFraction > 0.49 and
+        isMedium = (muon.innerTrackValidHitFraction > 0.8 and
                     muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
@@ -1120,9 +1120,14 @@ class edgeFriends:
             if abs(lep.pdgId) == 11:
               if lepeta > 2.5: return False
               if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-              if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
-              if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
-              if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
+              A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+              B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+              if lep.pt > 10:
+                  if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
+
+              # if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
+              # if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
+              # if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
               if hasattr(lep, 'idEmuTTH'):
                 if lep.idEmuTTH == 0: return False
             return True
@@ -1205,7 +1210,7 @@ def newMediumMuonId(muon):
                 muon.globalTrackChi2 < 3 and
                 muon.chi2LocalPosition < 12 and
                 muon.trkKink < 20)
-    isMedium = (muon.innerTrackValidHitFraction > 0.49 and
+    isMedium = (muon.innerTrackValidHitFraction > 0.8 and
                 muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
     return isMedium
     #muon.segmentCompatibility < 0.49: return False
@@ -1226,9 +1231,16 @@ def _susyEdgeTight(lep):
           etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
           if (etatest > 1.4442 and etatest < 1.566) : return False
           if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
-          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
-          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
+          
+          A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+          B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+          if lep.pt > 10.:
+              if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
+          else: return False
+
+#          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
+#          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
+#          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
           if lep.miniRelIso > 0.1: return False
         return True
 
