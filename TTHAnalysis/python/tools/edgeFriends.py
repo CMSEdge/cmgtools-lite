@@ -29,7 +29,9 @@ class edgeFriends:
         ##self.puFile.close()
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
         self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul21_nominalUpDown.root","READ")
-        self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
+        self.puHist   = copy.deepcopy( self.puFile.Get('weightsNominal') )
+        self.puHistUp = copy.deepcopy( self.puFile.Get('weightsUp') )
+        self.puHistDn = copy.deepcopy( self.puFile.Get('weightsDown') )
         self.puFile.Close()
         ##B-tagging stuff
         vector = ROOT.vector('string')()
@@ -101,6 +103,7 @@ class edgeFriends:
         fSFElec_FullFast_ISO.Close()
         fSFElec_FullFast_IP .Close()
         fSFElec_FullData    .Close()
+        fSFElec_Tracking    .Close()
 
         print 'elec', self.hElecDataFull_ID, self.hElecDataFull_ISO, self.hElecDataFull_IP
         print 'elec', self.hElecFullFast_ID, self.hElecFullFast_ISO, self.hElecFullFast_IP
@@ -114,6 +117,7 @@ class edgeFriends:
         ## file used before topup to 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
         ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
         self.wspace = copy.deepcopy( self.an_file.Get('w') )
+        self.an_file.Close()
         # data
         for t in ['DA']:#,'MC_SF']:
             for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldp','lepsDPhi_Edge']]:
@@ -235,6 +239,8 @@ class edgeFriends:
                     ("Lep2_mcMatchId"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
                     ("PileupW"+label, "F"), 
+                    ("PileupW_Up"+label, "F"),
+                    ("PileupW_Dn"+label, "F"), 
                     ("min_mlb1"+label, "F"),
                     ("min_mlb2"+label, "F"),
                     ("min_mlb1Up"+label, "F"),
@@ -405,9 +411,15 @@ class edgeFriends:
         # do pileupReweighting
         # ====================
         #puWt = self.pu_dict[int(ntrue)] if not isData else 1.
-        puWt = self.puHist.GetBinContent(self.puHist.FindBin(ntrue)) if not isData else 1.
+        puWt   = self.puHist  .GetBinContent(self.puHist  .FindBin(ntrue)) if not isData else 1.
+        puWtUp = self.puHistUp.GetBinContent(self.puHistUp.FindBin(ntrue)) if not isData else 1.
+        puWtDn = self.puHistDn.GetBinContent(self.puHistDn.FindBin(ntrue)) if not isData else 1.
+
         #if puWt > 10: puWt = 10.
-        ret["PileupW"] = puWt
+        ret["PileupW"]    = puWt
+        ret["PileupW_Up"] = puWtUp
+        ret["PileupW_Dn"] = puWtDn
+        
         t21 = time.time()
 
         # ===============================
