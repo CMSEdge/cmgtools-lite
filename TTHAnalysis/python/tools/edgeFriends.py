@@ -112,22 +112,22 @@ class edgeFriends:
         ## =================
         ## pdf things
         ## =================
-        self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version5_80X_2016Data_savingTheWorkspace_withSFPDFs_12p9invfb.root")
+        ##self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version5_80X_2016Data_savingTheWorkspace_withSFPDFs_12p9invfb.root")
         ## file for 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version4_80X_2016Data_savingTheWorkspace_withSFPDFs_7p65invfb.root")
         ## file used before topup to 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
-        ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
-        self.wspace = copy.deepcopy( self.an_file.Get('w') )
-        self.an_file.Close()
+        ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")<<<<<< SergioDevel
+        ## self.wspace = copy.deepcopy( self.an_file.Get('w') )
+     
         # data
-        for t in ['DA']:#,'MC_SF']:
-            for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldp','lepsDPhi_Edge']]:
-                print 'loading likelihoods for variable %s in %s'%(var[0],t)
-                setattr(self,'h_lh_ana_%s_%s' %(var[0],t), self.wspace.pdf('%s_analyticalPDF_%s'%(var[0],t)))
-                setattr(self,'var_ana_%s_%s'  %(var[0],t), self.wspace.var(var[1]))
-                setattr(self,'frame_ana_%s_%s'%(var[0],t),getattr(self,'var_ana_%s_%s'%(var[0],t)).frame())
-                getattr(self,'h_lh_ana_%s_%s' %(var[0],t)).plotOn(getattr(self,'frame_ana_%s_%s'%(var[0],t)))
-                setattr(self,'obs_ana%s_%s'   %(var[0],t), ROOT.RooArgSet(self.wspace.var(var[1])))
-        ## =================
+        # for t in ['DA']:#,'MC_SF']:
+        #     for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldp','lepsDPhi_Edge']]:
+        #         print 'loading likelihoods for variable %s in %s'%(var[0],t)
+        #         setattr(self,'h_lh_ana_%s_%s' %(var[0],t), self.wspace.pdf('%s_analyticalPDF_%s'%(var[0],t)))
+        #         setattr(self,'var_ana_%s_%s'  %(var[0],t), self.wspace.var(var[1]))
+        #         setattr(self,'frame_ana_%s_%s'%(var[0],t),getattr(self,'var_ana_%s_%s'%(var[0],t)).frame())
+        #         getattr(self,'h_lh_ana_%s_%s' %(var[0],t)).plotOn(getattr(self,'frame_ana_%s_%s'%(var[0],t)))
+        #         setattr(self,'obs_ana%s_%s'   %(var[0],t), ROOT.RooArgSet(self.wspace.var(var[1])))
+        # ## =================
 
         self.susymasslist = ['GenSusyMScan1'     , 'GenSusyMScan2'      , 'GenSusyMScan3'      , 'GenSusyMScan4'      ,
                              'GenSusyMGluino'    , 'GenSusyMGravitino'  , 'GenSusyMStop'       , 'GenSusyMSbottom'    ,
@@ -254,15 +254,15 @@ class edgeFriends:
                     ("srID"+label, "I"), 
                     ("mt2"+label, "F"), ("mt2_jecUp"+label, "F"), ("mt2_jecDn"+label, "F"),
                     ("mt2bb"+label, "F"), ("mt2bb_jecUp"+label, "F"), ("mt2bb_jecDn"+label, "F"),
-                    ("lh_ana_zpt_data"+label, "F") ,
+                    #("lh_ana_zpt_data"+label, "F") ,
                     #("lh_ana_a3d_data"+label, "F") ,
-                    ("lh_ana_met_data"+label, "F") ,
-                    ("lh_ana_genMet_data"+label, "F") ,
-                    ("lh_ana_mlb_data"+label, "F") ,
-                    ("lh_ana_mlbUp_data"+label, "F") ,
-                    ("lh_ana_mlbDn_data"+label, "F") , 
+                    # ("lh_ana_met_data"+label, "F") ,
+                    # ("lh_ana_genMet_data"+label, "F") ,
+                    # ("lh_ana_mlb_data"+label, "F") ,
+                    # ("lh_ana_mlbUp_data"+label, "F") ,
+                    #("lh_ana_mlbDn_data"+label, "F") , 
                     #("lh_ana_ldr_data"+label, "F") ,
-                    ("lh_ana_ldp_data"+label, "F") ,
+                    #("lh_ana_ldp_data"+label, "F") ,
                     # ("lh_ana_zpt_mc"+label  , "F") , 
                     # ("lh_ana_met_mc"+label  , "F") , 
                     # ("lh_ana_mlb_mc"+label  , "F") , 
@@ -275,10 +275,10 @@ class edgeFriends:
                     # ("lh_ana_ldr_mc_sf"+label  , "F") ,
                     # ("lh_ana_a3d_mc_sf"+label  , "F") ,
                     # ("lh_ana_ldp_mc_sf"+label  , "F") ,
-                    ("nll"+label, "F"), ("nll_jecUp"+label, "F"), ("nll_jecDn"+label, "F"),
-                    ('nll_genMet'+label, "F"), 
-                    ("nll_mc"+label, "F"), ("nll_mc_jecUp"+label, "F"), ("nll_mc_jecDn"+label, "F"),
-                    ("nll_mc_sf"+label, "F"),
+                    # ("nll"+label, "F"), ("nll_jecUp"+label, "F"), ("nll_jecDn"+label, "F"),
+                    # ('nll_genMet'+label, "F"), 
+                    # ("nll_mc"+label, "F"), ("nll_mc_jecUp"+label, "F"), ("nll_mc_jecDn"+label, "F"),
+                    # ("nll_mc_sf"+label, "F"),
                     ("weight_trigger"+label  , "F") ,
                     ("weight_btagsf"+label  , "F") ,
                     ("weight_btagsf_heavy_UP"+label, "F") ,
@@ -774,69 +774,69 @@ class edgeFriends:
         ret["st"] = met+lepret["Lep1_pt"+self.label]+lepret["Lep2_pt"+self.label]
         t9 = time.time()
 
-        ## get the SR id which is 1xx for central and 2xx for forward. the 10 digit is the number of 
-        ## b-tags and the signle digit is the mll region going from 1-5
-        isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
-        isBasicSREvent = isBasicSREvent * (abs(lepret["Lep1_eta"+self.label] - 1.5) > 0.1 and abs(lepret["Lep2_eta"+self.label] - 1.5) > 0.1)
-        # corrected to check that it passes the baseline selection also considering jec and genMet variations
-        isBasicSReventWVariations = isBasicSREvent * ( (met > 150 and ret['nJetSel'] >= 2 ) or (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2) or (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2) or (ret['genMet'] > 150 and ret['nJetSel'] >=2 ))
+        # ## get the SR id which is 1xx for central and 2xx for forward. the 10 digit is the number of 
+        # ## b-tags and the signle digit is the mll region going from 1-5
+        # isBasicSREvent = (ret['nPairLep'] > 0 and ret["lepsDR"] > 0.1 and lepret["Lep1_pt"+self.label] > 20. and lepret["Lep2_pt"+self.label] > 20. and ret['lepsMll'] > 20.)
+        # isBasicSREvent = isBasicSREvent * (abs(lepret["Lep1_eta"+self.label] - 1.5) > 0.1 and abs(lepret["Lep2_eta"+self.label] - 1.5) > 0.1)
+        # # corrected to check that it passes the baseline selection also considering jec and genMet variations
+        # isBasicSReventWVariations = isBasicSREvent * ( (met > 150 and ret['nJetSel'] >= 2 ) or (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2) or (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2) or (ret['genMet'] > 150 and ret['nJetSel'] >=2 ))
 
-        if isBasicSREvent:
-            srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
-            ret["srID"] = srID
-            # for t in  ['data','mc']:#, 'mc_sf']:
-            #     if t == 'data'  : nam = 'DA'
-            #     if t == 'mc'    : nam = 'MC'
-            #     if t == 'mc_sf' : nam = 'MC_SF'
-            #     for u in ['_ana']:
-            #         for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],
-            #                     ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldr',ret['lepsDR'],'lepsDR_Edge'],
-            #                     ['a3d',ret['d3D'],'d3D_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge']]:
-            #             self.wspace.var(var[2]).setVal(var[1])
-            #             ret["lh%s_%s_%s"%(u,var[0],t)] = getattr(self,'h_lh_ana_%s_%s'%(var[0],nam)).getVal(getattr(self,'obs_ana%s_%s'%(var[0],nam)))
+        # if isBasicSREvent:
+        #     srID = self.getSRID(ret['lepsMll'], lepret["Lep1_eta"+self.label], lepret["Lep2_eta"+self.label], ret["nBJetMedium35"])
+        #     ret["srID"] = srID
+        #     # for t in  ['data','mc']:#, 'mc_sf']:
+        #     #     if t == 'data'  : nam = 'DA'
+        #     #     if t == 'mc'    : nam = 'MC'
+        #     #     if t == 'mc_sf' : nam = 'MC_SF'
+        #     #     for u in ['_ana']:
+        #     #         for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],
+        #     #                     ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldr',ret['lepsDR'],'lepsDR_Edge'],
+        #     #                     ['a3d',ret['d3D'],'d3D_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge']]:
+        #     #             self.wspace.var(var[2]).setVal(var[1])
+        #     #             ret["lh%s_%s_%s"%(u,var[0],t)] = getattr(self,'h_lh_ana_%s_%s'%(var[0],nam)).getVal(getattr(self,'obs_ana%s_%s'%(var[0],nam)))
                     
-            #         if not ret["lh%s_mlb_%s"%(u,t)]: ret["lh%s_mlb_%s"%(u,t)] = 1e-50
-            #         if not ret["lh%s_ldr_%s"%(u,t)]: ret["lh%s_ldr_%s"%(u,t)] = 1e-50
-            #         if not ret["lh%s_met_%s"%(u,t)]: ret["lh%s_met_%s"%(u,t)] = 1e-50
-            #         if not ret["lh%s_zpt_%s"%(u,t)]: ret["lh%s_zpt_%s"%(u,t)] = 1e-50
-            #         if not ret["lh%s_a3d_%s"%(u,t)]: ret["lh%s_a3d_%s"%(u,t)] = 1e-50
-            #         if not ret["lh%s_ldp_%s"%(u,t)]: ret["lh%s_ldp_%s"%(u,t)] = 1e-50
+        #     #         if not ret["lh%s_mlb_%s"%(u,t)]: ret["lh%s_mlb_%s"%(u,t)] = 1e-50
+        #     #         if not ret["lh%s_ldr_%s"%(u,t)]: ret["lh%s_ldr_%s"%(u,t)] = 1e-50
+        #     #         if not ret["lh%s_met_%s"%(u,t)]: ret["lh%s_met_%s"%(u,t)] = 1e-50
+        #     #         if not ret["lh%s_zpt_%s"%(u,t)]: ret["lh%s_zpt_%s"%(u,t)] = 1e-50
+        #     #         if not ret["lh%s_a3d_%s"%(u,t)]: ret["lh%s_a3d_%s"%(u,t)] = 1e-50
+        #     #         if not ret["lh%s_ldp_%s"%(u,t)]: ret["lh%s_ldp_%s"%(u,t)] = 1e-50
 
-            for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],['genMet',ret['genMet'], 'met_Edge'],
-                        ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge'], 
-                        ['mlbUp',ret['sum_mlbUp'],'sum_mlb_Edge'], ['mlbDn',ret['sum_mlbDn'],'sum_mlb_Edge']]:
-                if isData and var[0]=='genMet': continue
-                label = var[0] if not var[0]=='genMet' else 'met'
-                label = label if not label=='mlbUp' else 'mlb'
-                label = label if not label=='mlbDn' else 'mlb'
+        #     for var in [['mlb',ret['sum_mlb'],'sum_mlb_Edge'],['met',met,'met_Edge'],['genMet',ret['genMet'], 'met_Edge'],
+        #                 ['zpt',ret['lepsZPt'],'lepsZPt_Edge'],['ldp',ret['lepsDPhi'],'lepsDPhi_Edge'], 
+        #                 ['mlbUp',ret['sum_mlbUp'],'sum_mlb_Edge'], ['mlbDn',ret['sum_mlbDn'],'sum_mlb_Edge']]:
+        #         if isData and var[0]=='genMet': continue
+        #         label = var[0] if not var[0]=='genMet' else 'met'
+        #         label = label if not label=='mlbUp' else 'mlb'
+        #         label = label if not label=='mlbDn' else 'mlb'
                 
-                self.wspace.var(var[2]).setVal(var[1])
-                ret["lh_ana_%s_data"%var[0]] = getattr(self,'h_lh_ana_%s_DA'%label).getVal(getattr(self,'obs_ana%s_DA'%label))
-                if not ret["lh_ana_%s_data"%var[0]]: ret["lh_ana_%s_data"%var[0]] = 1e-50
+        #         self.wspace.var(var[2]).setVal(var[1])
+        #         ret["lh_ana_%s_data"%var[0]] = getattr(self,'h_lh_ana_%s_DA'%label).getVal(getattr(self,'obs_ana%s_DA'%label))
+        #         if not ret["lh_ana_%s_data"%var[0]]: ret["lh_ana_%s_data"%var[0]] = 1e-50
 
 
-            ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met > 150 and ret['nJetSel'] >= 2 ) else 0.
-            if not isData:
-                ret['nll_genMet']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_genMet_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['genMet'] > 150 and ret['nJetSel'] >= 2) else 0.
-            else: ret['nll_genMet'] = -1
-            ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2 ) else 0.
-            ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2 ) else 0.
+        #     ret['nll']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (met > 150 and ret['nJetSel'] >= 2 ) else 0.
+        #     if not isData:
+        #         ret['nll_genMet']       = -1.*math.log(ret["lh_ana_mlb_data"] *ret["lh_ana_genMet_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['genMet'] > 150 and ret['nJetSel'] >= 2) else 0.
+        #     else: ret['nll_genMet'] = -1
+        #     ret['nll_jecUp']       = -1.*math.log(ret["lh_ana_mlbUp_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecUp'] > 150 and ret['nJetSel_jecUp'] >= 2 ) else 0.
+        #     ret['nll_jecDn']       = -1.*math.log(ret["lh_ana_mlbDn_data"] *ret["lh_ana_met_data"] *ret["lh_ana_zpt_data"] *ret["lh_ana_ldp_data"] ) if (ret['met_jecDn'] > 150 and ret['nJetSel_jecDn'] >= 2 ) else 0.
 
-        else:
-            ret["srID"]      = -99
-            for t in ['data']:#, 'mc_sf']:
-                for u in ['_ana']:
-                    ret["lh%s_mlb_%s"%(u,t)] = -999.
-                    #ret["lh%s_ldr_%s"%(u,t)] = -999.
-                    ret["lh%s_met_%s"%(u,t)] = -999.
-                    ret["lh%s_zpt_%s"%(u,t)] = -999.
-                    #ret["lh%s_a3d_%s"%(u,t)] = -999.
-                    ret["lh%s_ldp_%s"%(u,t)] = -999.
-            ret['nll']       = 0.
-            ret['nll_mc']    = 0.
-            ret['nll_mc_sf'] = 0.
-            ret['nll_jecUp'] = 0.
-            ret['nll_jecDn'] = 0.
+        # else:
+        #     ret["srID"]      = -99
+        #     for t in ['data']:#, 'mc_sf']:
+        #         for u in ['_ana']:
+        #             ret["lh%s_mlb_%s"%(u,t)] = -999.
+        #             #ret["lh%s_ldr_%s"%(u,t)] = -999.
+        #             ret["lh%s_met_%s"%(u,t)] = -999.
+        #             ret["lh%s_zpt_%s"%(u,t)] = -999.
+        #             #ret["lh%s_a3d_%s"%(u,t)] = -999.
+        #             ret["lh%s_ldp_%s"%(u,t)] = -999.
+        #     ret['nll']       = 0.
+        #     ret['nll_mc']    = 0.
+        #     ret['nll_mc_sf'] = 0.
+        #     ret['nll_jecUp'] = 0.
+        #     ret['nll_jecDn'] = 0.
         t10 = time.time()
 
         ## print 'time from start to pre trigloaded: %.3f mus'%( (t01-t0)*1000000. )
@@ -854,6 +854,8 @@ class edgeFriends:
         ## print 'time from prebtag to post btag   : %.3f mus'%( (t8 -t7)*1000000. )
         ## print 'time from post btag to poost mlbe: %.3f mus'%( (t9 -t8)*1000000. )
         ## print 'time from post mlb etc to post LH: %.3f mus'%( (t10-t9)*1000000. )
+
+
         fullret = {}
         for k,v in ret.iteritems(): 
             fullret[k+self.label] = v
