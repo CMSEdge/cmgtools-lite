@@ -29,7 +29,9 @@ class edgeFriends:
         ##self.puFile.close()
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
         self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul21_nominalUpDown.root","READ")
-        self.puHist =copy.deepcopy( self.puFile.Get('weightsNominal') )
+        self.puHist   = copy.deepcopy( self.puFile.Get('weightsNominal') )
+        self.puHistUp = copy.deepcopy( self.puFile.Get('weightsUp') )
+        self.puHistDn = copy.deepcopy( self.puFile.Get('weightsDown') )
         self.puFile.Close()
         ##B-tagging stuff
         vector = ROOT.vector('string')()
@@ -101,6 +103,7 @@ class edgeFriends:
         fSFElec_FullFast_ISO.Close()
         fSFElec_FullFast_IP .Close()
         fSFElec_FullData    .Close()
+        fSFElec_Tracking    .Close()
 
         print 'elec', self.hElecDataFull_ID, self.hElecDataFull_ISO, self.hElecDataFull_IP
         print 'elec', self.hElecFullFast_ID, self.hElecFullFast_ISO, self.hElecFullFast_IP
@@ -112,8 +115,9 @@ class edgeFriends:
         ##self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version5_80X_2016Data_savingTheWorkspace_withSFPDFs_12p9invfb.root")
         ## file for 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version4_80X_2016Data_savingTheWorkspace_withSFPDFs_7p65invfb.root")
         ## file used before topup to 7.65 self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version1_80X_2016Data_savingTheWorkspace.root")
-        ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")
+        ## file with SF PDFs self.an_file = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/pdfsForLikelihood/pdfs_version3_80X_2016Data_savingTheWorkspace_withSFPDFs.root")<<<<<< SergioDevel
         ## self.wspace = copy.deepcopy( self.an_file.Get('w') )
+     
         # data
         # for t in ['DA']:#,'MC_SF']:
         #     for var in [['mlb','sum_mlb_Edge'],['met','met_Edge'],['zpt','lepsZPt_Edge'],['ldp','lepsDPhi_Edge']]:
@@ -235,6 +239,8 @@ class edgeFriends:
                     ("Lep2_mcMatchId"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
                     ("PileupW"+label, "F"), 
+                    ("PileupW_Up"+label, "F"),
+                    ("PileupW_Dn"+label, "F"), 
                     ("min_mlb1"+label, "F"),
                     ("min_mlb2"+label, "F"),
                     ("min_mlb1Up"+label, "F"),
@@ -409,9 +415,15 @@ class edgeFriends:
         # do pileupReweighting
         # ====================
         #puWt = self.pu_dict[int(ntrue)] if not isData else 1.
-        puWt = self.puHist.GetBinContent(self.puHist.FindBin(ntrue)) if not isData else 1.
+        puWt   = self.puHist  .GetBinContent(self.puHist  .FindBin(ntrue)) if not isData else 1.
+        puWtUp = self.puHistUp.GetBinContent(self.puHistUp.FindBin(ntrue)) if not isData else 1.
+        puWtDn = self.puHistDn.GetBinContent(self.puHistDn.FindBin(ntrue)) if not isData else 1.
+
         #if puWt > 10: puWt = 10.
-        ret["PileupW"] = puWt
+        ret["PileupW"]    = puWt
+        ret["PileupW_Up"] = puWtUp
+        ret["PileupW_Dn"] = puWtDn
+        
         t21 = time.time()
 
         # ===============================
@@ -1172,7 +1184,7 @@ class edgeFriends:
                     muon.globalTrackChi2 < 3 and
                     muon.chi2LocalPosition < 12 and
                     muon.trkKink < 20)
-        isMedium = (muon.innerTrackValidHitFraction > 0.49 and
+        isMedium = (muon.innerTrackValidHitFraction > 0.8 and
                     muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
@@ -1193,9 +1205,14 @@ class edgeFriends:
             if abs(lep.pdgId) == 11:
               if lepeta > 2.5: return False
               if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-              if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
-              if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
-              if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
+              A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+              B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+              if lep.pt > 10:
+                  if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
+
+              # if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
+              # if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
+              # if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
               if hasattr(lep, 'idEmuTTH'):
                 if lep.idEmuTTH == 0: return False
             return True
@@ -1278,7 +1295,7 @@ def newMediumMuonId(muon):
                 muon.globalTrackChi2 < 3 and
                 muon.chi2LocalPosition < 12 and
                 muon.trkKink < 20)
-    isMedium = (muon.innerTrackValidHitFraction > 0.49 and
+    isMedium = (muon.innerTrackValidHitFraction > 0.8 and
                 muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
     return isMedium
     #muon.segmentCompatibility < 0.49: return False
@@ -1299,9 +1316,16 @@ def _susyEdgeTight(lep):
           etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
           if (etatest > 1.4442 and etatest < 1.566) : return False
           if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
-          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
-          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
+          
+          A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+          B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+          if lep.pt > 10.:
+              if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
+          else: return False
+
+#          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
+#          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
+#          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
           if lep.miniRelIso > 0.1: return False
         return True
 
