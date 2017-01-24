@@ -4,8 +4,7 @@ from CMGTools.Production.dataset import createDataset, createMyDataset
 import re
 
 class ComponentCreator(object):
-    def makeMCComponent(self,name,dataset,user,pattern,xSec=1,useAAA=False,unsafe=False,fracNegWeights=None):
-        
+    def makeMCComponent(self,name,dataset,user,pattern,xSec=1,useAAA=False,unsafe=False,fracNegWeights=None):      
          component = cfg.MCComponent(
              dataset=dataset,
              name = name,
@@ -165,11 +164,11 @@ class ComponentCreator(object):
         component.splitFactor = 100
         return component
 
-    def makeDataComponent(self,name,dataset,user,pattern,json=None,run_range=None,triggers=[],vetoTriggers=[],useAAA=False,jsonFilter=False):
+    def makeDataComponent(self,name,dataset,user,pattern,json=None,run_range=None,triggers=[],vetoTriggers=[],useAAA=False,jsonFilter=False,unsafe=False):
         component = cfg.DataComponent(
             #dataset = dataset,
             name = name,
-            files = self.getFiles(dataset,user,pattern,run_range=run_range,useAAA=useAAA,json=(json if jsonFilter else None)),
+            files = self.getFiles(dataset,user,pattern,run_range=run_range,useAAA=useAAA,json=(json if jsonFilter else None), unsafe=unsafe),
             intLumi = 1,
             triggers = triggers,
             json = (json if jsonFilter else None)

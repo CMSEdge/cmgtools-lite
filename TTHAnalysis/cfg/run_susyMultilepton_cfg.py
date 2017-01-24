@@ -80,10 +80,11 @@ if analysis=='susy':
     jetAna.jetEtaCentral = jetAna.jetEta
     jetAna.mcGT = "Fall17_17Nov2017_V6_MC"    
     if dataEra==2016:
-        jetAna.dataGT =[ (273150,"Summer16_23Sep2016BCDV3_DATA"),
-                         (276831,"Summer16_23Sep2016EFV3_DATA"),
-                         (278820,"Summer16_23Sep2016GV3_DATA"),
-                         (280919,"Summer16_23Sep2016HV3_DATA") ]
+        isoTrackAna.useLegacy2016=True
+        jetAna.dataGT =[ (273150,"Summer16_23Sep2016BCDV4_DATA"),
+                         (276831,"Summer16_23Sep2016EFV4_DATA"),
+                         (278820,"Summer16_23Sep2016GV4_DATA"),
+                         (280919,"Summer16_23Sep2016HV4_DATA") ]
     if dataEra==2017:
         jetAna.dataGT = [(297046,"Fall17_17Nov2017B_V6_DATA"),
                          (299368,"Fall17_17Nov2017C_V6_DATA"),
@@ -354,6 +355,20 @@ susyMultilepton_globalObjects.update({
          "met_shifts_shifted_ElectronEnUp" : NTupleObject("met_shifted_ElectronEnUp", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Up"),
          "met_shifts_shifted_ElectronEnDown" : NTupleObject("met_shifted_ElectronEnDown", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Down"),
 })
+
+
+if runData and dataEra==2016: 
+    fatJetType = NTupleObjectType("fatJet",  baseObjectTypes = [ jetType ], variables = [
+            NTupleVariable("prunedMass",  lambda x : x.userFloat("ak8PFJetsCHSPrunedMass"),  float, help="pruned mass"),
+            NTupleVariable("softDropMass", lambda x : x.userFloat("ak8PFJetsCHSSoftDropMass"), float, help="trimmed mass"),
+            NTupleVariable("tau1", lambda x : x.userFloat("NjettinessAK8:tau1"), float, help="1-subjettiness"),
+            NTupleVariable("tau2", lambda x : x.userFloat("NjettinessAK8:tau2"), float, help="2-subjettiness"),
+            NTupleVariable("tau3", lambda x : x.userFloat("NjettinessAK8:tau3"), float, help="3-subjettiness"),
+            NTupleVariable("topMass", lambda x : (x.tagInfo("caTop").properties().topMass if x.tagInfo("caTop") else -99), float, help="CA8 jet topMass"),
+            NTupleVariable("minMass", lambda x : (x.tagInfo("caTop").properties().minMass if x.tagInfo("caTop") else -99), float, help="CA8 jet minMass"),
+            NTupleVariable("nSubJets", lambda x : (x.tagInfo("caTop").properties().nSubJets if x.tagInfo("caTop") else -99), float, help="CA8 jet nSubJets"),
+            ])
+
 
 susyMultilepton_collections.update({
     "fatJets"         : NTupleCollection("FatJet",  copy.deepcopy(fatJetType),  15, help="AK8 jets, sorted by pt")
@@ -713,16 +728,16 @@ if runData:# and not isTest: # For running on data
         DatasetsAndTriggers.append( ("DoubleMuon", triggers_mumu_iso + triggers_mumu_ss + triggers_mumu_ht + triggers_3mu + triggers_3mu_alt + triggers_1mu_iso + triggers_1mu_noniso) )
         DatasetsAndTriggers.append( ("DoubleEG",   triggers_ee + triggers_ee_ht + triggers_3e + triggers_FR_1e_noiso + triggers_FR_1e_iso) )
         DatasetsAndTriggers.append( ("MuonEG",     triggers_mue + triggers_mue_ht + triggers_2mu1e + triggers_2e1mu ) )
-        if analysis=='susy':
-            DatasetsAndTriggers.append( ("SingleMuon", triggers_leptau + triggers_1mu_iso + triggers_1mu_noniso) )
-            DatasetsAndTriggers.append( ("SingleElectron", triggers_leptau + triggers_1e_iso + triggers_1e_noniso) )
-            DatasetsAndTriggers.append( ("Tau", triggers_leptau + triggers_1mu_iso + triggers_1e_iso) )
-            #for edgeZ OS
-            DatasetsAndTriggers.append( ("JetHT", triggers_pfht ) ) #triggerFlagsAna.triggerBits['htall']
-            DatasetsAndTriggers.append( ("MET", triggers_htmet ) ) # triggerFlagsAna.triggerBits['htmet']
-        else:
-            DatasetsAndTriggers.append( ("SingleMuon", triggers_1mu_iso + triggers_1mu_noniso) )
-            DatasetsAndTriggers.append( ("SingleElectron", triggers_1e) )
+        #if analysis=='susy':
+        #    DatasetsAndTriggers.append( ("SingleMuon", triggers_leptau + triggers_1mu_iso + triggers_1mu_noniso) )
+        #    DatasetsAndTriggers.append( ("SingleElectron", triggers_leptau + triggers_1e_iso + triggers_1e_noniso) )
+        #    DatasetsAndTriggers.append( ("Tau", triggers_leptau + triggers_1mu_iso + triggers_1e_iso) )
+        #    #for edgeZ OS
+        #    DatasetsAndTriggers.append( ("JetHT", triggers_pfht ) ) #triggerFlagsAna.triggerBits['htall']
+        #    DatasetsAndTriggers.append( ("MET", triggers_htmet ) ) # triggerFlagsAna.triggerBits['htmet']
+        #else:
+        #    DatasetsAndTriggers.append( ("SingleMuon", triggers_1mu_iso + triggers_1mu_noniso) )
+        #    DatasetsAndTriggers.append( ("SingleElectron", triggers_1e) )
 
         if runDataQCD: # for fake rate measurements in data
             FRTrigs_mu = triggers_FR_1mu_noiso
@@ -806,11 +821,11 @@ if True and runData:
     from CMGTools.Production.promptRecoRunRangeFilter import filterComponent
     printnewsummary = False
     for c in selectedComponents:
-        c.splitFactor = len(c.files)/3
+        c.splitFactor = len(c.files)/4
         if "PromptReco" in c.name:
             printnewsummary = True
             filterComponent(c, 1)
-            c.splitFactor = len(c.files)/3
+            c.splitFactor = len(c.files)/4
     if printnewsummary: printSummary(selectedComponents)
 
 

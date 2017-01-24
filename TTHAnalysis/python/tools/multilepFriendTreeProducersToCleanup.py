@@ -291,3 +291,54 @@ MODULES.append( ('LepMVAFriendJetLessIVFNOTAU_SIGDY', lambda: LepMVAFriend((os.e
                                                                    training="SoftJetLessIVF", label="JetLessIVFNOTAU_SIGDY")) )
 
 
+
+
+MODULES.append( ('leptonJetReCleanerTTH', lambda : LeptonJetReCleaner("Recl", # b1E2 definition of FO, 80X b-tag WP
+                                                                      looseLeptonSel = lambda lep : lep.miniRelIso < 0.4 and lep.sip3d < 8,
+                                                                      cleaningLeptonSel = lambda lep : lep.conept>10 and lep.jetBTagCSV<0.80 and (abs(lep.pdgId)!=11 or lep.conept<30 or _ttH_idEmu_cuts_E2(lep)) and ((lep.jetPtRatiov2>0.3 and lep.jetBTagCSV<0.46) or lep.mvaTTH>0.75), # cuts applied on top of loose
+                                                                      FOLeptonSel = lambda lep,ht : lep.conept>10 and lep.jetBTagCSV<0.80 and (abs(lep.pdgId)!=11 or lep.conept<30 or _ttH_idEmu_cuts_E2(lep)) and ((lep.jetPtRatiov2>0.3 and lep.jetBTagCSV<0.46) or lep.mvaTTH>0.75), # cuts applied on top of loose
+                                                                      tightLeptonSel = lambda lep,ht : lep.conept>10 and lep.jetBTagCSV<0.80 and (abs(lep.pdgId)!=11 or lep.conept<30 or _ttH_idEmu_cuts_E2(lep)) and ((lep.jetPtRatiov2>0.3 and lep.jetBTagCSV<0.46) or lep.mvaTTH>0.75) and (abs(lep.pdgId)!=13 or lep.ICHEPmediumMuonId>0) and lep.mvaTTH > 0.75, # cuts applied on top of loose
+                                                                      cleanJet = lambda lep,jet,dr : dr<0.4, # called on cleaning leptons and loose taus
+                                                                      selectJet = lambda jet: abs(jet.eta)<2.4,
+                                                                      cleanTau = lambda lep,tau,dr: dr<0.4,
+                                                                      looseTau = lambda tau: tau.pt > 20 and abs(tau.eta)<2.3 and abs(tau.dxy) < 1000 and abs(tau.dz) < 0.2 and tau.idMVAOldDMRun2dR03 >= 1 and tau.idDecayMode, # used in cleaning
+                                                                      tightTau = lambda tau: tau.idMVAOldDMRun2dR03 >= 2, # cuts applied on top of loose
+                                                                      cleanJetsWithTaus = True,
+                                                                      cleanTausWithLoose = True, # cleaning taus with cleaningLeptonSel == loose
+                                                                      doVetoZ = True,
+                                                                      doVetoLMf = True,
+                                                                      doVetoLMt = True,
+                                                                      jetPt = 40,
+                                                                      bJetPt = 25,
+                                                                      coneptdef = lambda lep: conept_TTH(lep) ) ))
+
+from CMGTools.TTHAnalysis.tools.tiamattZComputer import TiamattZComputer
+#MODULES.append( ('TiamattZWZ', lambda: TiamattZComputer(label="NNWZ",training="TiamattZ_WZ_v5.h5")) )
+#MODULES.append( ('TiamattZtZW', lambda: TiamattZComputer(label="NNtZW",training="TiamattZ_tZW_v5.LO.h5")) )
+#MODULES.append( ('TiamattZttH', lambda: TiamattZComputer(label="NNttH",training="TiamattZ_ttH_v5.h5")) )
+#MODULES.append( ('TiamattZtZq', lambda: TiamattZComputer(label="NNtZq",training="TiamattZ_tZq_v5.2.h5")) )
+MODULES.append( ('TiamattZtZqFall17', lambda: TiamattZComputer(label="NNtZq",training="TiamattZ_tZq_v1_Fall17.h5", preprocessing="TiamattZ_preprocessing.h5")) )
+
+
+from CMGTools.TTHAnalysis.tools.functionsTTV import _ttV_looseTTVLepId, _ttV_conePt, _ttV_fakableTTVLepId, _ttV_tightTTVLepId
+MODULES.append( ('leptonJetReCleanerTTV', lambda : LeptonJetReCleaner("Mini",
+                                                                      looseLeptonSel = lambda lep : _ttV_looseTTVLepId(lep),
+                                                                      cleaningLeptonSel = lambda lep : _ttV_conePt(lep)>10 and _ttV_fakableTTVLepId(lep),
+                                                                      FOLeptonSel = lambda lep,ht : _ttV_conePt(lep)>10 and _ttV_fakableTTVLepId(lep),
+                                                                      tightLeptonSel = lambda lep,ht : lep.pt>10 and _ttV_tightTTVLepId(lep),
+                                                                      cleanJet = lambda lep,jet,dr : dr<0.4,
+                                                                      selectJet = lambda jet: abs(jet.eta)<5.0 and jet.pt>25,
+                                                                      cleanTau = lambda l,j,d: True,
+                                                                      looseTau = lambda l: True,
+                                                                      tightTau = lambda l: True,
+                                                                      cleanJetsWithTaus = False,
+                                                                      doVetoZ = False,
+                                                                      doVetoLMf = False,
+                                                                      doVetoLMt = False,
+                                                                      jetPt = 25,
+                                                                      bJetPt = 25,
+                                                                      coneptdef = lambda lep: _ttV_conePt(lep),
+                                                                      storeJetVariables = True
+                                                                      ) ))
+
+#MODULES.append( ('TiamattZValidation', lambda: TiamattZComputer(label="nnl",training="TiamattZ_WZ_v2.0.h5",layers=["lstm_btag_lstm2","lstm_jet_lstm2","lstm_htop_lstm2","lstm_sltop_lstm2","lstm_hW_lstm2","lstm_lep_lstm2","lstm_ewk_lstm2","dense_d1","dense_d2","dense_d3","dense_d4"]) ) )
