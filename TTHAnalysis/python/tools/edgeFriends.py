@@ -171,6 +171,8 @@ class edgeFriends:
                     ("run"+label, "I"),
                     ("lumi"+label, "I"),
                     ("nVert"+label, "I"),
+                    ("mZ1"+label, "F"),
+                    ("mZ2"+label, "F"),
                     ("nLepTight"+label, "I"),
                     ("nLepLoose"+label, "I"),
                     ("nJetSel"+label, "I"), ("nJetSel_jecUp"+label, "I"), ("nJetSel_jecDn"+label, "I"),
@@ -364,6 +366,8 @@ class edgeFriends:
         ret['lumi'] = event.lumi
         ret['evt'] = long(event.evt)
         ret['nVert'] = event.nVert
+        ret['mZ1'] = event.mZ1
+        ret['mZ2'] = event.mZ2
         t01 = time.time()
         ## copy the triggers, susy masses and filters!!
         for mass in self.susymasslist:
@@ -392,7 +396,15 @@ class edgeFriends:
                                     event.Flag_badMuonFilter)# and 
                                     #event.Flag_METFilters)
         else:
-            ret['passesFilters'] = 1
+            ret['passesFilters'] = int(event.Flag_HBHENoiseFilter > 0 and 
+                                   event.Flag_HBHENoiseIsoFilter > 0 and 
+                                   event.Flag_EcalDeadCellTriggerPrimitiveFilter > 0 and 
+                                   event.Flag_goodVertices > 0 and 
+                                   event.Flag_eeBadScFilter > 0 and 
+                                   event.Flag_globalTightHalo2016Filter > 0 and
+                                   event.Flag_badChargedHadronFilter > 0 and
+                                   event.Flag_CSCTightHalo2016Filter > 0 and
+                                   event.Flag_badMuonFilter)# and 
 
         ## this will be slow
         ## ret['isLefthanded' ] = 0
