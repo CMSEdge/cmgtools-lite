@@ -171,6 +171,14 @@ class edgeFriends:
                     ("run"+label, "I"),
                     ("lumi"+label, "I"),
                     ("nVert"+label, "I"),
+                    ("Flag_HBHENoiseFilter"+label, "I"),
+                    ("Flag_HBHENoiseIsoFilter"+label, "I"),
+                    ("Flag_EcalDeadCellTriggerPrimitiveFilter"+label, "I"),
+                    ("Flag_goodVertices"+label, "I"),
+                    ("Flag_eeBadScFilter"+label, "I"),
+                    ("Flag_globalTightHalo2016Filter"+label, "I"),
+                    ("Flag_CSCTightHalo2016Filter"+label, "I"),
+                    ("Flag_badMuonFilter"+label, "F"),                                  
                     ("mZ1"+label, "F"),
                     ("mZ2"+label, "F"),
                     ("nLepTight"+label, "I"),
@@ -368,6 +376,17 @@ class edgeFriends:
         ret['nVert'] = event.nVert
         ret['mZ1'] = event.mZ1
         ret['mZ2'] = event.mZ2
+        ret['Flag_HBHENoiseFilter'] = event.Flag_HBHENoiseFilter
+        ret['Flag_HBHENoiseIsoFilter'] = event.Flag_HBHENoiseFilter
+        ret['Flag_EcalDeadCellTriggerPrimitiveFilter']= event.Flag_HBHENoiseFilter
+        ret['Flag_goodVertices']= event.Flag_HBHENoiseFilter
+        ret['Flag_eeBadScFilter']= event.Flag_HBHENoiseFilter
+        ret['Flag_globalTightHalo2016Filter']= event.Flag_HBHENoiseFilter
+        ret['Flag_CSCTightHalo2016Filter']= event.Flag_HBHENoiseFilter
+        ret['Flag_badMuonFilter']= event.Flag_HBHENoiseFilter                                  
+        
+        
+        
         t01 = time.time()
         ## copy the triggers, susy masses and filters!!
         for mass in self.susymasslist:
@@ -384,28 +403,6 @@ class edgeFriends:
         ret['genWeight']          = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
         ## twiki:
         ##Flag_HBHENoiseFilter:Flag_HBHENoiseIsoFilter:Flag_EcalDeadCellTriggerPrimitiveFilter:Flag_goodVertices:Flag_eeBadScFilter:Flag_globalTightHalo2016Filter:badMuon:badChargedhadron
-        if isData:
-            ret['passesFilters'] = int(event.Flag_HBHENoiseFilter > 0 and 
-                                    event.Flag_HBHENoiseIsoFilter > 0 and 
-                                    event.Flag_EcalDeadCellTriggerPrimitiveFilter > 0 and 
-                                    event.Flag_goodVertices > 0 and 
-                                    event.Flag_eeBadScFilter > 0 and 
-                                    event.Flag_globalTightHalo2016Filter > 0 and
-                                    event.Flag_badChargedHadronFilter > 0 and
-                                    event.Flag_CSCTightHalo2016Filter > 0 and
-                                    event.Flag_badMuonFilter)# and 
-                                    #event.Flag_METFilters)
-        else:
-            ret['passesFilters'] = int(event.Flag_HBHENoiseFilter > 0 and 
-                                   event.Flag_HBHENoiseIsoFilter > 0 and 
-                                   event.Flag_EcalDeadCellTriggerPrimitiveFilter > 0 and 
-                                   event.Flag_goodVertices > 0 and 
-                                   event.Flag_eeBadScFilter > 0 and 
-                                   event.Flag_globalTightHalo2016Filter > 0 and
-                                   event.Flag_badChargedHadronFilter > 0 and
-                                   event.Flag_CSCTightHalo2016Filter > 0 and
-                                   event.Flag_badMuonFilter)# and 
-
         ## this will be slow
         ## ret['isLefthanded' ] = 0
         ## ret['isRighthanded'] = 0
