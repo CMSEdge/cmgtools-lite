@@ -37,14 +37,15 @@ class edgeFriends:
         vector = ROOT.vector('string')()
         vector.push_back("up")
         vector.push_back("down")
-        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2_ichep.csv")
+        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/work/s/sesanche/public/stuffForMoriond/CSVv2Moriond17_2017_1_26_BtoH.csv")
         self.reader_heavy = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_heavy.load(self.calib, 0, "comb") #0 means b-jets
         self.reader_c = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_c.load(self.calib, 1, "comb") #0 means b-jets
         self.reader_light = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_light.load(self.calib, 2, "incl") #0 means b-jets
-        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_14_7_2016.csv")
+        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/work/s/sesanche/public/stuffForMoriond/fastsim_csvv2_ttbar_26_1_2017.csv")
+        #self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_14_7_2016.csv")
         self.reader_heavy_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_heavy_FASTSIM.load(self.calibFASTSIM, 0, "fastsim") #0 means b-jets
         self.reader_c_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
