@@ -183,7 +183,12 @@ class edgeFriends:
                     ("Flag_eeBadScFilter"+label, "I"),
                     ("Flag_globalTightHalo2016Filter"+label, "I"),
                     ("Flag_CSCTightHalo2016Filter"+label, "I"),
-                    ("Flag_badMuonFilter"+label, "F"),                                  
+                    ("Flag_badChargedHadronFilter"+label, "F"),
+                    ("Flag_badMuonFilter"+label, "F"),
+                    ("Flag_badMuonMoriond2017"+label, "I"),
+                    ("Flag_badCloneMuonMoriond2017"+label, "I"),
+                    ("badCloneMuonMoriond2017_maxPt"+label, "F"),
+		    ("badNotCloneMuonMoriond2017_maxPt"+label, "F"),
                     ("mZ1"+label, "F"),
                     ("mZ2"+label, "F"),
                     ("nLepTight"+label, "I"),
@@ -392,7 +397,21 @@ class edgeFriends:
         ret['Flag_globalTightHalo2016Filter']= event.Flag_HBHENoiseFilter
         ret['Flag_CSCTightHalo2016Filter']= event.Flag_HBHENoiseFilter
         ret['Flag_badMuonFilter']= event.Flag_HBHENoiseFilter                                  
-        
+	ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
+	ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
+        if not isData:
+
+	    ret["Flag_badMuonMoriond2017"] = 1
+	    ret["Flag_badCloneMuonMoriond2017"] = 1
+            ret["badCloneMuonMoriond2017_maxPt"] = -1
+	    ret["badNotCloneMuonMoriond2017_maxPt"] = -1
+        else:
+
+            ret["Flag_badMuonMoriond2017"] = event.Flag_badMuonMoriond2017
+	    ret["Flag_badCloneMuonMoriond2017"] = event.Flag_badCloneMuonMoriond2017
+            ret["badCloneMuonMoriond2017_maxPt"] = event.badCloneMuonMoriond2017_maxPt
+	    ret["badNotCloneMuonMoriond2017_maxPt"] = event.badNotCloneMuonMoriond2017_maxPt
+
         ##Isotrack stuff
         ret['nPFLep5'] = event.nPFLep5        
         ret['nPFHad10'] = event.nPFHad10        
