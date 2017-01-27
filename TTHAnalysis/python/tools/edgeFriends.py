@@ -166,8 +166,8 @@ class edgeFriends:
                             'HLT_BIT_HLT_PFHT300_PFMET110_v',
                             'HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v']                           
 
-        self.btagMediumCut = 0.800
-        self.btagLooseCut  = 0.460
+        self.btagMediumCut =  0.8484 
+        self.btagLooseCut  =  0.5426
 
     def listBranches(self):
         label = self.label
