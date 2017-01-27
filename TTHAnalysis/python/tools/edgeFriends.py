@@ -149,6 +149,7 @@ class edgeFriends:
                             'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v',
                             'HLT_BIT_HLT_Mu30_TkMu11_v',
                             'HLT_BIT_HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v',
+                            'HLT_BIT_HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v',
                             'HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v',
                             'HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v',
                             'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
@@ -163,11 +164,10 @@ class edgeFriends:
                             'HLT_BIT_HLT_PFHT600_v',
                             'HLT_BIT_HLT_PFHT650_v',
                             'HLT_BIT_HLT_PFHT800_v',
-                            'HLT_BIT_HLT_PFHT300_PFMET110_v',
-                            'HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v']                           
+                            'HLT_BIT_HLT_PFHT300_PFMET110_v']                           
 
-        self.btagMediumCut = 0.800
-        self.btagLooseCut  = 0.460
+        self.btagMediumCut = 0.8484
+        self.btagLooseCut  = 0.5426
 
     def listBranches(self):
         label = self.label

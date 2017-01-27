@@ -12,8 +12,8 @@ def computeMT2(visaVec, visbVec, metVec):
     davismt2 = Davismt2()    
 
     metVector = array.array('d',[0.,metVec.px(), metVec.py()])
-    visaVector = array.array('d',[0.,visaVec.px(), visaVec.py()])
-    visbVector = array.array('d',[0.,visbVec.px(), visbVec.py()])
+    visaVector = array.array('d',[visaVec.M(),visaVec.px(), visaVec.py()])
+    visbVector = array.array('d',[visbVec.M(),visbVec.px(), visbVec.py()])
 
     davismt2.set_momenta(visaVector,visbVector,metVector);
     davismt2.set_mn(0);
