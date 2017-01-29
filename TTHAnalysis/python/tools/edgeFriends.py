@@ -28,7 +28,7 @@ class edgeFriends:
         ##self.pu_dict = eval(self.puFile.read())
         ##self.puFile.close()
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
-        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_jul21_nominalUpDown.root","READ")
+        self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileup_FULL_nominalUpDown.root","READ")
         self.puHist   = copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puHistUp = copy.deepcopy( self.puFile.Get('weightsUp') )
         self.puHistDn = copy.deepcopy( self.puFile.Get('weightsDown') )
