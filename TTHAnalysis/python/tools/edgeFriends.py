@@ -326,6 +326,9 @@ class edgeFriends:
                     ('mbb'+label, 'F'),
                     ('mbb_jecUp'+label, 'F'),
                     ('mbb_jecDn'+label, 'F'),
+                    ('FS_central_jets'+label, 'F'),
+                    ('FS_central_jets_jecUp'+label, 'F'),
+                    ('FS_central_jets_jecDn'+label, 'F')                    
                  ]
 
         for trig in self.triggerlist:
@@ -574,11 +577,12 @@ class edgeFriends:
             (ijlist_jecup   , nb25_jecUp, nb35_jecUp, nl35_jecUp, n35_jecUp, ht35_jecUp, theJets_jecUp, theBJets_jecUp, ret['mbb_jecUp'], the25BJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
             (ijlist_jecdn   , nb25_jecDn, nb35_jecDn, nl35_jecDn, n35_jecDn, ht35_jecDn, theJets_jecDn, theBJets_jecDn, ret['mbb_jecDn'], the25BJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
 
-        ret['nJet35']        = n35  
-        ret['nBJetMedium25'] = nb25 
-        ret['nBJetMedium35'] = nb35 
-        ret['nBJetLoose35']  = nl35 
-        ret["htJet35j"]      = ht35 
+        ret['FS_central_jets'] = checkJetsGenJets(jetsc, jetsd)
+        ret['nJet35']          = n35  
+        ret['nBJetMedium25']   = nb25 
+        ret['nBJetMedium35']   = nb35 
+        ret['nBJetLoose35']    = nl35 
+        ret["htJet35j"]        = ht35 
 
         if hasattr(event, "nJet_jecUp"):
             ret['nJet35_jecUp']        = n35_jecUp ; ret['nJet35_jecDn']        = n35_jecDn 
@@ -586,13 +590,13 @@ class edgeFriends:
             ret['nBJetMedium35_jecUp'] = nb35_jecUp; ret['nBJetMedium35_jecDn'] = nb35_jecDn
             ret['nBJetLoose35_jecUp']  = nl35_jecUp; ret['nBJetLoose35_jecDn']  = nl35_jecDn
             ret["htJet35j_jecUp"]      = ht35_jecUp; ret["htJet35j_jecDn"]      = ht35_jecDn
-
+            ret['FS_central_jets_jecUp']     = checkJetsGenJets(jetsc_jecUp, jetsd_jecUp)
+            ret['FS_central_jets_jecDn']     = checkJetsGenJets(jetsc_jecDn, jetsd_jecDn)
 
 
 
 
         # 2. compute the jet list
-
         ret['nJetSel']       = len(ret["iJ"])
         if hasattr(event, "nJet_jecUp"):
             ret['nJetSel_jecUp'] = len(ijlist_jecup)
@@ -948,6 +952,21 @@ class edgeFriends:
                 if deltaR(l,j) < 0.4:
                     j._clean = False
         return jetcoll
+
+    def checkJetsGenJets(self, coll1, coll2):
+        flag = True
+        if not self.isSMS: return True
+        for j in coll1:
+            if abs(j.eta) > 2.5 or j.pt < 20: continue # not central
+            if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
+            if j.Jet_chHEF  > 0.1:            continue # charged franction > 0.1
+            flag = False # both conditions have failed
+        for j in coll2:
+            if abs(j.eta) > 2.5 or j.pt < 20: continue # not central
+            if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
+            if j.Jet_chHEF  > 0.1:            continue # charged franction > 0.1
+            flag = False # both conditions have failed
+        return flag
 
     def countJets(self, coll1, coll2):
         nb25 = 0; nb25 = 0; nb35 = 0; ht35 = 0.; nl35 = 0; n35 = 0
