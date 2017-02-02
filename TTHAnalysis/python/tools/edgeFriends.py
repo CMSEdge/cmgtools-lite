@@ -52,7 +52,8 @@ class edgeFriends:
         self.reader_c_FASTSIM.load(self.calibFASTSIM, 1, "fastsim") #0 means b-jets
         self.reader_light_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_light_FASTSIM.load(self.calibFASTSIM, 2, "fastsim") #0 means b-jets
-        self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns_16.root")
+        self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root")
+        #self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__SMS-T1bbbb-T1qqqq_25ns_Moriond17.root")
         self.h_btag_eff_b    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_b"   ))
         self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
         self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
@@ -145,6 +146,7 @@ class edgeFriends:
                             'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v',
                             'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v',
                             'HLT_BIT_HLT_Mu27_TkMu8_v',
+                            'HLT_BIT_HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v',
                             'HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
                             'HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
                             'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v',
@@ -394,15 +396,15 @@ class edgeFriends:
         ret['mZ1'] = event.mZ1
         ret['mZ2'] = event.mZ2
         ret['Flag_HBHENoiseFilter'] = event.Flag_HBHENoiseFilter
-        ret['Flag_HBHENoiseIsoFilter'] = event.Flag_HBHENoiseFilter
-        ret['Flag_EcalDeadCellTriggerPrimitiveFilter']= event.Flag_HBHENoiseFilter
-        ret['Flag_goodVertices']= event.Flag_HBHENoiseFilter
-        ret['Flag_eeBadScFilter']= event.Flag_HBHENoiseFilter
-        ret['Flag_globalTightHalo2016Filter']= event.Flag_HBHENoiseFilter
-        ret['Flag_CSCTightHalo2016Filter']= event.Flag_HBHENoiseFilter
-        ret['Flag_badMuonFilter']= event.Flag_HBHENoiseFilter                                  
-	ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
-	ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
+        ret['Flag_HBHENoiseIsoFilter'] = event.Flag_HBHENoiseIsoFilter
+        ret['Flag_EcalDeadCellTriggerPrimitiveFilter']= event.Flag_EcalDeadCellTriggerPrimitiveFilter
+        ret['Flag_goodVertices']= event.Flag_goodVertices
+        ret['Flag_eeBadScFilter']= event.Flag_eeBadScFilter
+        ret['Flag_globalTightHalo2016Filter']= event.Flag_globalTightHalo2016Filter
+        ret['Flag_CSCTightHalo2016Filter']= event.Flag_CSCTightHalo2016Filter
+        ret['Flag_badMuonFilter']= event.Flag_badMuonFilter
+        ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
+        ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
         if not isData:
 
 	    ret["Flag_badMuonMoriond2017"] = 1
@@ -1156,14 +1158,14 @@ class edgeFriends:
                     drmjj = dijetmass
         return drmjj  
 
-   
+  
     #############Pablin
     def get_SF_btag(self, pt, eta, mcFlavour):
 
        flavour = 2
        if abs(mcFlavour) == 5: flavour = 0
        elif abs(mcFlavour)==4: flavour = 1
-  
+
        pt_cutoff  = max(30. , min(669., pt))
        eta_cutoff = min(2.39, abs(eta))
 
@@ -1189,13 +1191,16 @@ class edgeFriends:
           SFupcorr = self.reader_heavy_FASTSIM.eval_auto_bounds("up", flavour, eta_cutoff, pt_cutoff)
           SFdowncorr = self.reader_heavy_FASTSIM.eval_auto_bounds("down", flavour, eta_cutoff, pt_cutoff)
 
-       return [SF*SFcorr, SFup*SFupcorr, SFdown*SFdowncorr]
+       if self.isSMS:
+          return [SFcorr, SFupcorr, SFdowncorr]
+       else:
+          return [SF, SFup, SFdown]
 
-
+ 
     def getBtagEffFromFile(self, pt, eta, mcFlavour):
-    
+
        pt_cutoff = max(20.,min(399., pt))
-       if (abs(mcFlavour) == 5): 
+       if (abs(mcFlavour) == 5):
            h = self.h_btag_eff_b
            #use pt bins up to 600 GeV for b
            pt_cutoff = max(20.,min(599., pt))
@@ -1203,12 +1208,11 @@ class edgeFriends:
            h = self.h_btag_eff_c
        else:
            h = self.h_btag_eff_udsg
-    
+
        binx = h.GetXaxis().FindBin(pt_cutoff)
        biny = h.GetYaxis().FindBin(fabs(eta))
 
        return h.GetBinContent(binx,biny)
-
 
     def getWeightBtag(self, jets):
 
@@ -1220,38 +1224,38 @@ class edgeFriends:
         errHdown = 0
         errLup   = 0
         errLdown = 0
-    
+
         for jet in jets:
-        
+
             csv = jet.btagCSV
             mcFlavor = (jet.hadronFlavour if hasattr(jet, 'hadronFlavour') else jet.mcFlavour)
             eta = jet.eta
             pt = jet.pt
 
-            if(eta > 2.5): continue
+            if(abs(eta) > 2.5): continue
             if(pt < 20): continue
             eff = self.getBtagEffFromFile(pt, eta, mcFlavor)
 
-            istag = csv > self.btagMediumCut and eta < 2.5 and pt > 20
+            istag = csv > self.btagMediumCut and abs(eta) < 2.5 and pt > 20
             SF = self.get_SF_btag(pt, eta, mcFlavor)
             if(istag):
                  mcTag = mcTag * eff
                  dataTag = dataTag * eff * SF[0]
                  if(mcFlavor == 5 or mcFlavor ==4):
-	             errHup  = errHup + (SF[1] - SF[0]  )/SF[0]
-	             errHdown = errHdown = (SF[0] - SF[2])/SF[0]
-                 else: 
-	             errLup = errLup + (SF[1] - SF[0])/SF[0]
+                     errHup  = errHup + (SF[1] - SF[0]  )/SF[0]
+                     errHdown = errHdown + (SF[0] - SF[2])/SF[0]
+                 else:
+                     errLup = errLup + (SF[1] - SF[0])/SF[0]
                      errLdown = errLdown + (SF[0] - SF[2])/SF[0]
-            else: 
+            else:
                  mcNoTag = mcNoTag * (1 - eff)
                  dataNoTag = dataNoTag * (1 - eff*SF[0])
                  if mcFlavor==5 or mcFlavor==4:
-	             errHup = errHup * -eff*(SF[1] - SF[0]  )/(1-eff*SF[0])
-                     errHdown = errHdown * -eff*(SF[0] - SF[2])/(1-eff*SF[0])	
+                     errHup = errHup - eff*(SF[1] - SF[0]  )/(1-eff*SF[0])
+                     errHdown = errHdown - eff*(SF[0] - SF[2])/(1-eff*SF[0])
                  else:
-	             errLup = errLup * -eff*(SF[1] - SF[0]  )/(1-eff*SF[0])
-	             errLdown = errLdown * -eff*(SF[0] - SF[2])/(1-eff*SF[0]);	
+                     errLup = errLup - eff*(SF[1] - SF[0])/(1-eff*SF[0])
+                     errLdown = errLdown - eff*(SF[0] - SF[2])/(1-eff*SF[0]);
 
 
         wtbtag = (dataNoTag * dataTag ) / ( mcNoTag * mcTag )
@@ -1261,6 +1265,7 @@ class edgeFriends:
         wtbtagDown_light = wtbtag*( 1 - errLdown )
 
         return [wtbtag, wtbtagUp_heavy, wtbtagUp_light, wtbtagDown_heavy, wtbtagDown_light]
+
 
     def selfNewMediumMuonId(self, muon):
         if not hasattr(muon, 'isGlobalMuon'):
