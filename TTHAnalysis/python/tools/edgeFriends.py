@@ -580,7 +580,7 @@ class edgeFriends:
             (ijlist_jecup   , nb25_jecUp, nb35_jecUp, nl35_jecUp, n35_jecUp, ht35_jecUp, theJets_jecUp, theBJets_jecUp, ret['mbb_jecUp'], the25BJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
             (ijlist_jecdn   , nb25_jecDn, nb35_jecDn, nl35_jecDn, n35_jecDn, ht35_jecDn, theJets_jecDn, theBJets_jecDn, ret['mbb_jecDn'], the25BJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
 
-        ret['FS_central_jets'] = checkJetsGenJets(jetsc, jetsd)
+        ret['FS_central_jets'] = self.checkJetsGenJets(jetsc, jetsd)
         ret['nJet35']          = n35  
         ret['nBJetMedium25']   = nb25 
         ret['nBJetMedium35']   = nb35 
@@ -593,8 +593,8 @@ class edgeFriends:
             ret['nBJetMedium35_jecUp'] = nb35_jecUp; ret['nBJetMedium35_jecDn'] = nb35_jecDn
             ret['nBJetLoose35_jecUp']  = nl35_jecUp; ret['nBJetLoose35_jecDn']  = nl35_jecDn
             ret["htJet35j_jecUp"]      = ht35_jecUp; ret["htJet35j_jecDn"]      = ht35_jecDn
-            ret['FS_central_jets_jecUp']     = checkJetsGenJets(jetsc_jecUp, jetsd_jecUp)
-            ret['FS_central_jets_jecDn']     = checkJetsGenJets(jetsc_jecDn, jetsd_jecDn)
+            ret['FS_central_jets_jecUp']     = self.checkJetsGenJets(jetsc_jecUp, jetsd_jecUp)
+            ret['FS_central_jets_jecDn']     = self.checkJetsGenJets(jetsc_jecDn, jetsd_jecDn)
 
 
 
