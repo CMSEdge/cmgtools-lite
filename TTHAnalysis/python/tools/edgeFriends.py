@@ -248,6 +248,7 @@ class edgeFriends:
                     ("Lep1_tightCharge"+label, "F"), 
                     ("Lep1_mvaIdSpring15"+label, "F"),
                     ("Lep1_mcMatchId"+label, "F"),
+                    ("Lep1_mcMatchTau"+label, "F"),
                     ("Lep1_minTauDR"+label, "F"),
                     ("Lep2_pt"+label, "F"), 
                     ("Lep2_eta"+label, "F"),
@@ -262,6 +263,7 @@ class edgeFriends:
                     ("Lep2_tightCharge"+label, "F"),
                     ("Lep2_mvaIdSpring15"+label, "F"),
                     ("Lep2_mcMatchId"+label, "F"),
+                    ("Lep2_mcMatchTau"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
                     ("PileupW"+label, "F"), 
                     ("PileupW_Up"+label, "F"),
@@ -532,7 +534,7 @@ class edgeFriends:
         ltlvs = [l1, l2]
         lepvectors = []
 
-        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId mcMatchTau'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -551,7 +553,7 @@ class edgeFriends:
                         tmp_dr = deltaR(lep, tau)
                         if tmp_dr < minDRTau:
                             minDRTau = tmp_dr
-                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId mcMatchTau'.split():
                     if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
