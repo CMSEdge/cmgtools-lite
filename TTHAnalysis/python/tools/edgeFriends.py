@@ -397,16 +397,22 @@ class edgeFriends:
         ret['nVert'] = event.nVert
         ret['mZ1'] = event.mZ1
         ret['mZ2'] = event.mZ2
-        ret['Flag_HBHENoiseFilter'] = event.Flag_HBHENoiseFilter
-        ret['Flag_HBHENoiseIsoFilter'] = event.Flag_HBHENoiseIsoFilter
-        ret['Flag_EcalDeadCellTriggerPrimitiveFilter']= event.Flag_EcalDeadCellTriggerPrimitiveFilter
-        ret['Flag_goodVertices']= event.Flag_goodVertices
-        ret['Flag_eeBadScFilter']= event.Flag_eeBadScFilter
-        ret['Flag_globalTightHalo2016Filter']= event.Flag_globalTightHalo2016Filter
-        ret['Flag_CSCTightHalo2016Filter']= event.Flag_CSCTightHalo2016Filter
-        ret['Flag_badMuonFilter']= event.Flag_badMuonFilter
-        ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
-        ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
+
+        for mass in self.susymasslist:
+            ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
+        self.isSMS =  (ret['GenSusyMScan1'] > 0)
+
+        if not self.isSMS:
+            ret['Flag_HBHENoiseFilter'] = event.Flag_HBHENoiseFilter
+            ret['Flag_HBHENoiseIsoFilter'] = event.Flag_HBHENoiseIsoFilter
+            ret['Flag_EcalDeadCellTriggerPrimitiveFilter']= event.Flag_EcalDeadCellTriggerPrimitiveFilter
+            ret['Flag_goodVertices']= event.Flag_goodVertices
+            ret['Flag_eeBadScFilter']= event.Flag_eeBadScFilter
+            ret['Flag_globalTightHalo2016Filter']= event.Flag_globalTightHalo2016Filter
+            ret['Flag_CSCTightHalo2016Filter']= event.Flag_CSCTightHalo2016Filter
+            ret['Flag_badMuonFilter']= event.Flag_badMuonFilter
+            ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
+            ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
         if not isData:
 
 	    ret["Flag_badMuonMoriond2017"] = 1
@@ -426,9 +432,6 @@ class edgeFriends:
         
         t01 = time.time()
         ## copy the triggers, susy masses and filters!!
-        for mass in self.susymasslist:
-            ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
-        self.isSMS =  (ret['GenSusyMScan1'] > 0)
 
         for trig in self.triggerlist:
             ##if not isData:
@@ -963,14 +966,15 @@ class edgeFriends:
         if not self.isSMS: return True
         for j in coll1:
             if abs(j.eta) > 2.5 or j.pt < 20: continue # not central
-            if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
-            if j.Jet_chHEF  > 0.1:            continue # charged franction > 0.1
+            #if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
+            if j.mcPt > 8.:              continue # taken from RA5/7 people (ask Nacho)
+            if j.chHEF  > 0.1:            continue # charged franction > 0.1
             flag = False # both conditions have failed
-        for j in coll2:
-            if abs(j.eta) > 2.5 or j.pt < 20: continue # not central
-            if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
-            if j.Jet_chHEF  > 0.1:            continue # charged franction > 0.1
-            flag = False # both conditions have failed
+#        for j in coll2:
+#            if abs(j.eta) > 2.5 or j.pt < 20: continue # not central
+#            if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
+#            if j.chHEF  > 0.1:            continue # charged franction > 0.1
+#            flag = False # both conditions have failed
         return flag
 
     def countJets(self, coll1, coll2):
