@@ -363,11 +363,24 @@ class edgeFriends:
         lepso = [l for l in Collection(event,"LepOther","nLepOther")]
         jetsc = [j for j in Collection(event,"Jet","nJet")]
         jetsd = [j for j in Collection(event,"DiscJet","nDiscJet")]
-        if hasattr(event, "nJet_jecUp"):
-            jetsc_jecUp = [j for j in Collection(event,"Jet_jecUp","nJet_jecUp")]
-            jetsd_jecUp = [j for j in Collection(event,"DiscJet_jecUp","nDiscJet_jecUp")]
-            jetsc_jecDn = [j for j in Collection(event,"Jet_jecDown","nJet_jecDown")]
-            jetsd_jecDn = [j for j in Collection(event,"DiscJet_jecDown","nDiscJet_jecDown")]
+#        if hasattr(event, "nJet_jecUp"):
+#            jetsc_jecUp = [j for j in Collection(event,"Jet_jecUp","nJet_jecUp")]
+#            jetsd_jecUp = [j for j in Collection(event,"DiscJet_jecUp","nDiscJet_jecUp")]
+#            jetsc_jecDn = [j for j in Collection(event,"Jet_jecDown","nJet_jecDown")]
+#            jetsd_jecDn = [j for j in Collection(event,"DiscJet_jecDown","nDiscJet_jecDown")]
+
+        #taking nominal first
+        jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
+        jetsd_jecUp = [j for j in Collection(event,"DiscJet","nDiscJet")]
+        jetsc_jecDn = [j for j in Collection(event,"Jet","nJet")]        
+        jetsd_jecDn = [j for j in Collection(event,"DiscJet","nDiscJet")]
+                       
+
+
+        # smearing now
+        jetsc_jecUp = self.smearJets(jetsc_jecUp, 1.)
+        jetsc_jecDn = self.smearJets(jetsc_jecDn,-1)
+
         #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
         (met, metphi)  = event.met_pt, event.met_phi
         isData = event.isData
@@ -404,7 +417,7 @@ class edgeFriends:
 
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
-        self.isSMS =  (ret['GenSusyMScan1'] > 0)
+        self.isSMS =  (ret['GenSusyMScan1'] > 0 or ret['GenSusyMNeutralino2'] > 0)
 
         if not self.isSMS:
             ret['Flag_HBHENoiseFilter'] = event.Flag_HBHENoiseFilter
@@ -589,15 +602,13 @@ class edgeFriends:
         ### Define jets
         ret["iJ"] = []
         jetsc       = self.setJetCollection(jetsc, lepst)      ; jetsd       = self.setJetCollection(jetsd, lepst);
-        if hasattr(event, "nJet_jecUp"):
-            jetsc_jecUp = self.setJetCollection(jetsc_jecUp, lepst); jetsd_jecUp = self.setJetCollection(jetsd_jecUp, lepst);
-            jetsc_jecDn = self.setJetCollection(jetsc_jecDn, lepst); jetsd_jecDn = self.setJetCollection(jetsd_jecDn, lepst);
-
+        jetsc_jecUp = self.setJetCollection(jetsc_jecUp, lepst); jetsd_jecUp = self.setJetCollection(jetsd_jecUp, lepst);
+        jetsc_jecDn = self.setJetCollection(jetsc_jecDn, lepst); jetsd_jecDn = self.setJetCollection(jetsd_jecDn, lepst);
+        
 
         (ret["iJ"]      , nb25      , nb35      , nl35      , n35      , ht35      , theJets      , theBJets      , ret['mbb']     , the25BJets) = self.countJets(jetsc      , jetsd      )
-        if hasattr(event, "nJet_jecUp"):
-            (ijlist_jecup   , nb25_jecUp, nb35_jecUp, nl35_jecUp, n35_jecUp, ht35_jecUp, theJets_jecUp, theBJets_jecUp, ret['mbb_jecUp'], the25BJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
-            (ijlist_jecdn   , nb25_jecDn, nb35_jecDn, nl35_jecDn, n35_jecDn, ht35_jecDn, theJets_jecDn, theBJets_jecDn, ret['mbb_jecDn'], the25BJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
+        (ijlist_jecup   , nb25_jecUp, nb35_jecUp, nl35_jecUp, n35_jecUp, ht35_jecUp, theJets_jecUp, theBJets_jecUp, ret['mbb_jecUp'], the25BJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
+        (ijlist_jecdn   , nb25_jecDn, nb35_jecDn, nl35_jecDn, n35_jecDn, ht35_jecDn, theJets_jecDn, theBJets_jecDn, ret['mbb_jecDn'], the25BJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
 
         ret['FS_central_jets'] = self.checkJetsGenJets(jetsc, jetsd)
         ret['nJet35']          = n35  
@@ -606,23 +617,21 @@ class edgeFriends:
         ret['nBJetLoose35']    = nl35 
         ret["htJet35j"]        = ht35 
 
-        if hasattr(event, "nJet_jecUp"):
-            ret['nJet35_jecUp']        = n35_jecUp ; ret['nJet35_jecDn']        = n35_jecDn 
-            ret['nBJetMedium25_jecUp'] = nb25_jecUp; ret['nBJetMedium25_jecDn'] = nb25_jecDn
-            ret['nBJetMedium35_jecUp'] = nb35_jecUp; ret['nBJetMedium35_jecDn'] = nb35_jecDn
-            ret['nBJetLoose35_jecUp']  = nl35_jecUp; ret['nBJetLoose35_jecDn']  = nl35_jecDn
-            ret["htJet35j_jecUp"]      = ht35_jecUp; ret["htJet35j_jecDn"]      = ht35_jecDn
-            ret['FS_central_jets_jecUp']     = self.checkJetsGenJets(jetsc_jecUp, jetsd_jecUp)
-            ret['FS_central_jets_jecDn']     = self.checkJetsGenJets(jetsc_jecDn, jetsd_jecDn)
+        ret['nJet35_jecUp']        = n35_jecUp ; ret['nJet35_jecDn']        = n35_jecDn 
+        ret['nBJetMedium25_jecUp'] = nb25_jecUp; ret['nBJetMedium25_jecDn'] = nb25_jecDn
+        ret['nBJetMedium35_jecUp'] = nb35_jecUp; ret['nBJetMedium35_jecDn'] = nb35_jecDn
+        ret['nBJetLoose35_jecUp']  = nl35_jecUp; ret['nBJetLoose35_jecDn']  = nl35_jecDn
+        ret["htJet35j_jecUp"]      = ht35_jecUp; ret["htJet35j_jecDn"]      = ht35_jecDn
+        ret['FS_central_jets_jecUp']     = self.checkJetsGenJets(jetsc_jecUp, jetsd_jecUp)
+        ret['FS_central_jets_jecDn']     = self.checkJetsGenJets(jetsc_jecDn, jetsd_jecDn)
 
 
 
 
         # 2. compute the jet list
         ret['nJetSel']       = len(ret["iJ"])
-        if hasattr(event, "nJet_jecUp"):
-            ret['nJetSel_jecUp'] = len(ijlist_jecup)
-            ret['nJetSel_jecDn'] = len(ijlist_jecdn)
+        ret['nJetSel_jecUp'] = len(ijlist_jecup)
+        ret['nJetSel_jecDn'] = len(ijlist_jecdn)
 
         mt2 = -1.; mt2_jecUp = -1.; mt2_jecDn = -1.
         mt2bb = -1.; mt2bb_jecUp = -1.; mt2bb_jecDn = -1.
@@ -653,7 +662,7 @@ class edgeFriends:
                 mt2bb   = min(mt2bb_A, mt2bb_B)
                 del b10obj, b11obj, b20obj, b21obj
                 
-            if (not hasattr(event, "nJet_jecUp") or ret['nBJetMedium25_jecUp'] != 2): ret['mt2bb_jecUp'] = -99
+            if (ret['nBJetMedium25_jecUp'] != 2): ret['mt2bb_jecUp'] = -99
             else: 
                 b1 = ROOT.TLorentzVector(); b2 = ROOT.TLorentzVector()
                 b1.SetPtEtaPhiM(the25BJets_jecUp[0].pt, the25BJets_jecUp[0].eta, the25BJets_jecUp[0].phi, the25BJets_jecUp[0].mass)
@@ -669,7 +678,7 @@ class edgeFriends:
                 mt2bb_jecUp   = min(mt2bb_A, mt2bb_B)
                 del b10obj_jecUp, b11obj_jecUp, b20obj_jecUp, b21obj_jecUp
 
-            if (not hasattr(event, "nJet_jecUp") or ret['nBJetMedium35_jecDn'] != 2): ret['mt2bb_jecDn'] = -99
+            if (ret['nBJetMedium35_jecDn'] != 2): ret['mt2bb_jecDn'] = -99
             else: 
                 b1 = ROOT.TLorentzVector(); b2 = ROOT.TLorentzVector()
                 b1.SetPtEtaPhiM(the25BJets_jecDn[0].pt, the25BJets_jecDn[0].eta, the25BJets_jecDn[0].phi, the25BJets_jecDn[0].mass)
@@ -692,12 +701,8 @@ class edgeFriends:
         ret['mt2_jecUp'] = mt2_jecUp
         ret['mt2_jecDn'] = mt2_jecDn
         ret['mt2bb'] = mt2bb
-        if hasattr(event, "nJet_jecUp"):
-            ret['mt2bb_jecUp'] = mt2bb_jecUp
-            ret['mt2bb_jecDn'] = mt2bb_jecDn
-        else:
-            ret['mt2bb_jecUp'] = -1
-            ret['mt2bb_jecDn'] = -1
+        ret['mt2bb_jecUp'] = mt2bb_jecUp
+        ret['mt2bb_jecDn'] = mt2bb_jecDn
         t5 = time.time()
         
 
@@ -731,20 +736,15 @@ class edgeFriends:
 
         theJets  = sorted(theJets , key = lambda j : j.pt, reverse = True)
         theBJets = sorted(theBJets, key = lambda j : j.pt, reverse = True)
-        if hasattr(event, "nJet_jecUp"):
-            theJets_jecUp = sorted(theJets_jecUp , key = lambda j : j.pt, reverse = True)
-            theJets_jecDn = sorted(theJets_jecDn , key = lambda j : j.pt, reverse = True)
+        theJets_jecUp = sorted(theJets_jecUp , key = lambda j : j.pt, reverse = True)
+        theJets_jecDn = sorted(theJets_jecDn , key = lambda j : j.pt, reverse = True)
 
         ret['lepsJZB_recoil'] = totalRecoil.Pt() - ret['lepsZPt']
         ret['bestMjj'] = self.getBestMjj(theJets)
         ret['dphiMjj'] = self.getDPhiMjj(theJets)
-        if hasattr(event, "nJet_jecUp"):
-            ret['dphiMjj_jecUp'] = self.getDPhiMjj(theJets_jecUp)
-            ret['dphiMjj_jecDn'] = self.getDPhiMjj(theJets_jecDn)
-        else:
-            ret['dphiMjj_jecUp'] = -99
-            ret['dphiMjj_jecDn'] = -99
-
+        ret['dphiMjj_jecUp'] = self.getDPhiMjj(theJets_jecUp)
+        ret['dphiMjj_jecDn'] = self.getDPhiMjj(theJets_jecDn)
+        
         ret['drMjj'] = self.getDRMjj(theJets)
         ret['minMjj']  = self.getMinMjj (theJets)
         ret['maxMjj']  = self.getMaxMjj (theJets)
@@ -801,7 +801,7 @@ class edgeFriends:
         leplist = [l1, l2]
         ## DO MLB CALCULATION HERE
         # find the global minimum mlb (or mlj)
-        for jec in ['', 'Up' ,'Dn'] if hasattr(event, "nJet_jecUp") else ['']:
+        for jec in ['', 'Up' ,'Dn']:
             theBJetsForMLB = theBJets if len(jec) == 0 else theBJets_jecUp if 'Up' in jec else theBJets_jecDn
             theJetsForMLB  = theJets  if len(jec) == 0 else theJets_jecUp  if 'Up' in jec else theJets_jecDn
             jet1coll = (theBJets if len(theBJetsForMLB) >= 1 else theJetsForMLB)
@@ -948,7 +948,6 @@ class edgeFriends:
 
         fullret = {}
         for k,v in ret.iteritems():
-            if not hasattr(event, "nJet_jecUp") and 'jec' in k: continue
             fullret[k+self.label] = v
         for k,v in jetret.iteritems(): 
             fullret["JetSel%s_%s" % (self.label,k)] = v
@@ -1128,6 +1127,17 @@ class edgeFriends:
                 if dijetmass > maxmjj:
                     maxmjj = dijetmass
         return maxmjj
+
+    def smearJets(self, jetcol, syst):
+        for j in jetcol:
+            if syst > 0: 
+                j.pt = j.rawPt*j.corr_JECUp
+            else:
+                j.pt = j.rawPt*j.corr_JECDown
+        return jetcol
+
+
+
     def getHardMjj(self, jetsel, _dphi = False, _dr = False):
         if len(jetsel) < 2: return -99.
         if not _dphi:
