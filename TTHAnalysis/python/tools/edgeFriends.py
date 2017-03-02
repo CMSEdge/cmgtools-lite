@@ -1130,10 +1130,11 @@ class edgeFriends:
 
     def smearJets(self, jetcol, syst):
         for j in jetcol:
+            quot = getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
             if syst > 0: 
-                j.pt = j.rawPt*j.corr_JECUp
+                j.pt = j.pt*j.corr_JECUp / quot
             else:
-                j.pt = j.rawPt*j.corr_JECDown
+                j.pt = j.pt*j.corr_JECDown /quot
         return jetcol
 
 
