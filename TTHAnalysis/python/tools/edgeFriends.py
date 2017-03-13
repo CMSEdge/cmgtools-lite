@@ -196,6 +196,7 @@ class edgeFriends:
                     ("mZ2"+label, "F"),
                     ("nLepTight"+label, "I"),
                     ("nLepLoose"+label, "I"),
+                    ("nTightTau"+label, "I"),
                     ("nJetSel"+label, "I"), ("nJetSel_jecUp"+label, "I"), ("nJetSel_jecDn"+label, "I"),
                     ("bestMjj"+label, "F"),
                     ("minMjj"+label, "F"),
@@ -360,6 +361,7 @@ class edgeFriends:
         t0 = time.time()
 
         leps  = [l for l in Collection(event,"LepGood","nLepGood")]
+        taus  = [t for t in Collection(event,"TauGood","nTauGood")]
         lepso = [l for l in Collection(event,"LepOther","nLepOther")]
         jetsc = [j for j in Collection(event,"Jet","nJet")]
         jetsd = [j for j in Collection(event,"DiscJet","nDiscJet")]
@@ -523,7 +525,15 @@ class edgeFriends:
             ret["iLT"].append(-1-il)
             ret["nLepGood20T"] += 1
         ret["nLepLoose"] = nLepLoose
-        ret["nLepTight"] = len(ret["iLT"])
+        ret["nLepTight"] = len(ret["iLT"])                                
+        
+        #tau veto stuff 
+        nTightTau = 0
+        for il,tau in enumerate(taus):
+            if not self.isTightTau(tau): continue
+            nTightTau+= 1
+        ret["nTightTau"] = nTightTau
+
 
         t22 = time.time()
         #
@@ -1297,6 +1307,9 @@ class edgeFriends:
 
         return [wtbtag, wtbtagUp_heavy, wtbtagUp_light, wtbtagDown_heavy, wtbtagDown_light]
 
+
+    def isTightTau(self, tau):
+        return (tau.idMVA >= 4 and tau.pt > 20 and abs(tau.eta)<2.3 and tau.idMVA >= 1 and tau.idDecayMode and tau.idAntiE >= 2)
 
     def selfNewMediumMuonId(self, muon):
         if not hasattr(muon, 'isGlobalMuon'):
