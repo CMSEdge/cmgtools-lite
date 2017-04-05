@@ -227,12 +227,12 @@ class edgeFriends:
                     ("lepsJZB_raw"+label, "F"),
                     ("lepsJZB_recoil"+label, "F"),
                     ("nPFLep5"+label, "I"),
-                    ("ISRweight_unw"    +label, "F"),
-                    ("ISRweight_unw_Up" +label, "F"),
-                    ("ISRweight_unw_Dn" +label, "F"),
-                    ("ISRweight"        +label, "F"),
-                    ("ISRweight_Up"     +label, "F"),
-                    ("ISRweight_Dn"     +label, "F"),
+                   # ("ISRweight_unw"    +label, "F"),
+                   # ("ISRweight_unw_Up" +label, "F"),
+                   # ("ISRweight_unw_Dn" +label, "F"),
+                   # ("ISRweight"        +label, "F"),
+                   # ("ISRweight_Up"     +label, "F"),
+                   # ("ISRweight_Dn"     +label, "F"),
                     ("nPFHad10"+label, "I"),
                     ("lepsDR"+label, "F"),
                     ("lepsMETRec"+label, "F"),
@@ -453,13 +453,13 @@ class edgeFriends:
         ret['nPFHad10'] = event.nPFHad10        
         
 
-        if self.isSMS:
-            ret["ISRweight_unw"    ] = event.ISRweight_unw
-            ret["ISRweight_unw_Up" ] = event.ISRweight_unw_Up
-            ret["ISRweight_unw_Dn" ] = event.ISRweight_unw_Dn
-            ret["ISRweight"        ] = event.ISRweight 
-            ret["ISRweight_Up"     ] = event.ISRweight_Up
-            ret["ISRweight_Dn"     ] = event.ISRweight_Dn
+       # if self.isSMS:
+       #     ret["ISRweight_unw"    ] = event.ISRweight_unw
+       #     ret["ISRweight_unw_Up" ] = event.ISRweight_unw_Up
+       #     ret["ISRweight_unw_Dn" ] = event.ISRweight_unw_Dn
+       #     ret["ISRweight"        ] = event.ISRweight 
+       #     ret["ISRweight_Up"     ] = event.ISRweight_Up
+       #     ret["ISRweight_Dn"     ] = event.ISRweight_Dn
 
 
         t01 = time.time()
