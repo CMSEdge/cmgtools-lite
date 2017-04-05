@@ -255,7 +255,7 @@ class edgeFriends:
                     ("Lep1_tightCharge"+label, "F"), 
                     ("Lep1_mvaIdSpring15"+label, "F"),
                     ("Lep1_mcMatchId"+label, "F"),
-                    ("Lep1_minTauDR"+label, "F"),
+                    ("Lep1_minTauDR"+label, "F"),              
                     ("Lep2_pt"+label, "F"), 
                     ("Lep2_eta"+label, "F"),
                     ("Lep2_phi"+label, "F"),
@@ -284,6 +284,9 @@ class edgeFriends:
                     ("sum_mlbDn"+label, "F"),
                     ("st"+label,"F"), 
                     ("srID"+label, "I"), 
+                    ("mT_lep1"+label, "F"),
+                    ("mT_lep2"+label, "F"),
+                    ("minMT"+label, "F"),
                     ("mt2"+label, "F"), ("mt2_jecUp"+label, "F"), ("mt2_jecDn"+label, "F"),
                     ("mt2bb"+label, "F"), ("mt2bb_jecUp"+label, "F"), ("mt2bb_jecDn"+label, "F"),
                     #("lh_ana_zpt_data"+label, "F") ,
@@ -643,6 +646,7 @@ class edgeFriends:
         ret['nJetSel_jecUp'] = len(ijlist_jecup)
         ret['nJetSel_jecDn'] = len(ijlist_jecdn)
 
+        mT_lep1 = -1.; mT_lep2 = -1.; minMT = -1.
         mt2 = -1.; mt2_jecUp = -1.; mt2_jecDn = -1.
         mt2bb = -1.; mt2bb_jecUp = -1.; mt2bb_jecDn = -1.
         if ret['nPairLep'] == 2:
@@ -652,7 +656,9 @@ class edgeFriends:
             metp4obj_jecUp = ROOT.reco.Particle.LorentzVector(ret['met_jecUp']*cos(metphi),ret['met_jecUp']*sin(metphi),0,ret['met_jecUp'])
             metp4obj_jecDn = ROOT.reco.Particle.LorentzVector(ret['met_jecDn']*cos(metphi),ret['met_jecDn']*sin(metphi),0,ret['met_jecDn'])
 
-            
+            mT_lep1 = self.getMT(l1mt2.Pt(), metp4obj.Pt(), l1mt2.Phi(),  metp4obj.Phi())
+            mT_lep2 = self.getMT(l2mt2.Pt(), metp4obj.Pt(), l2mt2.Phi(),  metp4obj.Phi())
+            minMT = self.getMinMT(l1mt2.Pt(),l2mt2.Pt(), metp4obj.Pt(), l1mt2.Phi(),l2mt2.Phi(),  metp4obj.Phi())
             mt2       = computeMT2(l1mt2, l2mt2, metp4obj)
             mt2_jecUp = computeMT2(l1mt2, l2mt2, metp4obj_jecUp)
             mt2_jecDn = computeMT2(l1mt2, l2mt2, metp4obj_jecDn)
@@ -707,6 +713,9 @@ class edgeFriends:
             del metp4obj, metp4obj_jecUp, metp4obj_jecDn
 
 
+        ret['mT_lep1'] = mT_lep1
+        ret['mT_lep2'] = mT_lep2
+        ret['minMT'] = minMT
         ret['mt2'] = mt2
         ret['mt2_jecUp'] = mt2_jecUp
         ret['mt2_jecDn'] = mt2_jecDn
@@ -841,7 +850,10 @@ class edgeFriends:
             ret["min_mlb1%s"%jec] = min_mlb if min_mlb < 1e6  else -1.
             ret["min_mlb2%s"%jec] = max_mlb if max_mlb < 1e6  else -1.
             ret["sum_mlb%s"%jec] = (ret["min_mlb1%s"%jec] + ret["min_mlb2%s"%jec]) if ret["min_mlb1%s"%jec] > 0. and ret["min_mlb2%s"%jec] > 0. else -1.
-        
+       
+
+
+
         # new mlb calculations
         # jet1coll = (theBJets if len(theBJets) >= 1 else theJets)
         # jet2coll = (theBJets if len(theBJets) >= 2 else theJets)
@@ -1046,6 +1058,15 @@ class edgeFriends:
         else: mbb = -99
         return retlist, nb25, nb35, nl35, n35, ht35, thejets, thebjets, mbb, thebjets25
 
+
+    def getMT(self, pt1, pt2, phi1, phi2):
+        return sqrt(2*pt1*pt2*(1-cos(phi1-phi2)))
+
+    def getMinMT(self, l1, l2, met, lphi1, lphi2, metphi):
+        mT1 = sqrt(2*l1*met*(1-cos(lphi1-metphi)))
+        mT2 = sqrt(2*l2*met*(1-cos(lphi2-metphi)))
+        return min(mT1, mT2)
+
     def getMll_JZB(self, l1, l2, met, met_raw):
         metrecoil = (met + l1 + l2).Pt()
         metrawrecoil = (met_raw + l1 + l2).Pt() 
@@ -1073,7 +1094,7 @@ class edgeFriends:
             [mll, jzb, jzb_raw, dr, metrec, zpt, dphi, d3D] = self.getMll_JZB(lepst[0].p4(), lepst[1].p4(), metp4, metp4_raw)
             [parPt, ortPt] = self.getParOrtPt(lepst[0].p4(),lepst[1].p4())
             ret = (0, 1, mll, jzb, jzb_raw, dr, metrec, zpt, dphi, d3D, parPt, ortPt, lepst[0].p4().Theta() - lepst[1].p4().Theta())
-        return ret
+        return ret                                                                                                                        
 
     def getSRID(self, mll, eta1, eta2, nb):
         mllid, bid, etaid = -1, -1, -1
