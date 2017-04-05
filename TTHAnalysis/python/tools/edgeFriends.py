@@ -1228,7 +1228,7 @@ class edgeFriends:
        if abs(mcFlavour) == 5: flavour = 0
        elif abs(mcFlavour)==4: flavour = 1
 
-       pt_cutoff  = max(30. , min(669., pt))
+       pt_cutoff  = max(20. , min(999., pt))
        eta_cutoff = min(2.39, abs(eta))
 
        if flavour == 2:
