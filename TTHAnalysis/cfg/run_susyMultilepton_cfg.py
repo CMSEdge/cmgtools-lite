@@ -936,15 +936,17 @@ elif test == '80X-MC':
         comp.files = [ tmpfil ]
         if not getHeppyOption("single"): comp.fineSplitFactor = 4
     else: raise RuntimeError, "Unknown MC sample: %s" % what
-elif test == '80X-Data':
+elif test == '92X-Data':
     what = getHeppyOption("sample","ZLL")
     if what == "ZLL":
-        json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'
-        DoubleMuon = kreator.makeDataComponent("DoubleMuon_Run2016H_run283885", "/DoubleMuon/Run2016H-PromptReco-v2/MINIAOD", "CMS", ".*root", run_range = (283885,283885), triggers = triggers_mumu)
-        DoubleEG = kreator.makeDataComponent("DoubleEG_Run2016H_run283885", "/DoubleEG/Run2016H-PromptReco-v2/MINIAOD", "CMS", ".*root", run_range = (283885,283885), triggers = triggers_ee)
-        DoubleMuon.files = [ 'root://eoscms//eos/cms/store/data/Run2016H/DoubleMuon/MINIAOD/PromptReco-v2/000/283/885/00000/5A21CC75-D09D-E611-BFDC-FA163E163D77.root' ]
-        DoubleEG.files = [ 'root://eoscms//eos/cms/store/data/Run2016H/DoubleEG/MINIAOD/PromptReco-v2/000/283/885/00000/743981FC-949D-E611-836E-FA163EC09DF2.root' ]
-        selectedComponents = [ DoubleMuon, DoubleEG ]
+        #json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'
+        sequence.remove(jsonAna)
+        DoubleMuon = kreator.makeDataComponent("DoubleMuon_Run2017B", "/DoubleMuon/Run2017B-23Jun2017-v1/MINIAOD", "CMS", ".*root", run_range = (297047,297678), triggers = triggers_mumu)
+        #DoubleEG = kreator.makeDataComponent("DoubleEG_Run2016H_run283885", "/DoubleEG/Run2016H-PromptReco-v2/MINIAOD", "CMS", ".*root", run_range = (283885,283885), triggers = triggers_ee)
+        DoubleMuon.files = [ 'root://eoscms//eos/cms/store/data/Run2017B/DoubleMuon/MINIAOD/23Jun2017-v1/10000/046A6D49-4859-E711-8CAF-0025904B2C68.root' ]
+        #DoubleEG.files = [ 'root://eoscms//eos/cms/store/data/Run2016H/DoubleEG/MINIAOD/PromptReco-v2/000/283/885/00000/743981FC-949D-E611-836E-FA163EC09DF2.root' ]
+        selectedComponents = [ DoubleMuon ]
+        #selectedComponents = [ DoubleMuon, DoubleEG ]
     elif what == "MET":
         json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Final/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON.txt'
         MET = kreator.makeDataComponent("MET_Run2016H_run283885", "/MET/Run2016H-PromptReco-v2/MINIAOD", "CMS", ".*root", run_range = (283885,283885), triggers = triggers_SOS_highMET)
