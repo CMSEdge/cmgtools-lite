@@ -9,9 +9,9 @@ kreator = ComponentCreator()
 ### ----------------------------- Zero Tesla run  ----------------------------------------
 
 dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"  # use environmental variable, useful for instance to run on CRAB
-json='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_294297-999999_13TeV_PromptReco_Collisions17_JSON.txt'
+json='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/PromptReco/Cert_294927-297723_13TeV_PromptReco_Collisions17_JSON.txt'
 
-run_range = (297047,297678)
+run_range = (294927,297723)
 label = "_runs%s_%s"%(run_range[0], run_range[1])
 
 
@@ -23,7 +23,7 @@ MuonEG_Run2017B                     = kreator.makeDataComponent("MuonEG_Run2017B
 ### ----------------------------- Run2016B v2 03Feb2017 ----------------------------------------
 \
 
-samples = [DoubleMuon_Run2017B]
+samples = [DoubleMuon_Run2017B, DoubleEG_Run2017B, MuonEG_Run2017B]
 
 from CMGTools.TTHAnalysis.setup.Efficiencies import *
 dataDir = "$CMSSW_BASE/src/CMGTools/TTHAnalysis/data"
