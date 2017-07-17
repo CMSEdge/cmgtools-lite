@@ -50,27 +50,27 @@ class edgeFriends:
         self.badResolutionTrackTaggerFile.close()
         self.badMuonTrackTaggerFile.close()
         ##B-tagging stuff
-        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2.csv")
-        self.reader_heavy    = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "central")
-        self.reader_heavy_UP = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "up")
-        self.reader_heavy_DN = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "down")
-        self.reader_light    = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "central")
-        self.reader_light_UP = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "up")
-        self.reader_light_DN = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "down")
+        #self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSVv2.csv")
+        #self.reader_heavy    = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "central")
+        #self.reader_heavy_UP = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "up")
+        #self.reader_heavy_DN = ROOT.BTagCalibrationReader(self.calib, 1, "mujets", "down")
+        #self.reader_light    = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "central")
+        #self.reader_light_UP = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "up")
+        #self.reader_light_DN = ROOT.BTagCalibrationReader(self.calib, 1, "comb"  , "down")
 
-        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_20_11_2015.csv")
-        self.reader_heavyFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "central")
-        self.reader_heavy_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "up")
-        self.reader_heavy_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "down")
-        self.reader_lightFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "central")
-        self.reader_light_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "up")
-        self.reader_light_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "down")
+        #self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/CSV_13TEV_Combined_20_11_2015.csv")
+        #self.reader_heavyFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "central")
+        #self.reader_heavy_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "up")
+        #self.reader_heavy_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim", "down")
+        #self.reader_lightFASTSIM    = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "central")
+        #self.reader_light_UPFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "up")
+        #self.reader_light_DNFASTSIM = ROOT.BTagCalibrationReader(self.calibFASTSIM, 1, "fastsim"  , "down")
 
-        self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns.root")
-        self.h_btag_eff_b    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_b"   ))
-        self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
-        self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
-        self.f_btag_eff.Close()
+        #self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns.root")
+        #self.h_btag_eff_b    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_b"   ))
+        #self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
+        #self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
+        #self.f_btag_eff.Close()
         ## =================
         ## pdf things
         ## =================
@@ -225,10 +225,15 @@ class edgeFriends:
         lepso = [l for l in Collection(event,"LepOther","nLepOther")]
         jetsc = [j for j in Collection(event,"Jet","nJet")]
         jetsd = [j for j in Collection(event,"DiscJet","nDiscJet")]
-        jetsc_jecUp = [j for j in Collection(event,"Jet_jecUp","nJet_jecUp")]
-        jetsd_jecUp = [j for j in Collection(event,"DiscJet_jecUp","nDiscJet_jecUp")]
-        jetsc_jecDn = [j for j in Collection(event,"Jet_jecDown","nJet_jecDown")]
-        jetsd_jecDn = [j for j in Collection(event,"DiscJet_jecDown","nDiscJet_jecDown")]
+        #jetsc_jecUp = [j for j in Collection(event,"Jet_jecUp","nJet_jecUp")]
+        #jetsd_jecUp = [j for j in Collection(event,"DiscJet_jecUp","nDiscJet_jecUp")]
+        #jetsc_jecDn = [j for j in Collection(event,"Jet_jecDown","nJet_jecDown")]
+        #jetsd_jecDn = [j for j in Collection(event,"DiscJet_jecDown","nDiscJet_jecDown")]
+        #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
+        jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
+        jetsd_jecUp = [j for j in Collection(event,"DiscJet","nDiscJet")]
+        jetsc_jecDn = [j for j in Collection(event,"Jet","nJet")]
+        jetsd_jecDn = [j for j in Collection(event,"DiscJet","nDiscJet")]
         #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
         (met, metphi)  = event.met_pt, event.met_phi
         (met_raw, metphi_raw)  = event.met_rawPt, event.met_rawPhi
@@ -245,7 +250,8 @@ class edgeFriends:
         lepret  = {}
         trigret = {}
         ret['met'] = met; ret['met_phi'] = metphi;
-        ret['met_jecUp'] = event.met_jecUp_pt; ret['met_jecDn'] = event.met_jecDown_pt 
+        #ret['met_jecUp'] = event.met_jecUp_pt; ret['met_jecDn'] = event.met_jecDown_pt 
+        ret['met_jecUp'] = event.met_pt; ret['met_jecDn'] = event.met_pt 
         ret['run'] = event.run
         ret['lumi'] = event.lumi
         ret['evt'] = long(event.evt)
@@ -765,19 +771,31 @@ class edgeFriends:
        eta_cutoff = min(2.39, abs(eta))
 
        if flavour == 2:
-          SF = self.reader_light.eval(flavour,eta_cutoff, pt_cutoff);
-          SFup = self.reader_light_UP.eval(flavour,eta_cutoff, pt_cutoff);
-          SFdown = self.reader_light_DN.eval(flavour,eta_cutoff, pt_cutoff);
-          SFcorr = self.reader_lightFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
-          SFupcorr = self.reader_light_UPFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
-          SFdowncorr = self.reader_light_DNFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
+          #SF = self.reader_light.eval(flavour,eta_cutoff, pt_cutoff);
+          #SFup = self.reader_light_UP.eval(flavour,eta_cutoff, pt_cutoff);
+          #SFdown = self.reader_light_DN.eval(flavour,eta_cutoff, pt_cutoff);
+          #SFcorr = self.reader_lightFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
+          #SFupcorr = self.reader_light_UPFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
+          #SFdowncorr = self.reader_light_DNFASTSIM.eval(flavour,eta_cutoff, pt_cutoff);
+          SF = 1
+          SFup = 1
+          SFdown = 1
+          SFcorr = 1
+          SFupcorr = 1
+          SFdowncorr = 1
        else:
-          SF = self.reader_heavy.eval(flavour,eta_cutoff, pt_cutoff)
-          SFup  = self.reader_heavy_UP.eval(flavour,eta_cutoff, pt_cutoff)
-          SFdown = self.reader_heavy_DN.eval(flavour,eta_cutoff, pt_cutoff)
-          SFcorr = self.reader_heavyFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
-          SFupcorr  = self.reader_heavy_UPFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
-          SFdowncorr = self.reader_heavy_DNFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
+          #SF = self.reader_heavy.eval(flavour,eta_cutoff, pt_cutoff)
+          #SFup  = self.reader_heavy_UP.eval(flavour,eta_cutoff, pt_cutoff)
+          #SFdown = self.reader_heavy_DN.eval(flavour,eta_cutoff, pt_cutoff)
+          #SFcorr = self.reader_heavyFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
+          #SFupcorr  = self.reader_heavy_UPFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
+          #SFdowncorr = self.reader_heavy_DNFASTSIM.eval(flavour,eta_cutoff, pt_cutoff)
+          SF = 1
+          SFup = 1
+          SFdown = 1
+          SFcorr = 1
+          SFupcorr = 1
+          SFdowncorr = 1
 
        return [SF*SFcorr, SFup*SFupcorr, SFdown*SFdowncorr]
 
