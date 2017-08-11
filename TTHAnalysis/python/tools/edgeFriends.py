@@ -159,6 +159,10 @@ class edgeFriends:
                             'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
                             'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v',
                             'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v',
+                            #SOS triggers for slepton analysis
+                            'HLT_MET',
+                            'HLT_SOSHighMET',
+                            'HLT_SOSDoubleMuLowMET',
                             'HLT_BIT_HLT_PFHT200_v',
                             'HLT_BIT_HLT_PFHT250_v',
                             'HLT_BIT_HLT_PFHT300_v',
@@ -196,7 +200,6 @@ class edgeFriends:
                     ("mZ2"+label, "F"),
                     ("nLepTight"+label, "I"),
                     ("nLepLoose"+label, "I"),
-                    ("nLepLoose5"+label, "I"),
                     ("nTightTau"+label, "I"),
                     ("nJetSel"+label, "I"), ("nJetSel_jecUp"+label, "I"), ("nJetSel_jecDn"+label, "I"),
                     ("bestMjj"+label, "F"),
@@ -224,7 +227,7 @@ class edgeFriends:
                     ("nBJetLoose35"+label  , "I") , ("nBJetLoose35_jecUp"+label  , "I") , ("nBJetLoose35_jecDn"+label  , "I") ,
                     ("nBJetMedium35"+label , "I") , ("nBJetMedium35_jecUp"+label , "I") , ("nBJetMedium35_jecDn"+label , "I") ,
                     ("nBJetLoose25"+label  , "I") , ("nBJetLoose25_jecUp"+label , "I") , ("nBJetLoose25_jecDn"+label , "I") ,
-                    ("nJet25extEta"+label        , "I"),
+                    #("nJet25extEta"+label        , "I"),
                     ("iL1T"+label, "I"),
                     ("iL2T"+label, "I"), 
                     ("lepsMll"+label, "F"),
@@ -239,9 +242,18 @@ class edgeFriends:
                    # ("ISRweight_Up"     +label, "F"),
                    # ("ISRweight_Dn"     +label, "F"),
                     ("nPFHad10"+label, "I"),
+                    ("lepsPhi"+label, "F"),
                     ("lepsDR"+label, "F"),
                     ("lepsMETRec"+label, "F"),
                     ("lepsZPt"+label, "F"),
+                    ("ptBestZ"+label, "F"),
+                    ("newMet"+label, "F"),
+                    ("WmT"+label, "F"),
+                    ("WZMT2"+label, "F"),
+                    ("newMetPhi"+label, "F"),
+                    ("mllBestZ"+label, "F"),
+                    ("mllOtherZ"+label, "F"),
+                    ("mt2BestZ"+label, "F"),
                     ("metl1DPhi"+label, "F"),
                     ("metl2DPhi"+label, "F"),
                     ("met"+label, "F"), ("met_phi"+label, "F"), ("met_jecUp"+label, "F"), ("met_jecDn"+label, "F"), ("met_raw"+label, "F"),
@@ -260,7 +272,7 @@ class edgeFriends:
                     ("Lep1_tightCharge"+label, "F"), 
                     ("Lep1_mvaIdSpring15"+label, "F"),
                     ("Lep1_mcMatchId"+label, "F"),
-                    ("Lep1_mcMatchTau"+label, "F"),
+                    #("Lep1_mcMatchTau"+label, "F"),
                     ("Lep1_minTauDR"+label, "F"),              
                     ("Lep2_pt"+label, "F"), 
                     ("Lep2_eta"+label, "F"),
@@ -275,7 +287,7 @@ class edgeFriends:
                     ("Lep2_tightCharge"+label, "F"),
                     ("Lep2_mvaIdSpring15"+label, "F"),
                     ("Lep2_mcMatchId"+label, "F"),
-                    ("Lep2_mcMatchTau"+label, "F"),
+                    #("Lep2_mcMatchTau"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),
                     ("PileupW"+label, "F"), 
                     ("PileupW_Up"+label, "F"),
@@ -523,12 +535,9 @@ class edgeFriends:
         # ===============================
 
         nLepLoose = 0
-        nLepLoose5 = 0
         for il,lep in enumerate(leps):
             if not self._susyEdgeLoose(lep): continue
             nLepLoose+= 1
-            if not self._susyEdgeLoose5(lep): continue
-            nLepLoose5+= 1
             if not self.tightLeptonSel(lep): continue
             ret["iLT"].append(il)
             ret["nLepGood20T"] += 1
@@ -536,13 +545,10 @@ class edgeFriends:
         for il,lep in enumerate(lepso):
             if not self._susyEdgeLoose(lep): continue
             nLepLoose+= 1
-            if not self._susyEdgeLoose5(lep): continue
-            nLepLoose5+= 1
             if not self.tightLeptonSel(lep): continue
             ret["iLT"].append(-1-il)
             ret["nLepGood20T"] += 1
         ret["nLepLoose"] = nLepLoose
-        ret["nLepLoose5"] = nLepLoose5
         ret["nLepTight"] = len(ret["iLT"])                                
         
         #tau veto stuff 
@@ -551,7 +557,6 @@ class edgeFriends:
             if not self.isTightTau(tau): continue
             nTightTau+= 1
         ret["nTightTau"] = nTightTau
-
 
         t22 = time.time()
         #
@@ -577,6 +582,7 @@ class edgeFriends:
         ret['lepsJZB'] = iL1iL2[3] 
         ret['lepsJZB_raw'] = iL1iL2[4] 
         ret['lepsDR'] = iL1iL2[5] 
+        ret['lepsPhi'] = iL1iL2[5] 
         ret['lepsMETRec'] = iL1iL2[6] 
         ret['lepsZPt'] = iL1iL2[7] 
         ret['lepsDPhi'] = iL1iL2[8]
@@ -592,7 +598,8 @@ class edgeFriends:
         ltlvs = [l1, l2]
         lepvectors = []
 
-        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId mcMatchTau'.split():
+        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+        #for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId mcMatchTau'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -611,7 +618,8 @@ class edgeFriends:
                         tmp_dr = deltaR(lep, tau)
                         if tmp_dr < minDRTau:
                             minDRTau = tmp_dr
-                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId mcMatchTau'.split():
+                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+                #for lfloat in 'pt eta phi miniRelIso pdgId mvaIdSpring15 dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId mcMatchTau'.split():
                     if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
@@ -625,20 +633,92 @@ class edgeFriends:
         else:
             ret['nPairLep'] = 0
         t4 = time.time()
-
+        #variables needed for 4l control regions
+        if (len(leps) <4): 
+            ret['mllBestZ'] = -99; ret['mt2BestZ'] = -99; ret['ptBestZ'] = -99; ret['mllOtherZ'] = -99; ret['newMet'] = -99;ret['newMetPhi'] = -99;
+        else:
+            metp4obj = ROOT.reco.Particle.LorentzVector(met*cos(metphi),met*sin(metphi),0,met)
+            l1Formt2 = ROOT.reco.Particle.LorentzVector(leps[0].p4().Px(), leps[0].p4().Py(),leps[0].p4().Pz(),leps[0].p4().Energy())
+            l2Formt2 = ROOT.reco.Particle.LorentzVector(leps[1].p4().Px(), leps[1].p4().Py(),leps[1].p4().Pz(),leps[1].p4().Energy())
+            l3Formt2 = ROOT.reco.Particle.LorentzVector(leps[2].p4().Px(), leps[2].p4().Py(),leps[2].p4().Pz(),leps[2].p4().Energy())
+            l4Formt2 = ROOT.reco.Particle.LorentzVector(leps[3].p4().Px(), leps[3].p4().Py(),leps[3].p4().Pz(),leps[3].p4().Energy())
+            l1 = ROOT.TLorentzVector(); l2 = ROOT.TLorentzVector(); l3 = ROOT.TLorentzVector(); l4 = ROOT.TLorentzVector(); newMet=  ROOT.TLorentzVector();
+            l1.SetPtEtaPhiM(leps[0].p4().Pt(), leps[0].p4().Eta(),leps[0].p4().Phi(),leps[0].p4().M()) 
+            l2.SetPtEtaPhiM(leps[1].p4().Pt(), leps[1].p4().Eta(),leps[1].p4().Phi(),leps[1].p4().M()) 
+            l3.SetPtEtaPhiM(leps[2].p4().Pt(), leps[2].p4().Eta(),leps[2].p4().Phi(),leps[2].p4().M()) 
+            l4.SetPtEtaPhiM(leps[3].p4().Pt(), leps[3].p4().Eta(),leps[3].p4().Phi(),leps[3].p4().M()) 
+            lepVecs = [l1, l2, l3, l4]
+            lepVecsForMT2 = [l1Formt2, l2Formt2, l3Formt2, l4Formt2]
+            bestmll = 1e6
+            newMT2 = -99
+            for i in lepVecs:
+                for j in lepVecs:
+                    if j == i: continue
+                    if (abs((i+j).M() - 91.1876) < abs(bestmll - 91.1876)):
+                        bestmll = (i+j).M()
+                        best = i+j
+                        ptobj = ROOT.reco.Particle.LorentzVector(best.Pt()*cos(best.Phi()),best.Pt()*sin(best.Phi()),0,best.Pt())
+                        newMetObj = metp4obj+ptobj
+                        for k in lepVecs:
+                            if k == i: continue
+                            if k == j: continue
+                            for m in lepVecs:
+                                if m == i: continue
+                                if m == j: continue
+                                if m == k: continue
+                                otherZmll = (k+m).M()
+                                newMT2 = computeMT2(lepVecsForMT2[lepVecs.index(k)], lepVecsForMT2[lepVecs.index(m)], newMetObj)
+            ret['newMet'] = newMetObj.Pt()
+            ret['newMetPhi'] = newMetObj.Phi()
+            ret['mt2BestZ'] = newMT2
+            ret['mllBestZ'] = bestmll                                                         
+            ret['mllOtherZ'] = otherZmll                                                         
+            ret['ptBestZ'] = best.Pt()                                                                                                                                                 
+        #variables needed for 3l control region
+        if (len(leps) < 3): 
+            ret['WmT'] = -99; ret['WZMT2'] = -99;
+        else:
+            metp4obj = ROOT.reco.Particle.LorentzVector(met*cos(metphi),met*sin(metphi),0,met)
+            l1Formt2 = ROOT.reco.Particle.LorentzVector(leps[0].p4().Px(), leps[0].p4().Py(),leps[0].p4().Pz(),leps[0].p4().Energy())
+            l2Formt2 = ROOT.reco.Particle.LorentzVector(leps[1].p4().Px(), leps[1].p4().Py(),leps[1].p4().Pz(),leps[1].p4().Energy())
+            l3Formt2 = ROOT.reco.Particle.LorentzVector(leps[2].p4().Px(), leps[2].p4().Py(),leps[2].p4().Pz(),leps[2].p4().Energy())
+            l1 = ROOT.TLorentzVector(); l2 = ROOT.TLorentzVector(); l3 = ROOT.TLorentzVector(); 
+            l1.SetPtEtaPhiM(leps[0].p4().Pt(), leps[0].p4().Eta(),leps[0].p4().Phi(),leps[0].p4().M()) 
+            l2.SetPtEtaPhiM(leps[1].p4().Pt(), leps[1].p4().Eta(),leps[1].p4().Phi(),leps[1].p4().M()) 
+            l3.SetPtEtaPhiM(leps[2].p4().Pt(), leps[2].p4().Eta(),leps[2].p4().Phi(),leps[2].p4().M()) 
+            lepVecs = [l1, l2, l3]
+            lepVecsForMT2 = [l1Formt2, l2Formt2, l3Formt2]
+            bestmll = 1e6
+            #In 3 lepton cases, this function computes the MT with the lepton coming from the Z and the MT2 with a lepton from a Z and a lepton from a W
+            for i in lepVecs:
+                for j in lepVecs:
+                    if j == i: continue
+                    if (abs((i+j).M() - 91.1876) < abs(bestmll - 91.1876)):
+                        bestmll = (i+j).M()
+                        best = i+j
+                        for k in lepVecs:
+                            if k == i: continue
+                            if k == j: continue
+                            WmT = self.getMT(k.Pt(), metp4obj.Pt(), k.Phi(),  metp4obj.Phi()) 
+                            if i.Pt() > j.Pt():
+                                WZMT2 = computeMT2(lepVecsForMT2[lepVecs.index(i)], lepVecsForMT2[lepVecs.index(k)], metp4obj)
+                            else:
+                                WZMT2 = computeMT2(lepVecsForMT2[lepVecs.index(j)], lepVecsForMT2[lepVecs.index(k)], metp4obj)
+            ret['WmT'] = WmT
+            ret['WZMT2'] = WZMT2
 
         ### Define jets
         ret["iJ"] = []
         jetsc       = self.setJetCollection(jetsc, lepst)      ; jetsd       = self.setJetCollection(jetsd, lepst);
         jetsc_jecUp = self.setJetCollection(jetsc_jecUp, lepst); jetsd_jecUp = self.setJetCollection(jetsd_jecUp, lepst);
         jetsc_jecDn = self.setJetCollection(jetsc_jecDn, lepst); jetsd_jecDn = self.setJetCollection(jetsd_jecDn, lepst);
-        jetslc       = self.setLooseJetCollection(jetslc, lepst)      ; jetsld       = self.setLooseJetCollection(jetsld, lepst);
+        #jetslc       = self.setLooseJetCollection(jetslc, lepst)      ; jetsld       = self.setLooseJetCollection(jetsld, lepst);
         
 
         (ret["iJ"]   ,nb25      ,nbl25      ,nb35      ,nl35      ,n35      ,n25      ,ht35      ,ht25      ,theJets      ,theBJets      ,ret['mbb']      ,the25BJets) = self.countJets(jetsc      , jetsd      )
         (ijlist_jecup,nb25_jecUp,nbl25_jecUp,nb35_jecUp,nl35_jecUp,n35_jecUp,n25_jecUp,ht35_jecUp,ht25_jecUp,theJets_jecUp,theBJets_jecUp,ret['mbb_jecUp'],the25BJets_jecUp) = self.countJets(jetsc_jecUp, jetsd_jecUp)
         (ijlist_jecdn,nb25_jecDn,nbl25_jecDn,nb35_jecDn,nl35_jecDn,n35_jecDn,n25_jecDn,ht35_jecDn,ht25_jecDn,theJets_jecDn,theBJets_jecDn,ret['mbb_jecDn'],the25BJets_jecDn) = self.countJets(jetsc_jecDn, jetsd_jecDn)
-        (n25wideeta) = self.countJetsLoose(jetslc, jetsld)
+        #(n25wideeta) = self.countJetsLoose(jetslc, jetsld)
 
         ret['FS_central_jets'] = self.checkJetsGenJets(jetsc, jetsd)
         ret['nJet35']          = n35  
@@ -649,7 +729,7 @@ class edgeFriends:
         ret['nBJetLoose25']    = nbl25 
         ret["htJet35j"]        = ht35 
         ret["htJet25j"]        = ht25 
-        ret["nJet25extEta"]    = n25wideeta
+        #ret["nJet25extEta"]    = n25wideeta
 
         ret['nJet35_jecUp']        = n35_jecUp ; ret['nJet35_jecDn']        = n35_jecDn 
         ret['nJet25_jecUp']        = n25_jecUp ; ret['nJet25_jecDn']        = n25_jecDn 
@@ -1020,19 +1100,19 @@ class edgeFriends:
                     j._clean = False
         return jetcoll                                                
 
-    def setLooseJetCollection(self, jetcoll, lepst):
-        for j in jetcoll:
-            j._clean = True
-            if abs(j.eta) > 3.0 or j.pt < 25.:
-                j._clean = False
-                continue
-            if j.pt < 25 and j.btagCSV < self.btagMediumCut: 
-                j._clean = False
-                continue
-            for l in lepst:
-                if deltaR(l,j) < 0.4:
-                    j._clean = False
-        return jetcoll                                                
+#    def setLooseJetCollection(self, jetcoll, lepst):
+#        for j in jetcoll:
+#            j._clean = True
+#            if abs(j.eta) > 3.0 or j.pt < 25.:
+#                j._clean = False
+#                continue
+#            if j.pt < 25 and j.btagCSV < self.btagMediumCut: 
+#                j._clean = False
+#                continue
+#            for l in lepst:
+#                if deltaR(l,j) < 0.4:
+#                    j._clean = False
+#        return jetcoll                                                
 
 
 
@@ -1135,7 +1215,7 @@ class edgeFriends:
         jzb_raw = metrawrecoil - zpt
         v1 = l1.Vect()
         v2 = l2.Vect()
-        return ((l1+l2).M(), jzb, jzb_raw, l1.DeltaR(l2), metrecoil, zpt, abs( deltaPhi( l1.Phi(), l2.Phi() )) , v1.Angle(v2))
+        return ((l1+l2).M(), jzb, jzb_raw, l1.DeltaR(l2), (l1+l2).Phi(), metrecoil, zpt, abs( deltaPhi( l1.Phi(), l2.Phi() )) , v1.Angle(v2))
     def getParOrtPt(self, l1, l2):
         if l1.Pt() > l2.Pt():
             v1 = l1.Vect()
@@ -1151,9 +1231,9 @@ class edgeFriends:
     def getPairVariables(self,lepst, metp4, metp4_raw):
         ret = (-999,-999,-99., -9000., -9000, -99., -99., -99., -99.,-99.,-99.,-99.,-99.,-99.)
         if len(lepst) >= 2:
-            [mll, jzb, jzb_raw, dr, metrec, zpt, dphi, d3D] = self.getMll_JZB(lepst[0].p4(), lepst[1].p4(), metp4, metp4_raw)
+            [mll, jzb, jzb_raw, dr, phi, metrec, zpt, dphi, d3D] = self.getMll_JZB(lepst[0].p4(), lepst[1].p4(), metp4, metp4_raw)
             [parPt, ortPt] = self.getParOrtPt(lepst[0].p4(),lepst[1].p4())
-            ret = (0, 1, mll, jzb, jzb_raw, dr, metrec, zpt, dphi, d3D, parPt, ortPt, lepst[0].p4().Theta() - lepst[1].p4().Theta())
+            ret = (0, 1, mll, jzb, jzb_raw, dr, phi, metrec, zpt, dphi, d3D, parPt, ortPt, lepst[0].p4().Theta() - lepst[1].p4().Theta())
         return ret                                                                                                                        
 
     def getSRID(self, mll, eta1, eta2, nb):
@@ -1189,7 +1269,7 @@ class edgeFriends:
                 dijetmass = (jet1+jet2).M()
                 if abs(dijetmass - 80.385) < abs(bestmjj - 80.385):
                     bestmjj = dijetmass
-        return bestmjj
+        return bestmjj                                                         
     def getMinMjj(self, jetsel):
         if len(jetsel) < 2: return -99.
         minmjj = 1e6
@@ -1432,35 +1512,6 @@ class edgeFriends:
               #  if lep.idEmuTTH == 0: return False
             return True                                                                                          
 
-    def _susyEdgeLoose5(self, lep):                                                                                
-            if lep.pt <= 5.: return False
-            if abs(lep.dxy) > 0.05: return False
-            if abs(lep.dz ) > 0.10: return False
-            if lep.sip3d > 8: return False
-            lepeta = abs(lep.eta)
-            if lep.miniRelIso > 0.4: return False
-            ## muons
-            if abs(lep.pdgId) == 13:
-              if lepeta > 2.4: return False
-              #if lep.mediumMuonId != 1: return False
-              if not self.selfNewMediumMuonId(lep): return False
-            ## electrons
-            if abs(lep.pdgId) == 11:
-              if lepeta > 2.5: return False
-              if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-              A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
-              B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
-              if lep.pt > 5:
-                  if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
-                                                                                                                 
-              # if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
-              # if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
-              # if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
-              #if hasattr(lep, 'idEmuTTH'):
-              #  if lep.idEmuTTH == 0: return False
-            return True                                                                                          
-
-
 #     def getLepSF(self, eta, pt, id):
 #         result = [1.,1.,1.,1.,1.]
 #         if abs(id) == 11:
@@ -1545,7 +1596,7 @@ def newMediumMuonId(muon):
     #muon.segmentCompatibility < 0.49: return False
  
 def _susyEdgeTight(lep):
-        if lep.pt <= 20.: return False
+        if lep.pt <= 5.: return False
         eta = abs(lep.eta)
         if eta          > 2.4: return False
         if abs(lep.dxy) > 0.05: return False
