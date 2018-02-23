@@ -476,6 +476,7 @@ metAna = cfg.Analyzer(
     metCollection     = "slimmedMETs",
     noPUMetCollection = "slimmedMETs",    
     copyMETsByValue = False,
+    makeShiftedMETs=False,
     doTkMet = False,
     doPuppiMet = False,
     doMetNoPU = False,
@@ -507,6 +508,13 @@ metAnaScaleDown = metAna.clone(name="metAnalyzerScaleDown",
     collectionPostFix = "_jecDown",
     )
 
+metAnaShifts = metAna.clone(name="metAnalyzerShifts",
+    copyMETsByValue = False,
+    makeShiftedMETs=True,
+    recalibrate = False, 
+    jetAnalyzerPostFix = "",
+    collectionPostFix = "_shifts",
+    )
 
 # Core Event Analyzer (computes basic quantities like HT, dilepton masses)
 from CMGTools.TTHAnalysis.analyzers.ttHCoreEventAnalyzer import ttHCoreEventAnalyzer

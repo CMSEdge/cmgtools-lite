@@ -74,9 +74,8 @@ if analysis=='susy':
     jetAna.cleanSelectedLeptons=True
     jetAna.storeLowPtJets=True
     jetAna.jetEtaCentral = jetAna.jetEta
-    jetAna.mcGT="Spring16_25nsV8_MC"    
-    jetAna.dataGT   = "Spring16_25nsV8BCD_DATA Spring16_25nsV8E_DATA Spring16_25nsV8F_DATA Spring16_25nsV8_DATA"
-    jetAna.runsDataJEC   = [276811, 277420, 278802]
+    jetAna.mcGT = "Fall17_17Nov2017_V4_MC"    
+    jetAna.dataGT = [(1,"Fall17_17Nov2017_V4_MC")]
 if not removeJecUncertainty:
     jetAna.addJECShifts = True
     jetAnaScaleDown.copyJetsByValue = True # do not remove this
@@ -96,12 +95,10 @@ if not removeJecUncertainty:
         jetAnaScaleUp.cleanSelectedLeptons=True
         jetAnaScaleUp.storeLowPtJets=True
         jetAnaScaleUp.jetEtaCentral = jetAnaScaleUp.jetEta
-        jetAnaScaleDown.mcGT="Spring16_25nsV8_MC"    
-        jetAnaScaleDown.dataGT   = "Spring16_25nsV8BCD_DATA Spring16_25nsV8E_DATA Spring16_25nsV8F_DATA Spring16_25nsV8_DATA"
-        jetAnaScaleDown.runsDataJEC   = [276811, 277420, 278802]
-        jetAnaScaleUp.mcGT="Spring16_25nsV8_MC"    
-        jetAnaScaleUp.dataGT   = "Spring16_25nsV8BCD_DATA Spring16_25nsV8E_DATA Spring16_25nsV8F_DATA Spring16_25nsV8_DATA"
-        jetAnaScaleUp.runsDataJEC   = [276811, 277420, 278802]
+        jetAnaScaleDown.mcGT = jetAna.mcGT
+        jetAnaScaleDown.dataGT = jetAna.dataGT
+        jetAnaScaleUp.mcGT = jetAna.mcGT
+        jetAnaScaleUp.dataGT = jetAna.dataGT
 
 
 if analysis in ['SOS']:
@@ -329,6 +326,21 @@ if not removeJecUncertainty:
             "discardedJets_jecDown" : NTupleCollection("DiscJet_jecDown", jetTypeSusySuperLight if analysis=='susy' else jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning (JEC -1sigma)"),
             })
 
+###adding extra MET quantities
+susyCoreSequence.insert(susyCoreSequence.index(metAnaScaleUp)+1, metAnaShifts)
+susyMultilepton_globalObjects.update({
+         "met_shifts_shifted_UnclusteredEnUp" : NTupleObject("met_shifted_UnclusteredEnUp", metType, help="PF E_{T}^{miss}, after type 1 corrections with met unclustered Up"),
+         "met_shifts_shifted_UnclusteredEnDown" : NTupleObject("met_shifted_UnclusteredEnDown", metType, help="PF E_{T}^{miss}, after type 1 corrections with met unclustered Up"),
+         "met_shifts_shifted_MuonEnUp" : NTupleObject("met_shifted_MuonEnUp", metType, help="PF E_{T}^{miss}, after type 1 corrections with muon Energy Up"),
+         "met_shifts_shifted_MuonEnDown" : NTupleObject("met_shifted_MuonEnDown", metType, help="PF E_{T}^{miss}, after type 1 corrections with muon Energy Down"),
+         "met_shifts_shifted_ElectronEnUp" : NTupleObject("met_shifted_ElectronEnUp", metType, help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Up"),
+         "met_shifts_shifted_ElectronEnDown" : NTupleObject("met_shifted_ElectronEnDown", metType, help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Down"),
+})
+
+susyMultilepton_collections.update({
+    "fatJets"         : NTupleCollection("FatJet",  fatJetType,  15, help="AK8 jets, sorted by pt")
+})
+
 ## Tree Producer
 treeProducer = cfg.Analyzer(
      AutoFillTreeProducer, name='treeProducerSusyMultilepton',
@@ -374,6 +386,7 @@ if not runSMS:
 metAna.doTkMet = True
 treeProducer.globalVariables.append(NTupleVariable("met_trkPt", lambda ev : ev.tkMet.pt() if  hasattr(ev,'tkMet') else  0, help="tkmet p_{T}"))
 treeProducer.globalVariables.append(NTupleVariable("met_trkPhi", lambda ev : ev.tkMet.phi() if  hasattr(ev,'tkMet') else  0, help="tkmet phi"))
+
 
 if not skipT1METCorr:
     if doMETpreprocessor: 
@@ -442,16 +455,17 @@ if runSMS:
 
 #from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv1 import *
 #from CMGTools.RootTools.samples.samples_13TeV_RunIISpring16MiniAODv2 import *
-from CMGTools.RootTools.samples.samples_13TeV_RunIISummer16MiniAODv2 import *
-from CMGTools.RootTools.samples.samples_13TeV_signals import *
-from CMGTools.RootTools.samples.samples_13TeV_80X_susySignalsPriv import *
-from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
+#from CMGTools.RootTools.samples.samples_13TeV_RunIISummer16MiniAODv2 import *
+from CMGTools.RootTools.samples.samples_13TeV_RunIIFall17_230218 import *
+#from CMGTools.RootTools.samples.samples_13TeV_signals import *
+#from CMGTools.RootTools.samples.samples_13TeV_80X_susySignalsPriv import *
+#from CMGTools.RootTools.samples.samples_13TeV_DATA2016 import *
 from CMGTools.RootTools.samples.configTools import printSummary, configureSplittingFromTime, cropToLumi, prescaleComponents, insertEventSelector
 
-selectedComponents = [TTLep_pow]
+selectedComponents = [TTZToLLNuNu]
 
 if analysis=='susy':
-    samples = []#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
+    samples = [TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
                #TTJets_SingleLeptonFromTbar, TTTT, TT_pow_ext4, TToLeptons_sch_amcatnlo, TToLeptons_tch_amcatnlo, TToLeptons_tch_powheg, T_tWch, VHToNonbb, WGToLNuG, WJetsToLNu, WJetsToLNu_LO, 
                #WWDouble, WWTo2L2Nu, WWW, WWZ, WZTo3LNu, WZTo3LNu_amcatnlo, WZZ, WpWpJJ, ZGTo2LG, ZZTo4L, ZZZ, tZq_ll]
    
@@ -897,7 +911,7 @@ elif test == '3':
     for comp in selectedComponents:
         comp.files = comp.files[:1]
         comp.splitFactor = 1
-        comp.fineSplitFactor = 4
+        comp.fineSplitFactor = 3
 elif test == '5':
     for comp in selectedComponents:
         comp.files = comp.files[:5]
