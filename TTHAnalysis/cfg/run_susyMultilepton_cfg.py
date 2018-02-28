@@ -74,8 +74,8 @@ if analysis=='susy':
     jetAna.cleanSelectedLeptons=True
     jetAna.storeLowPtJets=True
     jetAna.jetEtaCentral = jetAna.jetEta
-    jetAna.mcGT = "Fall17_17Nov2017_V4_MC"    
-    jetAna.dataGT = [(1,"Fall17_17Nov2017_V4_MC")]
+    jetAna.mcGT = "Fall17_17Nov2017_V6_MC"    
+    jetAna.dataGT = [(297046,"Fall17_17Nov2017B_V6_DATA"),(299368,"Fall17_17Nov2017C_V6_DATA"),(302030,"Fall17_17Nov2017D_V6_DATA"),(303574,"Fall17_17Nov2017E_V6_DATA"),(305040,"Fall17_17Nov2017F_V6_DATA")]
 if not removeJecUncertainty:
     jetAna.addJECShifts = True
     jetAnaScaleDown.copyJetsByValue = True # do not remove this
@@ -341,6 +341,69 @@ susyMultilepton_collections.update({
     "fatJets"         : NTupleCollection("FatJet",  fatJetType,  15, help="AK8 jets, sorted by pt")
 })
 
+
+##==========================================================
+
+variablesToKeep = open("variablesToKeep", "r").read().split('\n')#.splitlines()
+tagsToKeep = []
+collectionsToKeep = []
+for var in variablesToKeep:
+    tmp=var.split("_")
+    if len(tmp)==2:
+        if tmp[1] not in tagsToKeep: tagsToKeep.append(tmp[1])
+        if tmp[0] not in collectionsToKeep: collectionsToKeep.append(tmp[0])
+    if len(tmp)==3 and "jecUp" not in tmp and "jecDown" not in tmp:
+        if tmp[1]+"_"+tmp[2] not in tagsToKeep: tagsToKeep.append(tmp[1]+"_"+tmp[2])
+        if tmp[0] not in collectionsToKeep: collectionsToKeep.append(tmp[0])
+    if len(tmp)==4 and ( "jecUp"  in tmp or "jecDown" in tmp):
+        if tmp[2]+"_"+tmp[3] not in tagsToKeep: tagsToKeep.append(tmp[2]+"_"+tmp[3])
+        if tmp[0]+"_"+tmp[1] not in collectionsToKeep: collectionsToKeep.append(tmp[0]+"_"+tmp[1])
+
+
+#susyMultilepton_globalVariables=[obj for obj in susyMultilepton_globalVariables if obj.name in variablesToKeep]
+#for obj in susyMultilepton_globalObjects.keys():
+#    susyMultilepton_globalObjects[obj].objectType.variables[:]=[var for var in susyMultilepton_globalObjects[obj].objectType.variables if ( obj+"_"+var.name in variablesToKeep or var.name in tagsToKeep) ]
+
+#objectType /baseObjectType to be better managed, so stupid checking each step like that
+
+#def valid(colname, varname, varsToKeep, tagsToKeep):
+#    return (colname+"_"+varname in varsToKeep or varname in tagsToKeep)
+
+#for col in susyMultilepton_collections.keys():
+#    name=susyMultilepton_collections[col].name    
+#    if hasattr(susyMultilepton_collections[col],"variables"):
+#        susyMultilepton_collections[col].variables[:]=[var for var in susyMultilepton_collections[col].variables if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+#    if hasattr(susyMultilepton_collections[col].objectType,"variables"):
+#        susyMultilepton_collections[col].objectType.variables[:]=[var for var in susyMultilepton_collections[col].objectType.variables if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+#    if hasattr(susyMultilepton_collections[col].objectType,"baseObjectTypes"):
+#        for i, obj in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes):
+#            if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i],"variables"):
+#                susyMultilepton_collections[col].objectType.baseObjectTypes[i].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].variables \
+#                                                                                                 if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+#            if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i],"baseObjectTypes"):
+#                for i2, obj2 in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes):
+#                    if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2],"variables"):
+#                        susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].variables \
+#                                                                                                                             if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+#                    if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2],"baseObjectTypes"):
+#                        for i3, obj3 in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes):
+#                            if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3],"variables"):
+#                                susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].variables \
+#                                                                                                                                                         if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+#                            if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3],"baseObjectTypes"):
+#                                for i4, obj4 in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes):
+#                                    if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4],"variables"):
+#                                        susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4].variables \
+#                                                                                                                                                                                     if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+
+#and delete extra collections not needed
+#for col in susyMultilepton_collections.keys():
+#    name=susyMultilepton_collections[col].name
+#    if name not in collectionsToKeep: 
+#        del susyMultilepton_collections[col]
+
+##==========================================================
+
 ## Tree Producer
 treeProducer = cfg.Analyzer(
      AutoFillTreeProducer, name='treeProducerSusyMultilepton',
@@ -409,6 +472,9 @@ if analysis=='SOS':
     treeProducer.globalVariables.append(NTupleVariable("nISR", lambda ev: ev.nIsr, int, mcOnly=True, help="number of ISR jets according to SUSY recommendations"))
 
 
+
+
+
 #-------- SAMPLES AND TRIGGERS -----------
 
 
@@ -465,7 +531,7 @@ from CMGTools.RootTools.samples.configTools import printSummary, configureSplitt
 selectedComponents = [TTZToLLNuNu]
 
 if analysis=='susy':
-    samples = [TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
+    samples = [TTZToLLNuNu] #mcSamples #[TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
                #TTJets_SingleLeptonFromTbar, TTTT, TT_pow_ext4, TToLeptons_sch_amcatnlo, TToLeptons_tch_amcatnlo, TToLeptons_tch_powheg, T_tWch, VHToNonbb, WGToLNuG, WJetsToLNu, WJetsToLNu_LO, 
                #WWDouble, WWTo2L2Nu, WWW, WWZ, WZTo3LNu, WZTo3LNu_amcatnlo, WZZ, WpWpJJ, ZGTo2LG, ZZTo4L, ZZZ, tZq_ll]
    
