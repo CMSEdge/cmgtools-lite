@@ -35,6 +35,9 @@ triggers_3mu = [ "HLT_TripleMu_10_5_5_DZ_v*",
                  "HLT_TripleMu_12_10_5_v*", 
                  "HLT_TripleMu_5_3_3_Mass3p8to60_DCA_v*", # 5_3_3 only in late part of the data (esp. DCA one)
                  "HLT_TripleMu_5_3_3_Mass3p8to60_DZ_v*" ]
+
+triggers_3mu_alt=["HLT_TrkMu12_DoubleTrkMu5NoFiltersNoVtx_v*"]
+
 triggers_2mu1e = [ "HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ_v*" ]
 triggers_2e1mu = [ "HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v*" ,
                    "HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_v*" ]
@@ -64,12 +67,29 @@ triggers_ak8pfht_mass50 = ['HLT_AK8PFHT%d_TrimMass50_v*' % ht for ht in (750, 80
 # PF Jet
 triggers_ak8pfjet = ['HLT_AK8PFJet500_v*']
 
-# AK8 PF Jet: not in 2017B, lower thresholds are prescaled
-triggers_ak8pfjet_mass30 = ['HLT_AK8PFJet%d_TrimMass30_v*' % pt for pt in (360, 380, 400)]
+# AK8 PF Jet
+triggers_pfjet400_mass30 = ['HLT_AK8PFJet400_TrimMass30_v*']
 
 
-# MET and muon+MET triggers for SOS
-triggers_SOS_doublemulowMET = ["HLT_DoubleMu3_DZ_PFMET50_PFMHT60_v*"]
-triggers_SOS_highMET = ["HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_PFHT60_v*","HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60_v*","HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*","HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_v*"] #NoMu version
-#triggers_SOS_highMET = ["HLT_PFMET100_PFMHT100_IDTight_PFHT60_v*","HLT_PFMET120_PFMHT120_IDTight_PFHT60_v*","HLT_PFMET120_PFMHT120_IDTight_v*", "HLT_PFMET140_PFMHT140_IDTight_v*"]
-triggers_SOS_tripleMu = ["HLT_TripleMu_5_3_3_Mass3p8to60_DZ_v*"]
+#lepton tau
+triggers_leptau = ["HLT_IsoMu27_LooseChargedIsoPFTau20_SingleL1_v*",
+                   "HLT_IsoMu20_eta2p1_LooseChargedIsoPFTau27_eta2p1_CrossL1_v*",
+                   "HLT_IsoMu24_eta2p1_LooseChargedIsoPFTau20_SingleL1_v*",
+                   "HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTau30_eta2p1_CrossL1_v*",
+                   "HLT_DoubleMediumChargedIsoPFTau35_Trk1_eta2p1_Reg_v*"]
+
+
+triggers_htmet = ['HLT_PFHT500_PFMET100_PFMHT100_IDTight_v*']
+
+triggers_metNoMu100_mhtNoMu100=["HLT_PFMETNoMu100_PFMHTNoMu100_IDTight_PFHT60_v*"]
+
+triggers_pfht = ["HLT_PFHT180_v*",
+                 "HLT_PFHT250_v*",
+                 "HLT_PFHT350_v*",
+                 "HLT_PFHT370_v*",
+                 "HLT_PFHT430_v*",
+                 "HLT_PFHT510_v*",
+                 "HLT_PFHT590_v*",
+                 "HLT_PFHT680_v*",
+                 "HLT_PFHT780_v*",
+                 "HLT_PFHT890_v*"]

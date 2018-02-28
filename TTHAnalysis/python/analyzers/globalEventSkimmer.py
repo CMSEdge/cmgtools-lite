@@ -176,28 +176,34 @@ class globalEventSkimmer( Analyzer ):
 
 
     def parseSelection(self, selection, compName):
-
+        
         sel=selection
         scanopt=re.compile(r".+(\[.+\]).+")
         scansel=re.compile(r".+(\(.+\)).+")
+        #scansel2=re.compile(r".+(\(.+\)).+")
         so=re.match(scanopt, sel)
         ss=re.match(scansel, sel)
         sel=sel.replace("_"," ")
         if so:
             sel=re.sub(r'\[.*?\]',so.group(1),sel)
-        if ss:
-            sel=re.sub('\(.*?\)',ss.group(1),sel)
+        #if ss: #not sure why I did that...
+        #    print "--->>>>>>>>", sel,ss.group(1)
+        #    #sel=re.sub('\(.*?\)',ss.group(1),sel)
+        #    print "--->>>>>>>><>", sel
 
         objects=sel.split()
         ret={}
         for obj in objects:
+            
             scanline=re.compile(r"(\d+)(\D+)(\d+)$")
             scanlineXtra=re.compile(r"(\d+)(\D+)(\d+)(\[[^()0-9]{1}[^()]+\])$")
             scanlineId=re.compile(r"(\d+)(\D+)(\d+)(\(.+\))$")
+            #scanlineId2=re.compile(r"(\d+)(\D+)(\d+)\((.+)\)$")
             scanlineXtraId=re.compile(r"(\d+)(\D+)(\d+)(\[[^()0-9]{1}.+\])(\(.+\))$")
             m = re.match(scanline, obj) 
             mXtra = re.match(scanlineXtra, obj) 
             mId = re.match(scanlineId, obj) 
+            #mId2 = re.match(scanlineId2, obj) 
             mXtraId = re.match(scanlineXtraId, obj) 
             os=objectSelection()
             pid=""
@@ -220,6 +226,13 @@ class globalEventSkimmer( Analyzer ):
                 os.ptThr=float(mId.group(3))
                 os.xtra=""
                 os.cut=mId.group(4)
+            #if mId2:
+            #    os.num=int(mId2.group(1))
+            #    os.pid=mId2.group(2)
+            #    os.ptThr=float(mId2.group(3))
+            #    os.xtra=""
+            #    os.cut=mId2.group(4)
+            #    print mId2.group(4)
             if mXtraId:
                 os.num=int(mXtraId.group(1))
                 os.pid=mXtraId.group(2)
@@ -228,7 +241,7 @@ class globalEventSkimmer( Analyzer ):
                 os.cut=mXtraId.group(5)
 
 
-            #print " ----->>> ",os.pid, "// ", os.xtra," // ", os.ptThr," // ", os.cut
+            #print " ----->>> ",os.num, " // ", os.pid, " // ", os.xtra," // ", os.ptThr," // ", os.cut
             os.setFlags(compName)
             ret[obj]=os
 
