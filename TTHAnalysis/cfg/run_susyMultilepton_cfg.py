@@ -13,26 +13,6 @@ import re
 from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 
-from CMGTools.TTHAnalysis.analyzers.treeProducerSusyMultilepton import * 
-#from PhysicsTools.Heppy.analyzers.core.autovars import *
-#PhysicsTools/Heppy/python/analyzers/objects/autophobj
-import copy
-#v2=copy.deepcopy(fourVectorType)
-#testType = NTupleObject("test", fourVectorType,"")
-#testType2 = NTupleObject("test2", v2,"")
-#print fourVectorType.variables
-#print ">>",testType.objectType.variables
-#testType.objectType.variables[:]=[var for var in testType.objectType.variables if var.name == "pt"]
-#print "<<",testType.objectType.variables
-#print "--",fourVectorType.variables
-#print testType2.objectType.variables
-
-
-import sys
-#sys.exit(0)
-
-
-
 #-------- SET OPTIONS AND REDEFINE CONFIGURATIONS -----------
 
 is50ns = getHeppyOption("is50ns",False)
@@ -72,6 +52,7 @@ if analysis=='susy':
     susyCoreSequence.insert(susyCoreSequence.index(ttHLepSkim)+1,globalSkim)
     susyCoreSequence.remove(ttHLepSkim)
     globalSkim.selections=["2lep5",'1lep5_1tau18(tau.tauID("decayModeFindingNewDMs")==True)', '2tau18(tau.tauID("decayModeFindingNewDMs")==True)',"1lep5[maxObj1]"]
+    #globalSkim.selections=["2lep5",'1lep5_1tau18', '2tau18',"1lep5[maxObj1]"]
 #   [ lambda ev: 2<=sum([(lep.miniRelIso<0.4) for lep in ev.selectedLeptons]) ] 
 #   ["2lep5[os:!DS_TTW_RA5_sync]_1lep50"]#, "1lep5_1tau18", "2tau18","2lep5_1met50"]
 
@@ -262,8 +243,9 @@ if analysis=="susy":
             NTupleVariable("mcUCSXMatchId", lambda x : x.mcUCSXMatchId if hasattr(x,'mcUCSXMatchId') else -1, mcOnly=True, help="MC truth matching a la UCSX"),
             ])
     photonAna.do_mc_match = True
-    susyMultilepton_collections.update({ # for conversion studies
+    susyMultilepton_collections.update({ # for conversion and veto studies
             "selectedPhotons"    : NTupleCollection("PhoGood", photonTypeSusy, 10, help="Selected photons"),
+            "selectedIsoTrack" : NTupleCollection("isoTrack", isoTrackType, 50, help="isoTrack, sorted by pt")
             }) 
     del susyMultilepton_collections["discardedJets"]
     susyMultilepton_collections.update({"discardedJets"   : NTupleCollection("DiscJet", copy.deepcopy(jetTypeSusySuperLight), 15, help="Jets discarted in the jet-lepton cleaning (JEC)")
@@ -364,7 +346,6 @@ susyMultilepton_collections.update({
 })
 
 
-#print "+++",susyMultilepton_globalObjects["met"].objectType.variables,"/",susyMultilepton_globalObjects["met"].objectType.baseObjectTypes[0].variables
 ##==========================================================
 ## trimming the collections and the data to save place
 if analysis=="susy":
