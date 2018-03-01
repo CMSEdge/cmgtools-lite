@@ -13,6 +13,26 @@ import re
 from CMGTools.TTHAnalysis.analyzers.susyCore_modules_cff import *
 from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 
+from CMGTools.TTHAnalysis.analyzers.treeProducerSusyMultilepton import * 
+#from PhysicsTools.Heppy.analyzers.core.autovars import *
+#PhysicsTools/Heppy/python/analyzers/objects/autophobj
+import copy
+#v2=copy.deepcopy(fourVectorType)
+#testType = NTupleObject("test", fourVectorType,"")
+#testType2 = NTupleObject("test2", v2,"")
+#print fourVectorType.variables
+#print ">>",testType.objectType.variables
+#testType.objectType.variables[:]=[var for var in testType.objectType.variables if var.name == "pt"]
+#print "<<",testType.objectType.variables
+#print "--",fourVectorType.variables
+#print testType2.objectType.variables
+
+
+import sys
+#sys.exit(0)
+
+
+
 #-------- SET OPTIONS AND REDEFINE CONFIGURATIONS -----------
 
 is50ns = getHeppyOption("is50ns",False)
@@ -63,7 +83,7 @@ lepAna.miniIsolationVetoLeptons = None # use 'inclusive' to veto inclusive lepto
 lepAna.doIsolationScan = False
 
 # Lepton Preselection
-lepAna.loose_electron_id = "MVA_ID_NonTrig_Spring16_VLooseIdEmu"
+lepAna.loose_electron_id = "MVA_ID_nonIso_Fall17_Loose"
 isolation = "miniIso"
 
 jetAna.copyJetsByValue = True # do not remove this
@@ -246,7 +266,7 @@ if analysis=="susy":
             "selectedPhotons"    : NTupleCollection("PhoGood", photonTypeSusy, 10, help="Selected photons"),
             }) 
     del susyMultilepton_collections["discardedJets"]
-    susyMultilepton_collections.update({"discardedJets"   : NTupleCollection("DiscJet", jetTypeSusySuperLight, 15, help="Jets discarted in the jet-lepton cleaning (JEC)")
+    susyMultilepton_collections.update({"discardedJets"   : NTupleCollection("DiscJet", copy.deepcopy(jetTypeSusySuperLight), 15, help="Jets discarted in the jet-lepton cleaning (JEC)")
                                         })
     #keepJetVars=["pt","eta","phi","mass",
     #             #"etaetaMoment","phiphiMoment",
@@ -271,7 +291,9 @@ elif analysis=='SOS':
 leptonTypeSusy.addVariables([
         NTupleVariable("mvaIdSpring16HZZ",   lambda lepton : lepton.mvaRun2("Spring16HZZ") if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID, Spring16, HZZ; 1 for muons"),
         NTupleVariable("mvaIdSpring16GP",   lambda lepton : lepton.mvaRun2("Spring16GP") if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID, Spring16, GeneralPurpose; 1 for muons"),
-        ])
+        NTupleVariable("mvaIdFall17noIso",   lambda lepton : lepton.mvaRun2("Fall17noIso") if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID, Fall17 training, without isolation; 1 for muons"),
+        NTupleVariable("mvaIdFall17Iso",   lambda lepton : lepton.mvaRun2("Fall17Iso") if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID, Fall17 training, with isolation; 1 for muons"),
+ ])
 
 if lepAna.doIsolationScan:
     leptonTypeSusyExtraLight.addVariables([
@@ -316,86 +338,91 @@ if saveSuperClusterVariables:
 
 if not removeJecUncertainty:
     susyMultilepton_globalObjects.update({
-            "met_jecUp" : NTupleObject("met_jecUp", metType, help="PF E_{T}^{miss}, after type 1 corrections (JEC plus 1sigma)"),
-            "met_jecDown" : NTupleObject("met_jecDown", metType, help="PF E_{T}^{miss}, after type 1 corrections (JEC minus 1sigma)"),
+            "met_jecUp" : NTupleObject("met_jecUp", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections (JEC plus 1sigma)"),
+            "met_jecDown" : NTupleObject("met_jecDown", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections (JEC minus 1sigma)"),
             })
-    susyMultilepton_collections.update({
-            "cleanJets_jecUp"       : NTupleCollection("Jet_jecUp",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt (JEC plus 1sigma)"),
-            "cleanJets_jecDown"     : NTupleCollection("Jet_jecDown",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt (JEC minus 1sigma)"),
-            "discardedJets_jecUp"   : NTupleCollection("DiscJet_jecUp", jetTypeSusySuperLight if analysis=='susy' else jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning (JEC +1sigma)"),
-            "discardedJets_jecDown" : NTupleCollection("DiscJet_jecDown", jetTypeSusySuperLight if analysis=='susy' else jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning (JEC -1sigma)"),
-            })
+    #susyMultilepton_collections.update({
+    #        "cleanJets_jecUp"       : NTupleCollection("Jet_jecUp",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt (JEC plus 1sigma)"),
+    #        "cleanJets_jecDown"     : NTupleCollection("Jet_jecDown",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt (JEC minus 1sigma)"),
+    #        "discardedJets_jecUp"   : NTupleCollection("DiscJet_jecUp", jetTypeSusySuperLight if analysis=='susy' else jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning (JEC +1sigma)"),
+    #        "discardedJets_jecDown" : NTupleCollection("DiscJet_jecDown", jetTypeSusySuperLight if analysis=='susy' else jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning (JEC -1sigma)"),
+    #        })
 
 ###adding extra MET quantities
-susyCoreSequence.insert(susyCoreSequence.index(metAnaScaleUp)+1, metAnaShifts)
+susyCoreSequence.insert(susyCoreSequence.index(metAna)+1, metAnaShifts)
 susyMultilepton_globalObjects.update({
-         "met_shifts_shifted_UnclusteredEnUp" : NTupleObject("met_shifted_UnclusteredEnUp", metType, help="PF E_{T}^{miss}, after type 1 corrections with met unclustered Up"),
-         "met_shifts_shifted_UnclusteredEnDown" : NTupleObject("met_shifted_UnclusteredEnDown", metType, help="PF E_{T}^{miss}, after type 1 corrections with met unclustered Up"),
-         "met_shifts_shifted_MuonEnUp" : NTupleObject("met_shifted_MuonEnUp", metType, help="PF E_{T}^{miss}, after type 1 corrections with muon Energy Up"),
-         "met_shifts_shifted_MuonEnDown" : NTupleObject("met_shifted_MuonEnDown", metType, help="PF E_{T}^{miss}, after type 1 corrections with muon Energy Down"),
-         "met_shifts_shifted_ElectronEnUp" : NTupleObject("met_shifted_ElectronEnUp", metType, help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Up"),
-         "met_shifts_shifted_ElectronEnDown" : NTupleObject("met_shifted_ElectronEnDown", metType, help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Down"),
+         "met_shifts_shifted_UnclusteredEnUp" : NTupleObject("met_shifted_UnclusteredEnUp", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with met unclustered Up"),
+         "met_shifts_shifted_UnclusteredEnDown" : NTupleObject("met_shifted_UnclusteredEnDown", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with met unclustered Up"),
+         "met_shifts_shifted_MuonEnUp" : NTupleObject("met_shifted_MuonEnUp", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with muon Energy Up"),
+         "met_shifts_shifted_MuonEnDown" : NTupleObject("met_shifted_MuonEnDown", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with muon Energy Down"),
+         "met_shifts_shifted_ElectronEnUp" : NTupleObject("met_shifted_ElectronEnUp", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Up"),
+         "met_shifts_shifted_ElectronEnDown" : NTupleObject("met_shifted_ElectronEnDown", copy.deepcopy(metType), help="PF E_{T}^{miss}, after type 1 corrections with Electron Energy Down"),
 })
 
 susyMultilepton_collections.update({
-    "fatJets"         : NTupleCollection("FatJet",  fatJetType,  15, help="AK8 jets, sorted by pt")
+    "fatJets"         : NTupleCollection("FatJet",  copy.deepcopy(fatJetType),  15, help="AK8 jets, sorted by pt")
 })
 
 
+#print "+++",susyMultilepton_globalObjects["met"].objectType.variables,"/",susyMultilepton_globalObjects["met"].objectType.baseObjectTypes[0].variables
 ##==========================================================
 ## trimming the collections and the data to save place
 if analysis=="susy":
-    variablesToKeep = open(os.environ.get("CMSSW_BASE")+"/src/CMGTools/TTHAnalysis/cfg/susyVariablesToKeep", "r").read().split('\n')#.splitlines()
-    tagsToKeep = []
+    def valid(colname, varname, varsToKeep):
+        return (colname+"_"+varname in varsToKeep)
+
+    variablesToKeep = open(os.environ.get("CMSSW_BASE")+"/src/CMGTools/TTHAnalysis/cfg/susyVariablesToKeepFinal", "r").read().split('\n')#.splitlines()
     collectionsToKeep = []
     for var in variablesToKeep:
         tmp=var.split("_")
         if len(tmp)==2:
-            if tmp[1] not in tagsToKeep: tagsToKeep.append(tmp[1])
             if tmp[0] not in collectionsToKeep: collectionsToKeep.append(tmp[0])
         if len(tmp)==3 and "jecUp" not in tmp and "jecDown" not in tmp:
-            if tmp[1]+"_"+tmp[2] not in tagsToKeep: tagsToKeep.append(tmp[1]+"_"+tmp[2])
             if tmp[0] not in collectionsToKeep: collectionsToKeep.append(tmp[0])
-        if len(tmp)==4 and ( "jecUp"  in tmp or "jecDown" in tmp):
-            if tmp[2]+"_"+tmp[3] not in tagsToKeep: tagsToKeep.append(tmp[2]+"_"+tmp[3])
+        if len(tmp)==3 and ("jecUp" in tmp or "jecDown" in tmp):
             if tmp[0]+"_"+tmp[1] not in collectionsToKeep: collectionsToKeep.append(tmp[0]+"_"+tmp[1])
+        if len(tmp)==4 and ( "jecUp"  in tmp or "jecDown" in tmp):
+            if tmp[0]+"_"+tmp[1] not in collectionsToKeep: collectionsToKeep.append(tmp[0]+"_"+tmp[1])
+        if len(tmp)==4 and ( "met_shifted"  in var):
+            if tmp[0]+"_"+tmp[1]+"_"+tmp[2] not in collectionsToKeep: collectionsToKeep.append(tmp[0]+"_"+tmp[1]+"_"+tmp[2])
 
     susyMultilepton_globalVariables=[obj for obj in susyMultilepton_globalVariables if obj.name in variablesToKeep]
     for obj in susyMultilepton_globalObjects.keys():
-        susyMultilepton_globalObjects[obj].objectType.variables[:]=[var for var in susyMultilepton_globalObjects[obj].objectType.variables if ( obj+"_"+var.name in variablesToKeep or var.name in tagsToKeep) ]
-
+        name=susyMultilepton_globalObjects[obj].name  
+        susyMultilepton_globalObjects[obj].objectType.variables[:]=[var for var in susyMultilepton_globalObjects[obj].objectType.variables if valid( name, var.name, variablesToKeep) ]
+        if hasattr(susyMultilepton_globalObjects[obj].objectType,"baseObjectTypes"):
+            for i,sobj in enumerate(susyMultilepton_globalObjects[obj].objectType.baseObjectTypes):
+                susyMultilepton_globalObjects[obj].objectType.baseObjectTypes[i].variables[:]=[var for var in susyMultilepton_globalObjects[obj].objectType.baseObjectTypes[i].variables if valid(name, var.name, variablesToKeep) ]
+   
 #objectType /baseObjectType to be better managed, so stupid checking each step like that
 
-    def valid(colname, varname, varsToKeep, tagsToKeep):
-        #print varname, colname
-        return (colname+"_"+varname in varsToKeep or varname in tagsToKeep)
 
     for col in susyMultilepton_collections.keys():
         name=susyMultilepton_collections[col].name    
         if hasattr(susyMultilepton_collections[col],"variables"):
-            susyMultilepton_collections[col].variables[:]=[var for var in susyMultilepton_collections[col].variables if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+            susyMultilepton_collections[col].variables[:]=[var for var in susyMultilepton_collections[col].variables if valid(name, var.name, variablesToKeep) ]
         if hasattr(susyMultilepton_collections[col].objectType,"variables"):
-            susyMultilepton_collections[col].objectType.variables[:]=[var for var in susyMultilepton_collections[col].objectType.variables if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+            susyMultilepton_collections[col].objectType.variables[:]=[var for var in susyMultilepton_collections[col].objectType.variables if valid(name, var.name, variablesToKeep) ]
         if hasattr(susyMultilepton_collections[col].objectType,"baseObjectTypes"):
             for i, obj in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes):
                 if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i],"variables"):
                     susyMultilepton_collections[col].objectType.baseObjectTypes[i].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].variables \
-                                                                                                     if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+                                                                                                     if valid(name, var.name, variablesToKeep) ]
                 if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i],"baseObjectTypes"):
                     for i2, obj2 in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes):
                         if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2],"variables"):
                             susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].variables \
-                                                                                                                                 if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+                                                                                                                                 if valid(name, var.name, variablesToKeep) ]
                         if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2],"baseObjectTypes"):
                             for i3, obj3 in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes):
                                 if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3],"variables"):
                                     susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].variables \
-                                                                                                                                                             if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+                                                                                                                                                             if valid(name, var.name, variablesToKeep) ]
                                 if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3],"baseObjectTypes"):
                                     for i4, obj4 in enumerate(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes):
                                         if hasattr(susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4],"variables"):
                                             susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4].variables \
-                                                                                                                                                                                         if valid(name, var.name, variablesToKeep, tagsToKeep) ]
+                                                                                                                                                                                         if valid(name, var.name, variablesToKeep) ]
 
 #and delete extra collections not needed
     for col in susyMultilepton_collections.keys():
@@ -416,6 +443,11 @@ treeProducer = cfg.Analyzer(
      globalObjects = susyMultilepton_globalObjects,
      collections = susyMultilepton_collections,
 )
+
+if getHeppyOption("reduceMantissa",False) in (True,"True","true","yes","1"):
+    print 'Activating reduceMantissa!'
+    setLossyFloatCompression(10,16)
+
 
 if analysis in ['SOS']:
     del treeProducer.collections["discardedLeptons"]
@@ -447,9 +479,9 @@ if not runSMS:
 
 
 #additional MET quantities
-metAna.doTkMet = True
-treeProducer.globalVariables.append(NTupleVariable("met_trkPt", lambda ev : ev.tkMet.pt() if  hasattr(ev,'tkMet') else  0, help="tkmet p_{T}"))
-treeProducer.globalVariables.append(NTupleVariable("met_trkPhi", lambda ev : ev.tkMet.phi() if  hasattr(ev,'tkMet') else  0, help="tkmet phi"))
+#metAna.doTkMet = True
+#treeProducer.globalVariables.append(NTupleVariable("met_trkPt", lambda ev : ev.tkMet.pt() if  hasattr(ev,'tkMet') else  0, help="tkmet p_{T}"))
+#treeProducer.globalVariables.append(NTupleVariable("met_trkPhi", lambda ev : ev.tkMet.phi() if  hasattr(ev,'tkMet') else  0, help="tkmet phi"))
 
 
 if not skipT1METCorr:
@@ -794,12 +826,12 @@ if runFRMC or runDataQCD:
             tShort = t.replace("HLT_","FR_").replace("_v*","")
             triggerFlagsAna.triggerBits[tShort] = [ t ]
     treeProducer.collections = {
-        "selectedLeptons" : NTupleCollection("LepGood",  leptonTypeSusyExtraLight, 8, help="Leptons after the preselection"),
-        "otherLeptons"    : NTupleCollection("LepOther", leptonTypeSusy, 8, help="Leptons after the preselection"),
-        "cleanJets"       : NTupleCollection("Jet",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt"),
-        "discardedJets"    : NTupleCollection("DiscJet", jetTypeSusySuperLight if analysis=='susy' else jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning"),
-        "selectedTaus"    : NTupleCollection("TauGood",  tauTypeSusy, 8, help="Taus after the preselection"),
-        "otherTaus"       : NTupleCollection("TauOther",  tauTypeSusy, 8, help="Taus after the preselection not selected"),
+        "selectedLeptons" : NTupleCollection("LepGood",  copy.deepcopy(leptonTypeSusyExtraLight), 8, help="Leptons after the preselection"),
+        "otherLeptons"    : NTupleCollection("LepOther", copy.deepcopy(leptonTypeSusy), 8, help="Leptons after the preselection"),
+        "cleanJets"       : NTupleCollection("Jet",     copy.deepcopy(jetTypeSusyExtraLight), 15, help="Cental jets after full selection and cleaning, sorted by pt"),
+        "discardedJets"    : NTupleCollection("DiscJet", copy.deepcopy(jetTypeSusySuperLight) if analysis=='susy' else copy.deepcopy(jetTypeSusyExtraLight), 15, help="Jets discarted in the jet-lepton cleaning"),
+        "selectedTaus"    : NTupleCollection("TauGood",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection"),
+        "otherTaus"       : NTupleCollection("TauOther",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection not selected"),
     }
     if True: # 
         from CMGTools.TTHAnalysis.analyzers.ttHLepQCDFakeRateAnalyzer import ttHLepQCDFakeRateAnalyzer
@@ -858,8 +890,8 @@ if sample == "z3l":
     ttHLepSkim.minLeptons = 3
     if getHeppyOption("fast"): raise RuntimeError, 'Already added ttHFastLepSkimmer with 2-lep configuration, this is wrong.'
     treeProducer.collections = {
-        "selectedLeptons" : NTupleCollection("LepGood", leptonTypeSusyExtraLight, 8, help="Leptons after the preselection"),
-        "cleanJets"       : NTupleCollection("Jet",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt"),
+        "selectedLeptons" : NTupleCollection("LepGood", copy.deepcopy(leptonTypeSusyExtraLight), 8, help="Leptons after the preselection"),
+        "cleanJets"       : NTupleCollection("Jet",     copy.deepcopy(jetTypeSusyExtraLight), 15, help="Cental jets after full selection and cleaning, sorted by pt"),
     }
     from CMGTools.TTHAnalysis.analyzers.ttHFastLepSkimmer import ttHFastLepSkimmer
     fastSkim = cfg.Analyzer(
