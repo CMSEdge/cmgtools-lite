@@ -177,3 +177,26 @@ susyMultilepton_collections.update({
 #            "LeptonTrackMuPairs"    : NTupleCollection("LepTrkPair", leptonTrackPairType, 1000, help="Lepton + Mu track pairs"),
 
 })
+
+
+
+def setLossyFloatCompression(precision=12,highPrecision=-1):
+    for t in fourVectorType, leptonType, leptonTypeSusy:
+        for v in t.ownVars(True):
+            if v.type != float: continue
+            if v.name in ("pt","eta","mvaTTH") or "mvaId" in v.name:
+                v.setPrecision(highPrecision)
+            else:
+                v.setPrecision(precision)
+    for v in tlorentzFourVectorType.ownVars(True):
+        v.setPrecision(precision)
+    for t in tauType, jetType, jetTypeExtra, metType: 
+        for v in t.ownVars(True):
+            if v.type != float: continue
+            if v.name in ("pt","eta","btagCSV","btagDeepCSV"):
+                v.setPrecision(highPrecision)
+            else:
+                v.setPrecision(precision)
+    for v in susyMultilepton_globalVariables:
+        if v.type != float: continue
+v.setPrecision(precision)
