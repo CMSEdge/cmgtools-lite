@@ -230,7 +230,10 @@ TauGood_eta
 TauGood_idAntiE
 TauGood_idAntiMu
 TauGood_idDecayMode
+TauGood_idDecayModeNewDMs
 TauGood_idMVA
+TauGood_idMVANewDM
+TauGood_idMVAdR03
 TauGood_mass
 TauGood_mcMatchId
 TauGood_mcUCSXMatchId
@@ -301,6 +304,10 @@ htJet40a
 htJet40j
 htJet40ja
 isData
+isoTrack_eta
+isoTrack_phi
+isoTrack_pt
+isoTrack_mcMatchId
 lheHT
 lheHTIncoming
 lumi

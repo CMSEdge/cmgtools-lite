@@ -150,29 +150,29 @@ susyMultilepton_globalObjects.update({
 susyMultilepton_collections = susyCore_collections.copy()
 susyMultilepton_collections.update({
             # put more here
-            "gentopquarks"    : NTupleCollection("GenTop",     copy.deepcopy(genParticleType), 2, help="Generated top quarks from hard scattering (needed separately for top pt reweighting)"),
+            "gentopquarks"    : NTupleCollection("GenTop",     genParticleType, 2, help="Generated top quarks from hard scattering (needed separately for top pt reweighting)"),
             ##--------------------------------------------------                                                                                                                                   
-            "selectedTaus"    : NTupleCollection("TauGood",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection"),
-            "otherTaus"       : NTupleCollection("TauOther",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection not selected"),
-            "selectedLeptons" : NTupleCollection("LepGood",  copy.deepcopy(leptonTypeSusyExtraLight), 8, help="Leptons after the preselection"),
-            "otherLeptons"    : NTupleCollection("LepOther", copy.deepcopy(leptonTypeSusy), 8, help="Leptons after the preselection"),
+            "selectedTaus"    : NTupleCollection("TauGood",  tauTypeSusy, 8, help="Taus after the preselection"),
+            "otherTaus"       : NTupleCollection("TauOther",  tauTypeSusy, 8, help="Taus after the preselection not selected"),
+            "selectedLeptons" : NTupleCollection("LepGood",  leptonTypeSusyExtraLight, 8, help="Leptons after the preselection"),
+            "otherLeptons"    : NTupleCollection("LepOther", leptonTypeSusy, 8, help="Leptons after the preselection"),
             ##------------------------------------------------
-            "cleanJets"       : NTupleCollection("Jet",     copy.deepcopy(jetTypeSusyExtraLight), 15, help="Cental jets after full selection and cleaning, sorted by pt"),
-            "cleanJetsFwd"    : NTupleCollection("JetFwd",  copy.deepcopy(jetTypeSusy),  6, help="Forward jets after full selection and cleaning, sorted by pt"),
+            "cleanJets"       : NTupleCollection("Jet",     jetTypeSusyExtraLight, 15, help="Cental jets after full selection and cleaning, sorted by pt"),
+            "cleanJetsFwd"    : NTupleCollection("JetFwd",  jetTypeSusy,  6, help="Forward jets after full selection and cleaning, sorted by pt"),
             #"fatJets"         : NTupleCollection("FatJet",  fatJetType,  15, help="AK8 jets, sorted by pt"),
             ##------------------------------------------------
-            "discardedJets"    : NTupleCollection("DiscJet", copy.deepcopy(jetTypeSusyExtraLight), 15, help="Jets discarted in the jet-lepton cleaning"),
-            "discardedLeptons" : NTupleCollection("DiscLep", copy.deepcopy(leptonTypeSusy), 8, help="Leptons discarded in the jet-lepton cleaning"),
+            "discardedJets"    : NTupleCollection("DiscJet", jetTypeSusyExtraLight, 15, help="Jets discarted in the jet-lepton cleaning"),
+            "discardedLeptons" : NTupleCollection("DiscLep", leptonTypeSusy, 8, help="Leptons discarded in the jet-lepton cleaning"),
             #"recoveredJets"    : NTupleCollection("RecJet", jetTypeSusy, 15, help="Jets recovered declustering in the jet-lepton cleaning"),
             #"recoveredSplitJets" : NTupleCollection("RecSplitJet", jetTypeSusy, 15, help="Jets recovered declustering in the jet-lepton cleaning, split"),
             ##------------------------------------------------
-            "ivf"       : NTupleCollection("SV",     copy.deepcopy(svType), 20, help="SVs from IVF"),
+            "ivf"       : NTupleCollection("SV",     svType, 20, help="SVs from IVF"),
             #"genBHadrons"  : NTupleCollection("GenBHad", heavyFlavourHadronType, 20, mcOnly=True, help="Gen-level B hadrons"),
             #"genDHadrons"  : NTupleCollection("GenDHad", heavyFlavourHadronType, 20, mcOnly=True, help="Gen-level D hadrons"),
             ##------------------------------------------------
             #"jetsNonTauIdx" : NTupleCollection("JetNoTauIdx",objectInt, 10, help="index of jets not associated to taus"),
             ##------------------------------------------------
-            "LHE_weights"    : NTupleCollection("LHEweight",  copy.deepcopy(weightsInfoType), 1000, mcOnly=True, help="LHE weight info"),
+            "LHE_weights"    : NTupleCollection("LHEweight",  weightsInfoType, 1000, mcOnly=True, help="LHE weight info"),
 
 #            "LeptonTrackMuPairs"    : NTupleCollection("LepTrkPair", leptonTrackPairType, 1000, help="Lepton + Mu track pairs"),
 

@@ -6,7 +6,7 @@
 ##########################################################
 import PhysicsTools.HeppyCore.framework.config as cfg
 import re
-
+import sys
 
 #-------- LOAD ALL ANALYZERS -----------
 
@@ -47,14 +47,12 @@ ttHLepSkim.maxLeptons = 999
 
 #isotrackAnalyzer mode
 isoTrackAna.useLegacy2016=False
+isoTrackAna.setOff=False
 
 if analysis=='susy':
     susyCoreSequence.insert(susyCoreSequence.index(ttHLepSkim)+1,globalSkim)
     susyCoreSequence.remove(ttHLepSkim)
-    globalSkim.selections=["2lep5",'1lep5_1tau18(tau.tauID("decayModeFindingNewDMs")==True)', '2tau18(tau.tauID("decayModeFindingNewDMs")==True)',"1lep5[maxObj1]"]
-    #globalSkim.selections=["2lep5",'1lep5_1tau18', '2tau18',"1lep5[maxObj1]"]
-#   [ lambda ev: 2<=sum([(lep.miniRelIso<0.4) for lep in ev.selectedLeptons]) ] 
-#   ["2lep5[os:!DS_TTW_RA5_sync]_1lep50"]#, "1lep5_1tau18", "2tau18","2lep5_1met50"]
+    globalSkim.selections=["2lep5",'1lep5_1tau18', '2tau18',"1lep5[maxObj1]"]
 
 # Run miniIso
 lepAna.doMiniIsolation = True
@@ -346,13 +344,20 @@ susyMultilepton_collections.update({
 })
 
 
+
 ##==========================================================
+##making a deep copy of all the objects that we can modify independently
+for col in susyMultilepton_collections.keys():
+    susyMultilepton_collections[col]=copy.deepcopy(susyMultilepton_collections[col])
+for obj in susyMultilepton_globalObjects.keys():
+    susyMultilepton_globalObjects[obj]=copy.deepcopy(susyMultilepton_globalObjects[obj])
+
 ## trimming the collections and the data to save place
-if analysis=="susy":
+if analysis!="susy" and not getHeppyOption("doNotTrimNtuple",False):
     def valid(colname, varname, varsToKeep):
         return (colname+"_"+varname in varsToKeep)
 
-    variablesToKeep = open(os.environ.get("CMSSW_BASE")+"/src/CMGTools/TTHAnalysis/cfg/susyVariablesToKeepFinal", "r").read().split('\n')#.splitlines()
+    variablesToKeep = open(os.environ.get("CMSSW_BASE")+"/src/CMGTools/TTHAnalysis/cfg/susyVariablesToKeep", "r").read().split('\n')
     collectionsToKeep = []
     for var in variablesToKeep:
         tmp=var.split("_")
@@ -375,9 +380,7 @@ if analysis=="susy":
             for i,sobj in enumerate(susyMultilepton_globalObjects[obj].objectType.baseObjectTypes):
                 susyMultilepton_globalObjects[obj].objectType.baseObjectTypes[i].variables[:]=[var for var in susyMultilepton_globalObjects[obj].objectType.baseObjectTypes[i].variables if valid(name, var.name, variablesToKeep) ]
    
-#objectType /baseObjectType to be better managed, so stupid checking each step like that
-
-
+    #objectType /baseObjectType to be better managed, so stupid checking each step like that
     for col in susyMultilepton_collections.keys():
         name=susyMultilepton_collections[col].name    
         if hasattr(susyMultilepton_collections[col],"variables"):
@@ -405,12 +408,12 @@ if analysis=="susy":
                                             susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4].variables[:]=[var for var in susyMultilepton_collections[col].objectType.baseObjectTypes[i].baseObjectTypes[i2].baseObjectTypes[i3].baseObjectTypes[i4].variables \
                                                                                                                                                                                          if valid(name, var.name, variablesToKeep) ]
 
-#and delete extra collections not needed
+    #and delete extra collections not needed
     for col in susyMultilepton_collections.keys():
         name=susyMultilepton_collections[col].name
         if name not in collectionsToKeep: 
             del susyMultilepton_collections[col]
-
+#sys.exit(0)
 ##==========================================================
 
 ## Tree Producer
