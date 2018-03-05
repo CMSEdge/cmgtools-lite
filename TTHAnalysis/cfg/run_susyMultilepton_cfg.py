@@ -344,7 +344,6 @@ susyMultilepton_collections.update({
 })
 
 
-
 ##==========================================================
 ##making a deep copy of all the objects that we can modify independently
 for col in susyMultilepton_collections.keys():
@@ -353,7 +352,7 @@ for obj in susyMultilepton_globalObjects.keys():
     susyMultilepton_globalObjects[obj]=copy.deepcopy(susyMultilepton_globalObjects[obj])
 
 ## trimming the collections and the data to save place
-if analysis!="susy" and not getHeppyOption("doNotTrimNtuple",False):
+if analysis=="susy" and not getHeppyOption("doNotTrimNtuple",False):
     def valid(colname, varname, varsToKeep):
         return (colname+"_"+varname in varsToKeep)
 
@@ -413,6 +412,8 @@ if analysis!="susy" and not getHeppyOption("doNotTrimNtuple",False):
         name=susyMultilepton_collections[col].name
         if name not in collectionsToKeep: 
             del susyMultilepton_collections[col]
+
+
 #sys.exit(0)
 ##==========================================================
 
