@@ -501,7 +501,7 @@ triggerFlagsAna.triggerBits = {
     'DoubleMu' : triggers_mumu_iso,
     'DoubleMuSS' : triggers_mumu_ss,
     'DoubleMuNoIso' : triggers_mumu_noniso, 
-    'DoubleEl' : triggers_ee,
+    'DoubleEl' : triggers_ee + triggers_ee_noniso,
     'MuEG'     : triggers_mue,
     'DoubleMuHT' : triggers_mumu_ht,
     'DoubleElHT' : triggers_ee_ht,
