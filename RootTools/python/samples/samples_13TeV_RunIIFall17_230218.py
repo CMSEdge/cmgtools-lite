@@ -50,6 +50,13 @@ GGHZZ4L = kreator.makeMCComponent("GGHZZ4L", "/GluGluHToZZTo4L_M125_13TeV_powheg
 GGHZZ4L_ext = kreator.makeMCComponent("GGHZZ4L_ext", "/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v11_ext1-v1/MINIAODSIM", "CMS", ".*root", 0.01212)
 #VHToNonbb = kreator.makeMCComponent("VHToNonbb", "/VHToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM", "CMS", ".*root", 0.9561)
 
+VBF_HToZZTo4L = kreator.makeMCComponent("VBF_HToZZTo4L","/VBF_HToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v11_ext1-v1/MINIAODSIM","CMS",".*root", 0.001034)
+GluGluToContinToZZTo2e2mu = kreator.makeMCComponent("GluGluToContinToZZTo2e2mu","/GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v2/MINIAODSIM","CMS",".*root", 0.00734)
+GluGluToContinToZZTo2e2nu = kreator.makeMCComponent("GluGluToContinToZZTo2e2nu","/GluGluToContinToZZTo2e2nu_13TeV_MCFM701_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM","CMS",".*root", 0.003956)
+GluGluToContinToZZTo2mu2nu = kreator.makeMCComponent("GluGluToContinToZZTo2mu2nu","/GluGluToContinToZZTo2mu2nu_13TeV_MCFM701_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v2/MINIAODSIM","CMS",".*root", 0.003956)
+GluGluToContinToZZTo2mu2tau = kreator.makeMCComponent("GluGluToContinToZZTo2mu2tau","/GluGluToContinToZZTo2mu2tau_13TeV_MCFM701_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v2/MINIAODSIM","CMS",".*root", 0.00734)
+GluGluToContinToZZTo2e2tau = kreator.makeMCComponent("GluGluToContinToZZTo2e2tau","/GluGluToContinToZZTo2e2tau_13TeV_MCFM701_pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v2/MINIAODSIM","CMS",".*root", 0.00734)
+
 Higgs = [
 TTHnobb,
 ##TTHnobb_ext,
@@ -57,6 +64,12 @@ TTHnobb_pow,
 GGHZZ4L,
 GGHZZ4L_ext,
 #VHToNonbb,
+VBF_HToZZTo4L,
+#GluGluToContinToZZTo2e2mu,
+GluGluToContinToZZTo2e2nu,
+GluGluToContinToZZTo2mu2nu,
+GluGluToContinToZZTo2mu2tau,
+GluGluToContinToZZTo2e2tau
 ]
 
 

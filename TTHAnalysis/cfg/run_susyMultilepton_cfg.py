@@ -33,6 +33,9 @@ forcedSplitFactor = getHeppyOption("splitFactor",-1)
 forcedFineSplitFactor = getHeppyOption("fineSplitFactor",-1)
 isTest = getHeppyOption("test",None) != None and not re.match("^\d+$",getHeppyOption("test"))
 selectedEvents=getHeppyOption("selectEvents","")
+group=getHeppyOption("mcGroup",-1)
+siggroup=int(getHeppyOption("sigGroup",-1))
+
 
 sample = "main"
 #if runDataQCD or runFRMC: sample="qcd1l"
@@ -549,7 +552,7 @@ from CMGTools.RootTools.samples.configTools import printSummary, configureSplitt
 selectedComponents = [TTZToLLNuNu]
 
 if analysis=='susy':
-    samples = [TTZToLLNuNu] #mcSamples #[TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
+    samples = [] #mcSamples #[TTZToLLNuNu] #mcSamples #[TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
                #TTJets_SingleLeptonFromTbar, TTTT, TT_pow_ext4, TToLeptons_sch_amcatnlo, TToLeptons_tch_amcatnlo, TToLeptons_tch_powheg, T_tWch, VHToNonbb, WGToLNuG, WJetsToLNu, WJetsToLNu_LO, 
                #WWDouble, WWTo2L2Nu, WWW, WWZ, WZTo3LNu, WZTo3LNu_amcatnlo, WZZ, WpWpJJ, ZGTo2LG, ZZTo4L, ZZZ, tZq_ll]
    
@@ -562,6 +565,18 @@ if analysis=='susy':
         selectedComponents = samples #samples_2l +samples_1l
     else:
         selectedComponents = samples_LHE
+
+    if int(group)==0:
+        selectedComponents=[GGHZZ4L,GGHZZ4L_ext,DYJetsToLL_M10to50_LO,TBar_tWch_noFullHad,TBar_tWch_noFullHad_ext,TTGJets,TTZ_LO,TToLeptons_sch_amcatnlo,T_tWch,VBF_HToZZTo4L,WWTo2L2Nu,ZZTo4L,TBar_tWch,WWTo1L1Nu2Q]
+    if int(group)==1:
+        selectedComponents=[DYJetsToLL_M50,TBar_tch_powheg,TTJets_SingleLeptonFromT,TTTT,TTTT_ext,TTZZ,T_tch_powheg,ZZTo2L2Nu]
+    if int(group)==2:
+        selectedComponents=[DYJetsToLL_M50_LO,TTWToLNu,TTWW,TTWZ,TTW_LO,TTZH,T_tWch_noFullHad,WJetsToLNu_LO]
+    if int(group)==3:
+        selectedComponents=[GluGluToContinToZZTo2e2nu,GluGluToContinToZZTo2e2tau,GluGluToContinToZZTo2mu2nu,GluGluToContinToZZTo2mu2tau,TTJets]
+    if int(group)==4:
+        selectedComponents=[TTHnobb,TTHnobb_pow,TTLLJets_m1to10,TTZToLLNuNu,WZTo3LNu_amcatnlo,tZq_ll]
+
 
     if runSMS:
         selectedComponents=[TChiSlepSnu,T1tttt_2016,T5qqqqVV_2016]
@@ -766,7 +781,8 @@ if True and runData:
 
 
 if runFRMC: 
-    QCD_Mu5 = [ QCD_Pt20to30_Mu5, QCD_Pt30to50_Mu5, QCD_Pt50to80_Mu5, QCD_Pt80to120_Mu5, QCD_Pt120to170_Mu5 ]
+    QCD = QCDPtbcToE + QCDPtEMEnriched + [QCD_Mu15] + QCD_Mu5
+#    QCD_Mu5 = [ QCD_Pt20to30_Mu5, QCD_Pt30to50_Mu5, QCD_Pt50to80_Mu5, QCD_Pt80to120_Mu5, QCD_Pt120to170_Mu5 ]
 #    QCDPtEMEnriched = [ QCD_Pt20to30_EMEnriched, QCD_Pt30to50_EMEnriched, QCD_Pt50to80_EMEnriched, QCD_Pt80to120_EMEnriched, QCD_Pt120to170_EMEnriched ]
 #    QCDPtbcToE = [ QCD_Pt_20to30_bcToE, QCD_Pt_30to80_bcToE, QCD_Pt_80to170_bcToE ]
 #    QCDHT = [ QCD_HT100to200, QCD_HT200to300, QCD_HT300to500, QCD_HT500to700 ]
@@ -776,7 +792,7 @@ if runFRMC:
 
 #    selectedComponents = [TTJets_SingleLeptonFromT,TTJets_SingleLeptonFromTbar]
 
-    selectedComponents = [QCD_Mu15] + QCD_Mu5 + [WJetsToLNu,DYJetsToLL_M10to50,DYJetsToLL_M50] 
+    selectedComponents = QCD #[QCD_Mu15] + QCD_Mu5 + [WJetsToLNu,DYJetsToLL_M10to50,DYJetsToLL_M50] 
 
     time = 5.0
     configureSplittingFromTime([WJetsToLNu],20,time)
