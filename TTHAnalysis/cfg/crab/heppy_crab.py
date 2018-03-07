@@ -75,5 +75,6 @@ for comp in conf.components:
 
 os.system("rm options.json")
 os.system("rm python.tar.gz")
+os.system("rm external.tar.gz")
 os.system("rm cmgdataset.tar.gz")
 os.system("rm cafpython.tar.gz")
