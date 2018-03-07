@@ -568,7 +568,7 @@ if analysis=='susy':
         selectedComponents = samples_LHE
 
     if int(group)==0:
-        selectedComponents=[GGHZZ4L]#,GGHZZ4L_ext,DYJetsToLL_M10to50_LO,TBar_tWch_noFullHad,TBar_tWch_noFullHad_ext,TTGJets,TTZ_LO,TToLeptons_sch_amcatnlo,T_tWch,VBF_HToZZTo4L,WWTo2L2Nu,ZZTo4L,TBar_tWch,WWTo1L1Nu2Q]
+        selectedComponents=[GGHZZ4L,GGHZZ4L_ext,DYJetsToLL_M10to50_LO,TBar_tWch_noFullHad,TBar_tWch_noFullHad_ext,TTGJets,TTZ_LO,TToLeptons_sch_amcatnlo,T_tWch,VBF_HToZZTo4L,WWTo2L2Nu,ZZTo4L,TBar_tWch,WWTo1L1Nu2Q]
     if int(group)==1:
         selectedComponents=[DYJetsToLL_M50,TBar_tch_powheg,TTJets_SingleLeptonFromT,TTTT,TTTT_ext,TTZZ,T_tch_powheg,ZZTo2L2Nu]
     if int(group)==2:
