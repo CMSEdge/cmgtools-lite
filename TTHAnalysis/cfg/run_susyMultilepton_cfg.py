@@ -7,6 +7,7 @@
 import PhysicsTools.HeppyCore.framework.config as cfg
 import re
 import sys
+import copy
 
 #-------- LOAD ALL ANALYZERS -----------
 
@@ -553,7 +554,7 @@ from CMGTools.RootTools.samples.configTools import printSummary, configureSplitt
 selectedComponents = [TTZToLLNuNu]
 
 if analysis=='susy':
-    samples = [] #mcSamples #[TTZToLLNuNu] #mcSamples #[TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
+    samples = [TTJets_SingleLeptonFromT] #mcSamples #[TTZToLLNuNu] #mcSamples #[TTZToLLNuNu, TTZ_LO, tZq_ll, WZTo3LNu_amcatnlo,TTHnobb,TTHnobb_pow]#DYJetsToLL_M10to50, DYJetsToLL_M50, DYJetsToLL_M10to50_LO, DYJetsToLL_M50_LO, GGHZZ4L, TBarToLeptons_tch_powheg, TBar_tWch, TGJets, TTGJets, TTJets, TTJets_DiLepton, TTJets_SingleLeptonFromT, 
                #TTJets_SingleLeptonFromTbar, TTTT, TT_pow_ext4, TToLeptons_sch_amcatnlo, TToLeptons_tch_amcatnlo, TToLeptons_tch_powheg, T_tWch, VHToNonbb, WGToLNuG, WJetsToLNu, WJetsToLNu_LO, 
                #WWDouble, WWTo2L2Nu, WWW, WWZ, WZTo3LNu, WZTo3LNu_amcatnlo, WZZ, WpWpJJ, ZGTo2LG, ZZTo4L, ZZZ, tZq_ll]
    
@@ -796,11 +797,11 @@ if runFRMC:
     selectedComponents = QCD #[QCD_Mu15] + QCD_Mu5 + [WJetsToLNu,DYJetsToLL_M10to50,DYJetsToLL_M50] 
 
     time = 5.0
-    configureSplittingFromTime([WJetsToLNu],20,time)
+#    configureSplittingFromTime([WJetsToLNu],20,time)
 #    configureSplittingFromTime([WJetsToLNu_LO],20,time)
-    configureSplittingFromTime([DYJetsToLL_M10to50],10,time)
-    configureSplittingFromTime([DYJetsToLL_M50],30,time)
-    configureSplittingFromTime([QCD_Mu15]+QCD_Mu5,70,time)
+#    configureSplittingFromTime([DYJetsToLL_M10to50],10,time)
+#    configureSplittingFromTime([DYJetsToLL_M50],30,time)
+#    configureSplittingFromTime([QCD_Mu15]+QCD_Mu5,70,time)
 #    configureSplittingFromTime(QCDPtbcToE,50,time)
 #    configureSplittingFromTime(QCDPtEMEnriched,25,time)
 #    configureSplittingFromTime([ QCD_HT100to200, QCD_HT200to300 ],10,time)
@@ -827,14 +828,14 @@ if runFRMC or runDataQCD:
         for t in FRTrigs:
             tShort = t.replace("HLT_","FR_").replace("_v*","")
             triggerFlagsAna.triggerBits[tShort] = [ t ]
-    treeProducer.collections = {
-        "selectedLeptons" : NTupleCollection("LepGood",  copy.deepcopy(leptonTypeSusyExtraLight), 8, help="Leptons after the preselection"),
-        "otherLeptons"    : NTupleCollection("LepOther", copy.deepcopy(leptonTypeSusy), 8, help="Leptons after the preselection"),
-        "cleanJets"       : NTupleCollection("Jet",     copy.deepcopy(jetTypeSusyExtraLight), 15, help="Cental jets after full selection and cleaning, sorted by pt"),
-        "discardedJets"    : NTupleCollection("DiscJet", copy.deepcopy(jetTypeSusySuperLight) if analysis=='susy' else copy.deepcopy(jetTypeSusyExtraLight), 15, help="Jets discarted in the jet-lepton cleaning"),
-        "selectedTaus"    : NTupleCollection("TauGood",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection"),
-        "otherTaus"       : NTupleCollection("TauOther",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection not selected"),
-    }
+    #treeProducer.collections = {
+    #    "selectedLeptons" : NTupleCollection("LepGood",  copy.deepcopy(leptonTypeSusyExtraLight), 8, help="Leptons after the preselection"),
+    #    "otherLeptons"    : NTupleCollection("LepOther", copy.deepcopy(leptonTypeSusy), 8, help="Leptons after the preselection"),
+    #    "cleanJets"       : NTupleCollection("Jet",     copy.deepcopy(jetTypeSusyExtraLight), 15, help="Cental jets after full selection and cleaning, sorted by pt"),
+    #    "discardedJets"    : NTupleCollection("DiscJet", copy.deepcopy(jetTypeSusySuperLight) if analysis=='susy' else copy.deepcopy(jetTypeSusyExtraLight), 15, help="Jets discarted in the jet-lepton cleaning"),
+    #    "selectedTaus"    : NTupleCollection("TauGood",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection"),
+    #    "otherTaus"       : NTupleCollection("TauOther",  copy.deepcopy(tauTypeSusy), 8, help="Taus after the preselection not selected"),
+    #}
     if True: # 
         from CMGTools.TTHAnalysis.analyzers.ttHLepQCDFakeRateAnalyzer import ttHLepQCDFakeRateAnalyzer
         ttHLepQCDFakeRateAna = cfg.Analyzer(ttHLepQCDFakeRateAnalyzer, name="ttHLepQCDFakeRateAna",
