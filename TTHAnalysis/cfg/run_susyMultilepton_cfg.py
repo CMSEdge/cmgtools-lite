@@ -19,6 +19,7 @@ from PhysicsTools.HeppyCore.framework.heppy_loop import getHeppyOption
 is50ns = getHeppyOption("is50ns",False)
 analysis = getHeppyOption("analysis","ttH")
 runData = getHeppyOption("runData",False)
+dataEra = int(getHeppyOption("dataEra",2017))
 runDataQCD = getHeppyOption("runDataQCD",False)
 runQCDBM = getHeppyOption("runQCDBM",False)
 runFRMC = getHeppyOption("runFRMC",False)
@@ -56,7 +57,7 @@ isoTrackAna.setOff=False
 if analysis=='susy':
     susyCoreSequence.insert(susyCoreSequence.index(ttHLepSkim)+1,globalSkim)
     susyCoreSequence.remove(ttHLepSkim)
-    globalSkim.selections=["2lep5",'1lep5_1tau18', '2tau18',"1lep5[maxObj1]"]
+    globalSkim.selections=["2lep5",'1lep5_1tau18',"1lep5[maxObj1]"] #'2tau18', -> not used
 
 # Run miniIso
 lepAna.doMiniIsolation = True
@@ -78,7 +79,18 @@ if analysis=='susy':
     jetAna.storeLowPtJets=True
     jetAna.jetEtaCentral = jetAna.jetEta
     jetAna.mcGT = "Fall17_17Nov2017_V6_MC"    
-    jetAna.dataGT = [(297046,"Fall17_17Nov2017B_V6_DATA"),(299368,"Fall17_17Nov2017C_V6_DATA"),(302030,"Fall17_17Nov2017D_V6_DATA"),(303574,"Fall17_17Nov2017E_V6_DATA"),(305040,"Fall17_17Nov2017F_V6_DATA")]
+    if dataEra==2016:
+        jetAna.dataGT =[ (273150,"Summer16_23Sep2016BCDV3_DATA"),
+                         (276831,"Summer16_23Sep2016EFV3_DATA"),
+                         (278820,"Summer16_23Sep2016GV3_DATA"),
+                         (280919,"Summer16_23Sep2016HV3_DATA") ]
+    if dataEra==2017:
+        jetAna.dataGT = [(297046,"Fall17_17Nov2017B_V6_DATA"),
+                         (299368,"Fall17_17Nov2017C_V6_DATA"),
+                         (302030,"Fall17_17Nov2017D_V6_DATA"),
+                         (303574,"Fall17_17Nov2017E_V6_DATA"),
+                         (305040,"Fall17_17Nov2017F_V6_DATA")]
+
 if not removeJecUncertainty:
     jetAna.addJECShifts = True
     jetAnaScaleDown.copyJetsByValue = True # do not remove this
@@ -500,8 +512,10 @@ if analysis=='SOS':
 
 #-------- SAMPLES AND TRIGGERS -----------
 
-
-from CMGTools.RootTools.samples.triggers_13TeV_DATA2017 import *
+if dataEra==2016:
+    from CMGTools.RootTools.samples.triggers_13TeV_DATA2016 import *
+else:
+    from CMGTools.RootTools.samples.triggers_13TeV_DATA2017 import *
 triggerFlagsAna.triggerBits = {
     'DoubleMu' : triggers_mumu_iso,
     'DoubleMuSS' : triggers_mumu_ss,
@@ -627,9 +641,8 @@ if scaleProdToLumi>0: # select only a subset of a sample, corresponding to a giv
         c.splitFactor = len(c.files)
         c.fineSplitFactor = 1
 
-
-if runData and not isTest: # For running on data
-
+if runData:# and not isTest: # For running on data
+    print "Running on data"
     is50ns = False
     dataChunks = []
 
@@ -637,27 +650,43 @@ if runData and not isTest: # For running on data
     #json = os.environ['CMSSW_BASE']+'/src/CMGTools/TTHAnalysis/data/json/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt' # 36.15/fb
     json = os.environ['CMSSW_BASE']+ '/src/CMGTools/TTHAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt' # 36.46 /fb
 
+    if dataEra==2016:
+        json = os.environ['CMSSW_BASE']+ '/src/CMGTools/TTHAnalysis/data/json/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt'
+    if dataEra==2017:
+        json = os.environ['CMSSW_BASE']+ '/src/CMGTools/TTHAnalysis/data/json/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
+
     #processing = "Run2016B-23Sep2016-v1"; short = "Run2016B_23Sep2016_v1"; run_ranges = [(272760,273017)]; useAAA=True; # -v2 starts from 272760 to 273017
     #dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016B-23Sep2016-v3"; short = "Run2016B_23Sep2016_v3"; run_ranges = [(273150,275376)]; useAAA=True; # -v3 starts from 273150 to 275376
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016C-23Sep2016-v1"; short = "Run2016C_23Sep2016_v1"; run_ranges = [(271036,284044)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016D-23Sep2016-v1"; short = "Run2016D_23Sep2016_v1"; run_ranges = [(271036,284044)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016E-23Sep2016-v1"; short = "Run2016E_23Sep2016_v1"; run_ranges = [(271036,284044)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016F-23Sep2016-v1"; short = "Run2016F_23Sep2016_v1"; run_ranges = [(271036,284044)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016G-23Sep2016-v1"; short = "Run2016G_23Sep2016_v1"; run_ranges = [(271036,284044)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    #run H ==============================================================================================================
-    processing = "Run2016H-PromptReco-v1"; short = "Run2016H-PromptReco-v1"; run_ranges = [(281085,281201)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016H-PromptReco-v2"; short = "Run2016H-PromptReco-v2"; run_ranges = [(281207,284035)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
-    processing = "Run2016H-PromptReco-v3"; short = "Run2016H-PromptReco-v3"; run_ranges = [(284036,284044)]; useAAA=True;
-    dataChunks.append((json,processing,short,run_ranges,useAAA))
+
+    if dataEra==2016:
+        processing = "Run2016B-07Aug17_ver2-v1"; short = "Run2016B_07Aug17_ver2-v1"; run_ranges = [(273150,275376)]; useAAA=True; #for everything but DoubleEG
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016B-07Aug17_ver2-v2"; short = "Run2016B_07Aug17_ver2-v2"; run_ranges = [(273150,275376)]; useAAA=True;#for DoubleEG
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016C-07Aug17-v1"; short = "Run2016C_07Aug17_v1"; run_ranges = [(275657,276283)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016D-07Aug17-v1"; short = "Run2016D_07Aug17_v1"; run_ranges = [(276315,276811)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016E-07Aug17-v1"; short = "Run2016E_07Aug17_v1"; run_ranges = [(276831,277420)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016F-07Aug17-v1"; short = "Run2016F_07Aug17_v1"; run_ranges = [(277772,278808)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016G-07Aug17-v1"; short = "Run2016G_07Aug17_v1"; run_ranges = [(278820,280385)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2016H-07Aug17-v1"; short = "Run2016H_07Aug17_v1"; run_ranges = [(280919,284044)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+    if dataEra==2017:
+        print "processing 2017 data"
+        processing = "Run2017B-17Nov2017-v1"; short = "Run2017B_17Nov2017_v1"; run_ranges = [(297046,299329)]; useAAA=True;#for DoubleEG
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2017C-17Nov2017-v1"; short = "Run2017C_17Nov2017_v1"; run_ranges = [(299368,302029)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2017D-17Nov2017-v1"; short = "Run2017D_17Nov2017_v1"; run_ranges = [(302030,303434)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2017E-17Nov2017-v1"; short = "Run2017E_17Nov2017_v1"; run_ranges = [(303824,304797)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
+        processing = "Run2017F-17Nov2017-v1"; short = "Run2017F_17Nov2017_v1"; run_ranges = [(305040,306462)]; useAAA=True;
+        dataChunks.append((json,processing,short,run_ranges,useAAA))
 
 
     compSelection = ""; compVeto = ""
@@ -681,13 +710,13 @@ if runData and not isTest: # For running on data
             DatasetsAndTriggers.append( ("DoubleEG",   ["HLT_Ele%d_CaloIdM_TrackIdM_PFJet30_v*" % pt for pt in (8,12)]) )
             DatasetsAndTriggers.append( ("JetHT",   triggers_FR_jet) )
     else:
-        DatasetsAndTriggers.append( ("DoubleMuon", triggers_mumu_iso + triggers_mumu_ss + triggers_mu30tkmu11 + triggers_mumu_ht + triggers_3mu + triggers_3mu_alt + triggers_mu27tkmu8) )
-        DatasetsAndTriggers.append( ("DoubleEG",   triggers_ee + triggers_doubleele33 + triggers_doubleele33_MW + triggers_ee_ht + triggers_3e) )
-        DatasetsAndTriggers.append( ("MuonEG",     triggers_mue + triggers_mue_ht + triggers_2mu1e + triggers_2e1mu + triggers_mu30ele30) )
+        DatasetsAndTriggers.append( ("DoubleMuon", triggers_mumu_iso + triggers_mumu_ss + triggers_mumu_ht + triggers_3mu + triggers_3mu_alt + triggers_1mu_iso + triggers_1mu_noniso) )
+        DatasetsAndTriggers.append( ("DoubleEG",   triggers_ee + triggers_ee_ht + triggers_3e + triggers_FR_1e_noiso + triggers_FR_1e_iso) )
+        DatasetsAndTriggers.append( ("MuonEG",     triggers_mue + triggers_mue_ht + triggers_2mu1e + triggers_2e1mu ) )
         if analysis=='susy':
             DatasetsAndTriggers.append( ("SingleMuon", triggers_leptau + triggers_1mu_iso + triggers_1mu_noniso) )
-            DatasetsAndTriggers.append( ("SingleElectron", triggers_leptau + triggers_1e) )
-            DatasetsAndTriggers.append( ("Tau", triggers_leptau + triggers_1mu_iso + triggers_1e) )
+            DatasetsAndTriggers.append( ("SingleElectron", triggers_leptau + triggers_1e_iso + triggers_1e_noniso) )
+            DatasetsAndTriggers.append( ("Tau", triggers_leptau + triggers_1mu_iso + triggers_1e_iso) )
             #for edgeZ OS
             DatasetsAndTriggers.append( ("JetHT", triggers_pfht ) ) #triggerFlagsAna.triggerBits['htall']
             DatasetsAndTriggers.append( ("MET", triggers_htmet ) ) # triggerFlagsAna.triggerBits['htmet']
@@ -713,7 +742,7 @@ if runData and not isTest: # For running on data
             ]
             exclusiveDatasets = True
 
-        if runDataQCD or True: # for fake rate measurements in data
+        if runDataQCD: # for fake rate measurements in data
             if analysis!='susy':
                 ttHLepSkim.minLeptons=1
             else:
@@ -740,6 +769,9 @@ if runData and not isTest: # For running on data
         if len(run_ranges)==0: run_ranges=[None]
         vetos = []
         for pd,triggers in DatasetsAndTriggers:
+            if ((pd=="DoubleEG" or pd=="SingleElectron") and processing=="Run2016B-07Aug17_ver2-v1" and dataEra==2016) or \
+               ((pd!="DoubleEG" and pd!="SingleElectron") and processing=="Run2016B-07Aug17_ver2-v2" and dataEra==2016):
+                continue
             for run_range in run_ranges:
                 label = ""
                 if run_range!=None:
@@ -756,7 +788,7 @@ if runData and not isTest: # For running on data
                                                  json=json, 
                                                  run_range=(run_range if "PromptReco" not in myprocessing else None), 
                                                  triggers=triggers[:], vetoTriggers = vetos[:],
-                                                 useAAA=useAAA)
+                                                 useAAA=useAAA, unsafe=True)
                 if "PromptReco" in myprocessing:
                     from CMGTools.Production.promptRecoRunRangeFilter import filterComponent
                     filterComponent(comp, verbose=1)
@@ -772,8 +804,8 @@ printSummary(selectedComponents)
 
 if True and runData:
     from CMGTools.Production.promptRecoRunRangeFilter import filterComponent
+    printnewsummary = False
     for c in selectedComponents:
-        printnewsummary = False
         c.splitFactor = len(c.files)/3
         if "PromptReco" in c.name:
             printnewsummary = True

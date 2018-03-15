@@ -66,7 +66,7 @@ triggers_1mu_noniso = [ 'HLT_Mu45_eta2p1_v*',
                         'HLT_TkMu50_v*' ]
 
 # note: here the WP75 is th name in MC, WPLoose and WPTight should be in data
-triggers_1e      = [ 
+triggers_1e_iso      = [ 
         #"HLT_Ele23_WPLoose_Gsf_v*", # only up to 5E33
         #"HLT_Ele27_WPLoose_Gsf_v*", # only up to 5E33
         "HLT_Ele25_WPTight_Gsf_v*",        # not in column 0
@@ -206,4 +206,4 @@ triggers_doubleele33  = ['HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*']
 triggers_pfht = triggers_pfht200 + triggers_pfht250 + triggers_pfht300 + triggers_pfht350 + triggers_pfht400 + triggers_pfht475 + triggers_pfht600 + triggers_pfht650 + triggers_pfht800
 ###---- MET:
 triggers_htmet = ['HLT_PFHT300_PFMET110_v*']
-
+triggers_metNoMu100_mhtNoMu100 = []

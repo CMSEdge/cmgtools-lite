@@ -156,7 +156,7 @@ class CMSDataset( BaseDataset ):
             query += "  status=VALID" # status doesn't interact well with run range
         if self.dbsInstance != None:
             query += "  instance=prod/%s" % self.dbsInstance
-        dbs='dasgoclient --query="file %s=%s"'%(qwhat,query) # files must be valid
+        dbs='das_client.py --query="file %s=%s"'%(qwhat,query) # files must be valid
         if begin >= 0:
             dbs += ' --index %d' % begin
         if end >= 0:
@@ -245,7 +245,7 @@ class CMSDataset( BaseDataset ):
                 query = "%s run between [%d, %d]" % (query,runmin if runmin > 0 else 1, runmax if runmax > 0 else 999999)
         if dbsInstance != None:
             query += "  instance=prod/%s" % dbsInstance
-        dbs='dasgoclient --query="summary %s=%s" --format=json'%(qwhat,query)
+        dbs='das_client.py --query="summary %s=%s" --format=json'%(qwhat,query)
         jdata = json.load(_dasPopen(dbs))['data']
         events = []
         files = []
