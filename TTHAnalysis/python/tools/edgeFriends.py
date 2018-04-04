@@ -29,9 +29,9 @@ class edgeFriends:
         ##self.puFile.close()
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
         #self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileup_FULL_nominalUpDown.root","READ")
-        self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mvesterb/public/puStuff/puw_nTrueInt_Moriond2017_36p5fb_Summer16_69mb_central.root","READ")
-        self.puFileUp = ROOT.TFile("/afs/cern.ch/work/m/mvesterb/public/puStuff/puw_nTrueInt_Moriond2017_36p5fb_Summer16_69mb_up.root","READ")
-        self.puFileDn = ROOT.TFile("/afs/cern.ch/work/m/mvesterb/public/puStuff/puw_nTrueInt_Moriond2017_36p5fb_Summer16_69mb_down.root","READ")
+        self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/pileup_weights_nominal.root", "READ")
+        self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/pileup_weights_up.root","READ")
+        self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/pileup_weights_down.root","READ")
         #self.puHist   = copy.deepcopy( self.puFile.Get('weightsNominal') )
         self.puHist   = copy.deepcopy( self.puFile.Get('puw') )
         self.puHistUp = copy.deepcopy( self.puFileUp.Get('puw') )
@@ -41,7 +41,7 @@ class edgeFriends:
         vector = ROOT.vector('string')()
         vector.push_back("up")
         vector.push_back("down")
-        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/work/s/sesanche/public/stuffForMoriond/CSVv2Moriond17_2017_1_26_BtoH.csv")
+        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/btaggingweights/CSVv2_94XSF_V1_B_F.csv")
         self.reader_heavy = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_heavy.load(self.calib, 0, "comb") #0 means b-jets
         self.reader_c = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
