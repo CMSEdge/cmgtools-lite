@@ -142,44 +142,21 @@ class edgeFriends:
                              'GenSusyMNeutralino', 'GenSusyMNeutralino2', 'GenSusyMNeutralino3', 'GenSusyMNeutralino4',
                              'GenSusyMChargino'  , 'GenSusyMChargino2']
 
-        self.triggerlist = ['HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v',
-                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v',
-                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v',
-                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v',
-                            'HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v',
-                            'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v',
-                            'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v',
-                            'HLT_BIT_HLT_Mu27_TkMu8_v',
-                            'HLT_BIT_HLT_TkMu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v',
-                            'HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
-                            'HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
-                            'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v',
-                            'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v',
-                            'HLT_BIT_HLT_Mu30_TkMu11_v',
-                            'HLT_BIT_HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL_v',
-                            'HLT_BIT_HLT_Mu33_Ele33_CaloIdL_GsfTrkIdVL_v',
-                            'HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v',
-                            'HLT_BIT_HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v',
-                            'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v',
-                            'HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_DZ_v',
-                            'HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v',
-                            #SOS triggers for slepton analysis
-                            'HLT_MET',
-                            'HLT_SOSHighMET',
-                            'HLT_SOSDoubleMuLowMET',
-                            'HLT_BIT_HLT_PFHT200_v',
-                            'HLT_BIT_HLT_PFHT250_v',
-                            'HLT_BIT_HLT_PFHT300_v',
-                            'HLT_BIT_HLT_PFHT350_v',
-                            'HLT_BIT_HLT_PFHT400_v',
-                            'HLT_BIT_HLT_PFHT475_v',
-                            'HLT_BIT_HLT_PFHT600_v',
-                            'HLT_BIT_HLT_PFHT650_v',
-                            'HLT_BIT_HLT_PFHT800_v',
-                            'HLT_BIT_HLT_PFHT300_PFMET110_v']                           
+        self.triggerlist = [ 'HLT_MuEG', 
+                             'HLT_DoubleEl', 
+                             'HLT_DoubleMu', 
+                             'HLT_BIT_HLT_PFHT180_v',
+                             'HLT_BIT_HLT_PFHT250_v',
+                             'HLT_BIT_HLT_PFHT350_v',
+                             'HLT_BIT_HLT_PFHT370_v',
+                             'HLT_BIT_HLT_PFHT430_v',
+                             'HLT_BIT_HLT_PFHT510_v',
+                             'HLT_BIT_HLT_PFHT590_v',
+                             'HLT_BIT_HLT_PFHT680_v',
+                             'HLT_BIT_HLT_PFHT890_v']
 
-        self.btagMediumCut =  0.8484 
-        self.btagLooseCut  =  0.5426
+        self.btagMediumCut =  0.8838 
+        self.btagLooseCut  =  0.5803
 
     def listBranches(self):
         label = self.label
@@ -196,8 +173,8 @@ class edgeFriends:
                     ("Flag_EcalDeadCellTriggerPrimitiveFilter"+label, "I"),
                     ("Flag_goodVertices"+label, "I"),
                     ("Flag_eeBadScFilter"+label, "I"),
+                    ("Flag_ecalBadCalibFilter"+label, "I"),
                     ("Flag_globalTightHalo2016Filter"+label, "I"),
-                    ("Flag_CSCTightHalo2016Filter"+label, "I"),
                     ("Flag_badChargedHadronFilter"+label, "F"),
                     ("Flag_badMuonFilter"+label, "F"),
                     ("Flag_badMuonMoriond2017"+label, "I"),
@@ -458,6 +435,7 @@ class edgeFriends:
             ret['Flag_EcalDeadCellTriggerPrimitiveFilter']= event.Flag_EcalDeadCellTriggerPrimitiveFilter
             ret['Flag_goodVertices']= event.Flag_goodVertices
             ret['Flag_eeBadScFilter']= event.Flag_eeBadScFilter
+            ret['Flag_ecalBadCalibFilter']= event.Flag_ecalBadCalibFilter
             ret['Flag_globalTightHalo2016Filter']= event.Flag_globalTightHalo2016Filter
             ret['Flag_badMuonFilter']= event.Flag_badMuonFilter
             ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
@@ -1496,7 +1474,7 @@ class edgeFriends:
         #muon.segmentCompatibility < 0.49: return False
 
     def _susyEdgeLoose(self, lep):
-            if lep.pt <= 10.: return False
+            if lep.pt <= 5.: return False
             if abs(lep.dxy) > 0.05: return False
             if abs(lep.dz ) > 0.10: return False
             if lep.sip3d > 8: return False
@@ -1511,11 +1489,26 @@ class edgeFriends:
             if abs(lep.pdgId) == 11:
               if lepeta > 2.5: return False
               if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-              A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
-              B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
-              if lep.pt > 10:
-                  if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
-
+              if lepeta < 0.8: 
+                  if lep.pt <  10   and lep.pt > 5  and lep.mvaIdFall17noIso <= 0.488: return False
+                  if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.788+(0.148/14)*(lep.pt -10)): return False
+                  if lep.pt >=  25  and lep.mvaIdFall17noIso <= -0.64: return False
+              if lepeta >= 0.8 and lepeta < 1.479: 
+                  if lep.pt <  10   and lep.pt > 5  and lep.mvaIdFall17noIso <= -0.045: return False
+                  if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.85 +(0.075/15)*(lep.pt -10)): return False
+                  if lep.pt >=  25  and lep.mvaIdFall17noIso <= -0.775: return False
+              if lepeta >= 1.479 and lepeta < 2.4: 
+                  if lep.pt <  10   and lep.pt > 5  and lep.mvaIdFall17noIso <= -0.733: return False
+                  if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.81+(0.077/15)*(lep.pt -10)): return False
+                  if lep.pt >=  25  and lep.mvaIdFall17noIso <= -0.733: return False                                         
+                  
+              #2016 WPs below:
+              #A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
+              #B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
+              #if lep.pt > 10:
+              #    if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
+              
+              #2015 WPs below:
               # if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
               # if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
               # if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
@@ -1614,25 +1607,23 @@ def _susyEdgeTight(lep):
         if abs(lep.dz ) > 0.10: return False
         if eta > 1.4 and eta < 1.6: return False
         if abs(lep.pdgId) == 13:
-          ## old medium ID if lep.mediumMuonId != 1: return False
           if not newMediumMuonId(lep): return False
           if lep.miniRelIso > 0.2: return False
-        #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
         if abs(lep.pdgId) == 11:
           etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
           if (etatest > 1.4442 and etatest < 1.566) : return False
           if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-          
-          A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
-          B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
-          if lep.pt > 10.:
-              if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
-          else: return False
+        if eta < 0.8: 
+            if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (0.2+0.032*(lep.pt -10)): return False
+            if lep.pt >=  25  and lep.mvaIdFall17noIso <= 0.68: return False
+        if eta >= 0.8 and eta < 1.479: 
+            if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (0.1+0.025*(lep.pt -10)): return False
+            if lep.pt >=  25  and lep.mvaIdFall17noIso <= 0.475: return False
+        if eta >= 1.479: 
+            if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.1+0.028*(lep.pt -10)): return False
+            if lep.pt >=  25  and lep.mvaIdFall17noIso <= 0.32: return False                                         
 
-#          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
-#          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
-#          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
-          if lep.miniRelIso > 0.1: return False
+        if lep.miniRelIso > 0.1: return False
         return True
 
 if __name__ == '__main__':
