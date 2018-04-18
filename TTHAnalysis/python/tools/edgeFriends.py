@@ -147,8 +147,8 @@ class edgeFriends:
                              'HLT_BIT_HLT_PFHT680_v',
                              'HLT_BIT_HLT_PFHT890_v']
 
-        self.btagMediumCut =  0.8484 
-        self.btagLooseCut  =  0.5426
+        self.btagMediumCut =  0.8838 
+        self.btagLooseCut  =  0.5803
 
     def setPU(self, name):
 
