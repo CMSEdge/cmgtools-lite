@@ -29,15 +29,7 @@ class edgeFriends:
         ##self.puFile.close()
         #self.puFile = ROOT.TFile("/afs/cern.ch/work/m/mdunser/public/puWeighting/2016/pileup_nominalUpDown.root","READ")
         #self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileup_FULL_nominalUpDown.root","READ")
-        self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/pileup_weights_nominal.root", "READ")
-        self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/pileup_weights_up.root","READ")
-        self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/pileup_weights_down.root","READ")
-        #self.puHist   = copy.deepcopy( self.puFile.Get('weightsNominal') )
-        self.puHist   = copy.deepcopy( self.puFile.Get('puw') )
-        self.puHistUp = copy.deepcopy( self.puFileUp.Get('puw') )
-        self.puHistDn = copy.deepcopy( self.puFileDn.Get('puw') )
-        self.puFile.Close()
-        ##B-tagging stuff
+                ##B-tagging stuff
         vector = ROOT.vector('string')()
         vector.push_back("up")
         vector.push_back("down")
@@ -155,8 +147,28 @@ class edgeFriends:
                              'HLT_BIT_HLT_PFHT680_v',
                              'HLT_BIT_HLT_PFHT890_v']
 
-        self.btagMediumCut =  0.8838 
-        self.btagLooseCut  =  0.5803
+        self.btagMediumCut =  0.8484 
+        self.btagLooseCut  =  0.5426
+
+    def setPU(self, name):
+
+        if name.find("Run2017") != -1:
+	   self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal.root", "READ")
+           self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up.root","READ")
+           self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down.root","READ")
+        else:    
+	   self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal_" + name + ".root", "READ")
+           self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up_" + name + ".root","READ")
+           self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down_" + name + ".root","READ")
+        self.puHist   = copy.deepcopy( self.puFile.Get('puw') )
+        self.puHistUp = copy.deepcopy( self.puFileUp.Get('puw') )
+        self.puHistDn = copy.deepcopy( self.puFileDn.Get('puw') )
+        self.puFile.Close()
+        self.puFileUp.Close()
+        self.puFileDn.Close()
+
+
+
 
     def listBranches(self):
         label = self.label
