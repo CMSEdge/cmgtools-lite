@@ -8,7 +8,7 @@ MODULES = []
 
  
 from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgeTight
-MODULES.append( ('edgeFriends', edgeFriends("Edge",
+MODULES.append( ('edgeFriends', edgeFriends("Edge",  
                                 lambda lep : _susyEdgeTight(lep),
                                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4)) ) )
 
@@ -17,6 +17,7 @@ class VariableProducer(Module):
     def __init__(self,name,booker,modules):
         Module.__init__(self,name,booker)
         self._modules = [ (n,m() if type(m) == types.FunctionType else m) for (n,m) in modules ]
+
     def beginJob(self):
         self.t = PyTree(self.book("TTree","t","t"))
         self.branches = {}
@@ -248,8 +249,9 @@ def _runIt(myargs):
     modulesToRun = MODULES
     if options.modules != []:
         toRun = {}
-        for m,v in MODULES:
-            for pat in options.modules:
+	for m,v in MODULES:
+	    v.setPU(name)
+	    for pat in options.modules:
                 if re.match(pat,m):
                     toRun[m] = True 
         modulesToRun = [ (m,v) for (m,v) in MODULES if m in toRun ]
