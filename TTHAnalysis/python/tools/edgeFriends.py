@@ -235,6 +235,7 @@ class edgeFriends:
                     ("nTightTau"+label, "I"),
                     ("nJetSel"+label, "I"), ("nJetSel_jecUp"+label, "I"), ("nJetSel_jecDn"+label, "I"),
                     ("nFatJetSel"+label, "I"),
+                    ("rightMjj"+label, "F"),
                     ("bestMjj"+label, "F"),
                     ("minMjj"+label, "F"),
                     ("maxMjj"+label, "F"),
@@ -382,7 +383,7 @@ class edgeFriends:
         for fjfloat in "pt eta phi mass btagCSV prunedMass softDropMass tau1 tau2 tau3".split():
             biglist.append( ("FatJetSel"+label+"_"+fjfloat,"F",20,"nFatJetSel"+label) ) #if self.isMC:
         biglist.append( ("FatJetSel"+label+"_mcPt",     "F",20,"nFatJetSel"+label) )
-        biglist.append( ("FatJetSel"+label+"_mcFlavour","I",20,"nFatJetSel"+label) )
+        #biglist.append( ("FatJetSel"+label+"_mcFlavour","I",20,"nFatJetSel"+label) )
         biglist.append( ("FatJetSel"+label+"_mcMatchId","I",20,"nFatJetSel"+label) )
         biglist.append( ("FatJetSel"+label+"_hadronFlavour","I",20,"nFatJetSel"+label) )
         return biglist                                                                            
@@ -917,6 +918,7 @@ class edgeFriends:
         theJets_jecDn = sorted(theJets_jecDn , key = lambda j : j.pt, reverse = True)
 
         ret['lepsJZB_recoil'] = totalRecoil.Pt() - ret['lepsZPt']
+        ret['rightMjj'] = self.getRightMjj(theJets)
         ret['bestMjj'] = self.getBestMjj(theJets)
         ret['dphiMjj'] = self.getDPhiMjj(theJets)
         ret['dphiMjj_jecUp'] = self.getDPhiMjj(theJets_jecUp)
@@ -928,7 +930,7 @@ class edgeFriends:
         ret['hardMjj'] = self.getHardMjj(theJets)
         ret['hardJJDphi'] = self.getHardMjj(theJets, True)
         ret['hardJJDR'] = self.getHardMjj(theJets, True, True)
-        ret['j1MetDPhi'] = deltaPhi(metphi, theJets[0].phi) if len(theJets) > 0 else -99.
+        et['j1MetDPhi'] = deltaPhi(metphi, theJets[0].phi) if len(theJets) > 0 else -99.
         ret['j2MetDPhi'] = deltaPhi(metphi, theJets[1].phi) if len(theJets) > 1 else -99.
          
         t7 = time.time()
@@ -1292,6 +1294,21 @@ class edgeFriends:
 
         return (100*etaid + 10*nb + mllid)
 
+    def getRightMjj(self, jetsel):
+        if len(jetsel) < 2: return -99.
+        selectedjets = []
+        for jeti in jetsel:
+            if abs(jeti.partonMotherId) == 24:
+                jet = ROOT.TLorentzVector()
+                jet.SetPtEtaPhiM(jeti.pt, jeti.eta, jeti.phi, jeti.mass)
+                selectedjets.append(jet)
+
+        if len(selectedjets) > 1:
+            return (selectedjets[0] + selectedjets[1]).M()
+        else:
+            return 0
+
+
     def getBestMjj(self, jetsel):
         if len(jetsel) < 2: return -99.
         bestmjj = 1e6
@@ -1508,6 +1525,7 @@ class edgeFriends:
     def isTightTau(self, tau):
         return (tau.idMVA >= 4 and tau.pt > 20 and abs(tau.eta)<2.3 and tau.idMVA >= 1 and tau.idDecayMode and tau.idAntiE >= 2)
 
+
     def selfNewMediumMuonId(self, muon):
         if not hasattr(muon, 'isGlobalMuon'):
             return (muon.mediumMuonId == 1)
@@ -1521,7 +1539,7 @@ class edgeFriends:
         #muon.segmentCompatibility < 0.49: return False
 
     def _susyEdgeLoose(self, lep):
-            if lep.pt <= 5.: return False
+            if lep.pt <= 10.: return False
             if abs(lep.dxy) > 0.05: return False
             if abs(lep.dz ) > 0.10: return False
             if lep.sip3d > 8: return False
@@ -1536,26 +1554,11 @@ class edgeFriends:
             if abs(lep.pdgId) == 11:
               if lepeta > 2.5: return False
               if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-              if lepeta < 0.8: 
-                  if lep.pt <  10   and lep.pt > 5  and lep.mvaIdFall17noIso <= 0.488: return False
-                  if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.788+(0.148/14)*(lep.pt -10)): return False
-                  if lep.pt >=  25  and lep.mvaIdFall17noIso <= -0.64: return False
-              if lepeta >= 0.8 and lepeta < 1.479: 
-                  if lep.pt <  10   and lep.pt > 5  and lep.mvaIdFall17noIso <= -0.045: return False
-                  if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.85 +(0.075/15)*(lep.pt -10)): return False
-                  if lep.pt >=  25  and lep.mvaIdFall17noIso <= -0.775: return False
-              if lepeta >= 1.479 and lepeta < 2.4: 
-                  if lep.pt <  10   and lep.pt > 5  and lep.mvaIdFall17noIso <= -0.733: return False
-                  if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.81+(0.077/15)*(lep.pt -10)): return False
-                  if lep.pt >=  25  and lep.mvaIdFall17noIso <= -0.733: return False                                         
-                  
-              #2016 WPs below:
-              #A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
-              #B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
-              #if lep.pt > 10:
-              #    if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
-              
-              #2015 WPs below:
+              A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
+              B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
+              if lep.pt > 10:
+                  if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
+
               # if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
               # if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
               # if (lepeta > 1.479 and lep.mvaIdSpring15 < -0.92) : return False
@@ -1563,90 +1566,19 @@ class edgeFriends:
               #  if lep.idEmuTTH == 0: return False
             return True                                                                                          
 
-#     def getLepSF(self, eta, pt, id):
-#         result = [1.,1.,1.,1.,1.]
-#         if abs(id) == 11:
-#             #electrones
-#             pt  = min(199,pt)
-#             sf1 = self.hElecDataFull_ID .GetBinContent(self.hElecDataFull_ID .FindBin(pt, abs(eta)))
-#             sf2 = self.hElecDataFull_ISO.GetBinContent(self.hElecDataFull_ISO.FindBin(pt, abs(eta)))
-#             sf3 = self.hElecDataFull_IP .GetBinContent(self.hElecDataFull_IP .FindBin(pt, abs(eta)))
-#             sf7 = self.hElecTracking    .GetBinContent(self.hElecTracking    .FindBin(eta, pt)     ) 
-
-#             sf1_e = self.hElecDataFull_ID .GetBinError(self.hElecDataFull_ID .FindBin(pt, abs(eta)))
-#             sf2_e = self.hElecDataFull_ISO.GetBinError(self.hElecDataFull_ISO.FindBin(pt, abs(eta)))
-#             sf3_e = self.hElecDataFull_IP .GetBinError(self.hElecDataFull_IP .FindBin(pt, abs(eta)))
-#             sf7_e = self.hElecTracking    .GetBinError(self.hElecTracking    .FindBin(eta,pt)      )
-
-#             elVar = sqrt( (sf1_e*sf2*sf3*sf7)**2  + (sf1*sf2_e*sf3*sf7)**2
-#                          +(sf1*sf2*sf3_e*sf7)**2  + (sf1*sf2*sf3*sf7_e)**2 )
-#             elSF  = sf1*sf2*sf3*sf7
-
-#             return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
-
-#         else:
-#             pt  = min(119, pt)
-#             sf1 = self.hMuonDataFull_ID .GetBinContent(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
-#             sf2 = self.hMuonDataFull_ISO.GetBinContent(self.hMuonDataFull_ISO.FindBin(pt, abs(eta)))
-#             sf3 = self.hMuonDataFull_IP .GetBinContent(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
-#             sf7 = self.hMuonTracking    .Eval(eta)
-
-#             sf1_e = self.hMuonDataFull_ID .GetBinError(self.hMuonDataFull_ID .FindBin(pt, abs(eta)))
-#             sf2_e = self.hMuonDataFull_ISO.GetBinError(self.hMuonDataFull_ISO.FindBin(pt, abs(eta)))
-#             sf3_e = self.hMuonDataFull_IP .GetBinError(self.hMuonDataFull_IP .FindBin(pt, abs(eta)))
-# #            sf7_e = self.hMuonTracking    .Eval(eta)
-#             sf7_e = 0
-
-#             muVar = sqrt( (sf1_e*sf2*sf3*sf7)**2  + (sf1*sf2_e*sf3*sf7)**2
-#                           +(sf1*sf2*sf3_e*sf7)**2 + (sf1*sf2*sf3*sf7_e)**2 )
-#             muSF  = sf1*sf2*sf3*sf7
-#             return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
-
-    # def getLepFastSIM(self, eta, pt, id):
-    #     result = [1.,1.,1.,1.,1.]
-    #     if not self.isSMS: return result
-    #     if abs(id) == 11:
-    #         #electrones
-    #         pt  = min(199,pt)
-
-    #         sf4 = self.hElecFullFast_ID .GetBinContent(self.hElecFullFast_ID .FindBin(pt, abs(eta)))
-    #         sf5 = self.hElecFullFast_ISO.GetBinContent(self.hElecFullFast_ISO.FindBin(pt, abs(eta)))
-    #         sf6 = self.hElecFullFast_IP .GetBinContent(self.hElecFullFast_IP .FindBin(pt, abs(eta)))
-    #         sf4_e = 0.02 * sf4 # as prescribed in the twiki
-    #         sf5_e = 0.02 * sf5
-    #         sf6_e = 0.02 * sf6
-
-    #         elVar = sqrt( (sf4_e*sf5*sf6)**2 +(sf4*sf5_e*sf6)**2 +(sf4*sf5*sf6_e)**2 )
-    #         elSF  = sf4*sf5*sf6
-
-    #         return [ elSF, elSF, elSF, elSF+elVar, elSF-elVar]
-
-    #     else:
-    #         pt  = min(119, pt)
-    #         sf4 = self.hMuonFullFast_ID .GetBinContent(self.hMuonFullFast_ID .FindBin(pt, abs(eta)))
-    #         sf5 = self.hMuonFullFast_ISO.GetBinContent(self.hMuonFullFast_ISO.FindBin(pt, abs(eta)))
-    #         sf6 = self.hMuonFullFast_IP .GetBinContent(self.hMuonFullFast_IP .FindBin(pt, abs(eta)))
-    #         sf4_e = 0.02 * sf4 # as prescribed in the twiki
-    #         sf5_e = 0.02 * sf5
-    #         sf6_e = 0.02 * sf6
-
-    #         muVar = sqrt( (sf4_e*sf5*sf6)**2 + (sf4*sf5_e*sf6)**2 +(sf4*sf5*sf6_e)**2 )
-    #         muSF  = sf4*sf5*sf6
-    #         return [ muSF, muSF+muVar, muSF-muVar, muSF, muSF]
-            
-def newMediumMuonId(muon):
-    if not hasattr(muon, 'isGlobalMuon'):
-        return (muon.mediumMuonId == 1)
-    goodGlob = (muon.isGlobalMuon and 
-                muon.globalTrackChi2 < 3 and
-                muon.chi2LocalPosition < 12 and
-                muon.trkKink < 20)
-    isMedium = (muon.innerTrackValidHitFraction > 0.8 and
-                muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
-    return isMedium
-    #muon.segmentCompatibility < 0.49: return False
+    def newMediumMuonId(muon):
+        if not hasattr(muon, 'isGlobalMuon'):
+            return (muon.mediumMuonId == 1)
+        goodGlob = (muon.isGlobalMuon and 
+                    muon.globalTrackChi2 < 3 and
+                    muon.chi2LocalPosition < 12 and
+                    muon.trkKink < 20)
+        isMedium = (muon.innerTrackValidHitFraction > 0.8 and
+                    muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+        return isMedium
+        #muon.segmentCompatibility < 0.49: return False
  
-def _susyEdgeTight(lep):
+    def _susyEdgeTight(lep):
         if lep.pt <= 5.: return False
         eta = abs(lep.eta)
         if eta          > 2.4: return False
@@ -1654,24 +1586,30 @@ def _susyEdgeTight(lep):
         if abs(lep.dz ) > 0.10: return False
         if eta > 1.4 and eta < 1.6: return False
         if abs(lep.pdgId) == 13:
+          ## old medium ID if lep.mediumMuonId != 1: return False
           if not newMediumMuonId(lep): return False
           if lep.miniRelIso > 0.2: return False
+        #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
         if abs(lep.pdgId) == 11:
           etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
           if (etatest > 1.4442 and etatest < 1.566) : return False
           if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-        if eta < 0.8: 
-            if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (0.2+0.032*(lep.pt -10)): return False
-            if lep.pt >=  25  and lep.mvaIdFall17noIso <= 0.68: return False
-        if eta >= 0.8 and eta < 1.479: 
-            if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (0.1+0.025*(lep.pt -10)): return False
-            if lep.pt >=  25  and lep.mvaIdFall17noIso <= 0.475: return False
-        if eta >= 1.479: 
-            if lep.pt <  25   and lep.pt > 10  and lep.mvaIdFall17noIso <= (-0.1+0.028*(lep.pt -10)): return False
-            if lep.pt >=  25  and lep.mvaIdFall17noIso <= 0.32: return False                                         
+          
+          A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+          B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+          if lep.pt > 10.:
+              if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
+          else: return False
 
-        if lep.miniRelIso > 0.1: return False
+#          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
+#          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
+#          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
+          if lep.miniRelIso > 0.1: return False
         return True
+
+
+
+
 
 if __name__ == '__main__':
     from sys import argv
