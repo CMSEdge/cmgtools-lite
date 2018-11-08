@@ -392,15 +392,15 @@ class edgeFriends:
     def __call__(self,event):
         t0 = time.time()
 
-        isData = event.isData
+        isData = True #isData = event.isData
         leps  =  [l for l in Collection(event,"LepGood","nLepGood")]
-        taus  =  [t for t in Collection(event,"TauGood","nTauGood")]
+        taus  =  [t for t in Collection(event,"Tau","nTau")]
         #lepso =  [l for l in Collection(event,"LepOther","nLepOther")]
         jetsc =  [j for j in Collection(event,"Jet","nJet")]
         jetslc = [j for j in Collection(event,"Jet","nJet")]
-        jetsd =  [j for j in Collection(event,"DiscJet","nDiscJet")]
-        jetsld = [j for j in Collection(event,"DiscJet","nDiscJet")]
-        fatjetsc =[fj for fj in Collection(event,"FatJet","nFatJet")]
+        #jetsd =  [j for j in Collection(event,"DiscJet","nDiscJet")]
+        #jetsld = [j for j in Collection(event,"DiscJet","nDiscJet")]
+        fatjets=[fj for fj in Collection(event,"FatJet","nFatJet")]
         if not isData: 
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
 #        if hasattr(event, "nJet_jecUp"):
@@ -411,16 +411,16 @@ class edgeFriends:
 
         #taking nominal first
         jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
-        jetsd_jecUp = [j for j in Collection(event,"DiscJet","nDiscJet")]
+        #jetsd_jecUp = [j for j in Collection(event,"DiscJet","nDiscJet")]
         jetsc_jecDn = [j for j in Collection(event,"Jet","nJet")]        
-        jetsd_jecDn = [j for j in Collection(event,"DiscJet","nDiscJet")]
+        #jetsd_jecDn = [j for j in Collection(event,"DiscJet","nDiscJet")]
 
         # smearing now
         jetsc_jecUp = self.smearJets(jetsc_jecUp, 1.)
         jetsc_jecDn = self.smearJets(jetsc_jecDn,-1)
 
         #metco = [m for m in Collection(event,"metcJet","nDiscJet")]
-        (met, metphi)  = event.met_pt, event.met_phi
+        (met, metphi)  = event.MET_pt, event.MET_phi
 
         if not isData:
             gentaus  = [t for t in Collection(event,"genTau","ngenTau")]
@@ -468,8 +468,8 @@ class edgeFriends:
             ret['nTrueInt'] = -1   
 
         ret['run'] = event.run
-        ret['lumi'] = event.lumi
-        ret['evt'] = long(event.evt)
+        ret['lumi'] = event.luminosityBlock 
+        ret['evt'] = long(event.event)
         ret['nVert'] = event.nVert
         ret['mZ1'] = event.mZ1
         ret['mZ2'] = event.mZ2
@@ -485,9 +485,9 @@ class edgeFriends:
             ret['Flag_eeBadScFilter']= event.Flag_eeBadScFilter
             ret['Flag_ecalBadCalibFilter']= event.Flag_ecalBadCalibFilter
             ret['Flag_globalTightHalo2016Filter']= event.Flag_globalTightHalo2016Filter
-            ret['Flag_badMuonFilter']= event.Flag_badMuonFilter
-            ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
-            ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
+            ret['Flag_badMuonFilter']= event.Flag_BadPFMuonFilter
+            ret["Flag_badChargedHadronFilter"] = event.Flag_BadChargedHadronFilter
+            ret["Flag_badMuonFilter"] = event.Flag_BadPFMuonFilter
         if not isData:
 
 	    ret["Flag_badMuonMoriond2017"] = 1
@@ -633,7 +633,7 @@ class edgeFriends:
         ltlvs = [l1, l2]
         lepvectors = []
 
-        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+        for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -653,7 +653,7 @@ class edgeFriends:
                         tmp_dr = deltaR(lep, tau)
                         if tmp_dr < minDRTau:
                             minDRTau = tmp_dr
-                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+                for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
                     if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
@@ -1354,7 +1354,7 @@ class edgeFriends:
 
     def smearJets(self, jetcol, syst):
         for j in jetcol:
-            quot = getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
+            quot = getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3Res")
             if syst > 0: 
                 j.pt = j.pt*j.corr_JECUp / quot
             else:
@@ -1523,20 +1523,20 @@ class edgeFriends:
 
 
     def isTightTau(self, tau):
-        return (tau.idMVA >= 4 and tau.pt > 20 and abs(tau.eta)<2.3 and tau.idMVA >= 1 and tau.idDecayMode and tau.idAntiE >= 2)
+        return (tau.idMVAnewDM2017v2 >= 4 and tau.pt > 20 and abs(tau.eta)<2.3 and tau.idMVAnewDM2017v2 >= 1 and tau.idDecayMode and tau.idAntiEle >= 2)
 
 
     def selfNewMediumMuonId(self, muon):
         if not hasattr(muon, 'isGlobalMuon'):
-            return (muon.mediumMuonId == 1)
+            return (muon.mediumId == 1)
         goodGlob = (muon.isGlobalMuon and 
                     muon.globalTrackChi2 < 3 and
                     muon.chi2LocalPosition < 12 and
                     muon.trkKink < 20)
         isMedium = (muon.innerTrackValidHitFraction > 0.8 and
-                    muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+                    muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
-        #muon.segmentCompatibility < 0.49: return False
+        #muon.segmentComp < 0.49: return False
 
     def _susyEdgeLoose(self, lep):
             if lep.pt <= 10.: return False
@@ -1544,11 +1544,11 @@ class edgeFriends:
             if abs(lep.dz ) > 0.10: return False
             if lep.sip3d > 8: return False
             lepeta = abs(lep.eta)
-            if lep.miniRelIso > 0.4: return False
+            if lep.miniPFRelIso_all > 0.4: return False
             ## muons
             if abs(lep.pdgId) == 13:
               if lepeta > 2.4: return False
-              #if lep.mediumMuonId != 1: return False
+              #if lep.mediumId != 1: return False
               if not self.selfNewMediumMuonId(lep): return False
             ## electrons
             if abs(lep.pdgId) == 11:
@@ -1568,15 +1568,15 @@ class edgeFriends:
 
     def newMediumMuonId(muon):
         if not hasattr(muon, 'isGlobalMuon'):
-            return (muon.mediumMuonId == 1)
+            return (muon.mediumId == 1)
         goodGlob = (muon.isGlobalMuon and 
                     muon.globalTrackChi2 < 3 and
                     muon.chi2LocalPosition < 12 and
                     muon.trkKink < 20)
         isMedium = (muon.innerTrackValidHitFraction > 0.8 and
-                    muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+                    muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
-        #muon.segmentCompatibility < 0.49: return False
+        #muon.segmentComp < 0.49: return False
  
     def _susyEdgeTight(lep):
         if lep.pt <= 5.: return False
@@ -1586,9 +1586,9 @@ class edgeFriends:
         if abs(lep.dz ) > 0.10: return False
         if eta > 1.4 and eta < 1.6: return False
         if abs(lep.pdgId) == 13:
-          ## old medium ID if lep.mediumMuonId != 1: return False
+          ## old medium ID if lep.mediumId != 1: return False
           if not newMediumMuonId(lep): return False
-          if lep.miniRelIso > 0.2: return False
+          if lep.miniPFRelIso_all > 0.2: return False
         #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
         if abs(lep.pdgId) == 11:
           etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
@@ -1604,7 +1604,7 @@ class edgeFriends:
 #          if (eta < 0.8 and lep.mvaIdSpring15 < 0.87) : return False
 #          if (eta > 0.8 and eta < 1.479 and lep.mvaIdSpring15 < 0.60) : return False
 #          if (eta > 1.479 and lep.mvaIdSpring15 < 0.17) : return False
-          if lep.miniRelIso > 0.1: return False
+          if lep.miniPFRelIso_all > 0.1: return False
         return True
 
 
@@ -1623,7 +1623,7 @@ if __name__ == '__main__':
                 lambda lep : _susyEdgeTight(lep),
                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4 and abs(jet.eta) > 2.4))
         def analyze(self,ev):
-            print "\nrun %6d lumi %4d event %d: leps %d" % (ev.run, ev.lumi, ev.evt, ev.nLepGood)
+            print "\nrun %6d lumi %4d event %d: leps %d" % (ev.run, ev.luminosityBlock, ev.event, ev.nLepGood)
             print self.sf1(ev)
             print self.sf2(ev)
             print self.sf3(ev)
