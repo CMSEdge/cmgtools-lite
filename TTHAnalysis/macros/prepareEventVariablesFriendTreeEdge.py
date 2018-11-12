@@ -7,7 +7,9 @@ from time import sleep
 MODULES = []
 
  
-from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgeTight
+#from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgeTight
+from CMGTools.TTHAnalysis.tools.edgeFriends import *
+
 MODULES.append( ('edgeFriends', edgeFriends("Edge",  
                                 lambda lep : _susyEdgeTight(lep),
                                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4)) ) )
@@ -242,10 +244,10 @@ def _runIt(myargs):
     #int(ceil(entries/float(chunk)))
     print 'total number of chunks', nchunks
     
-    if not cn     == None: cn    .Scale(1./nchunks); booker.book('TH1D', cn    )
-    if not cnlhe  == None: cnlhe .Scale(1./nchunks); booker.book('TH1D', cnlhe )
-    if not sumgen == None: sumgen.Scale(1./nchunks); booker.book('TH1D', sumgen)
-    if not cnsms  == None: cnsms .Scale(1./nchunks); booker.book('TH3D', cnsms )
+    if not cn     == None: cn    .Scale(1./nchunks); booker.book('TH1F', cn    )
+    if not cnlhe  == None: cnlhe .Scale(1./nchunks); booker.book('TH1F', cnlhe )
+    if not sumgen == None: sumgen.Scale(1./nchunks); booker.book('TH1F', sumgen)
+    if not cnsms  == None: cnsms .Scale(1./nchunks); booker.book('TH3F', cnsms )
     modulesToRun = MODULES
     if options.modules != []:
         toRun = {}
