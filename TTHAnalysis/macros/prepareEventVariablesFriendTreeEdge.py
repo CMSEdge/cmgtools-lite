@@ -7,7 +7,10 @@ from time import sleep
 MODULES = []
 
  
-from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgeTight
+#from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgetight
+from CMGTools.TTHAnalysis.tools.edgeFriends import *
+
+
 MODULES.append( ('edgeFriends', edgeFriends("Edge",  
                                 lambda lep : _susyEdgeTight(lep),
                                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4)) ) )
@@ -217,7 +220,7 @@ def _runIt(myargs):
     cnsms = fb.Get('CountSMS')
     sumgen= fb.Get('SumGenWeights')
     print 'this is the status of sumgen', sumgen
-    print "getting tree.."
+    print "getting tree..", options.tree
     tb = fb.Get(options.tree)
 
     if not tb: tb = fb.Get("tree") # new trees
@@ -241,11 +244,12 @@ def _runIt(myargs):
     #scaling = len(jobs)
     #int(ceil(entries/float(chunk)))
     print 'total number of chunks', nchunks
-    
-    if not cn     == None: cn    .Scale(1./nchunks); booker.book('TH1D', cn    )
-    if not cnlhe  == None: cnlhe .Scale(1./nchunks); booker.book('TH1D', cnlhe )
-    if not sumgen == None: sumgen.Scale(1./nchunks); booker.book('TH1D', sumgen)
-    if not cnsms  == None: cnsms .Scale(1./nchunks); booker.book('TH3D', cnsms )
+   
+ 
+    if not cn     == None: cn    .Scale(1./nchunks); booker.book('TH1F', cn    )
+    if not cnlhe  == None: cnlhe .Scale(1./nchunks); booker.book('TH1F', cnlhe )
+    if not sumgen == None: sumgen.Scale(1./nchunks); booker.book('TH1F', sumgen)
+    if not cnsms  == None: cnsms .Scale(1./nchunks); booker.book('TH3F', cnsms )
     modulesToRun = MODULES
     if options.modules != []:
         toRun = {}
