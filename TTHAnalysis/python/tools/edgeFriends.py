@@ -388,9 +388,9 @@ class edgeFriends:
 
         ################## Event stuff
         ret['run'] = event.run
-        ret['lumi'] = event.lumi
-        ret['evt'] = long(event.evt)
-        ret['nVert'] = event.nVert
+        ret['lumi'] = event.luminosityBlock
+        ret['evt'] = long(event.event)
+        ret['nVert'] = event.PV_npvs
         ret['nTrueInt'] = -1   
         ret['genWeight'] = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
         puWt   = self.puHist  .GetBinContent(self.puHist  .FindBin(ntrue)) if not isData else 1.
@@ -428,9 +428,9 @@ class edgeFriends:
             ret['Flag_eeBadScFilter']= event.Flag_eeBadScFilter
             ret['Flag_ecalBadCalibFilter']= event.Flag_ecalBadCalibFilter
             ret['Flag_globalTightHalo2016Filter']= event.Flag_globalTightHalo2016Filter
-            ret['Flag_badMuonFilter']= event.Flag_badMuonFilter
-            ret["Flag_badChargedHadronFilter"] = event.Flag_badChargedHadronFilter
-            ret["Flag_badMuonFilter"] = event.Flag_badMuonFilter
+            ret['Flag_badMuonFilter']= event.Flag_BadPFMuonFilter
+            ret["Flag_badChargedHadronFilter"] = event.Flag_BadChargedCandidateFilter
+            ret["Flag_badMuonFilter"] = event.Flag_BadPFMuonFilter
         if not isData:
 	    ret["Flag_badMuonMoriond2017"] = 1
 	    ret["Flag_badCloneMuonMoriond2017"] = 1
@@ -520,7 +520,7 @@ class edgeFriends:
         l2 = ROOT.TLorentzVector()
         ltlvs = [l1, l2]
         lepvectors = []
-        for lfloat in 'pt eta phi miniRelIso pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+        for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -533,7 +533,7 @@ class edgeFriends:
             lcount = 1
             for idx in [ret['iL1T'], ret['iL2T']]:
                 lep = leps[idx] 
-                for lfloat in 'pt eta phi miniRelIso pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+                for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
                     if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
@@ -1244,13 +1244,13 @@ class edgeFriends:
 
     def selfNewMediumMuonId(self, muon):
         if not hasattr(muon, 'isGlobalMuon'):
-            return (muon.mediumMuonId == 1)
+            return (muon.mediumId == 1)
         goodGlob = (muon.isGlobalMuon and 
                     muon.globalTrackChi2 < 3 and
                     muon.chi2LocalPosition < 12 and
                     muon.trkKink < 20)
         isMedium = (muon.innerTrackValidHitFraction > 0.8 and
-                    muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+                    muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
     #################################################################################################################
@@ -1261,7 +1261,7 @@ class edgeFriends:
             if abs(lep.dz ) > 0.10: return False
             if lep.sip3d > 8: return False
             lepeta = abs(lep.eta)
-            if lep.miniRelIso > 0.4: return False
+            if lep.miniPFRelIso_all > 0.4: return False
             ## muons
             if abs(lep.pdgId) == 13:
               if lepeta > 2.4: return False
@@ -1286,13 +1286,13 @@ class edgeFriends:
 
     def newMediumMuonId(muon):
         if not hasattr(muon, 'isGlobalMuon'):
-            return (muon.mediumMuonId == 1)
+            return (muon.mediumId == 1)
         goodGlob = (muon.isGlobalMuon and 
                     muon.globalTrackChi2 < 3 and
                     muon.chi2LocalPosition < 12 and
                     muon.trkKink < 20)
         isMedium = (muon.innerTrackValidHitFraction > 0.8 and
-                    muon.segmentCompatibility > (0.303 if goodGlob else  0.451) )
+                    muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
     #################################################################################################################
@@ -1307,7 +1307,7 @@ class edgeFriends:
         if abs(lep.pdgId) == 13:
           ## old medium ID if lep.mediumMuonId != 1: return False
           if not newMediumMuonId(lep): return False
-          if lep.miniRelIso > 0.2: return False
+          if lep.miniPFRelIso_all > 0.2: return False
         #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
         if abs(lep.pdgId) == 11:
           etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
@@ -1320,7 +1320,7 @@ class edgeFriends:
               if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
           else: return False
 
-          if lep.miniRelIso > 0.1: return False
+          if lep.miniPFRelIso_all > 0.1: return False
         return True
     #################################################################################################################
 
@@ -1341,7 +1341,7 @@ if __name__ == '__main__':
                 lambda lep : _susyEdgeTight(lep),
                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4 and abs(jet.eta) > 2.4))
         def analyze(self,ev):
-            print "\nrun %6d lumi %4d event %d: leps %d" % (ev.run, ev.lumi, ev.evt, ev.nLepGood)
+            print "\nrun %6d lumi %4d event %d: leps %d" % (ev.run, ev.luminosityBlock, ev.event, ev.nLepGood)
             print self.sf1(ev)
             print self.sf2(ev)
             print self.sf3(ev)
