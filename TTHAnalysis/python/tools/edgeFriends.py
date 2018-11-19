@@ -331,14 +331,14 @@ class edgeFriends:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=mass)) )
 
         ################## Selected jets
-        for jfloat in "pt eta phi mass btagCSV rawPt".split():
+        for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
             biglist.append( ("JetSel"+label+"_"+jfloat,"F",20,"nJetSel"+label) ) #if self.isMC:
         biglist.append( ("JetSel"+label+"_mcPt",     "F",20,"nJetSel"+label) )
         biglist.append( ("JetSel"+label+"_mcFlavour","I",20,"nJetSel"+label) )
         biglist.append( ("JetSel"+label+"_mcMatchId","I",20,"nJetSel"+label) )
 
         ################## Selected Fat jets
-        for fjfloat in "pt eta phi mass btagCSV prunedMass softDropMass tau1 tau2 tau3".split():
+        for fjfloat in "pt eta phi mass btagCSVV2 prunedMass softDropMass tau1 tau2 tau3".split():
             biglist.append( ("FatJetSel"+label+"_"+fjfloat,"F",20,"nFatJetSel"+label) ) #if self.isMC:
         biglist.append( ("FatJetSel"+label+"_mcPt",     "F",20,"nFatJetSel"+label) )
         biglist.append( ("FatJetSel"+label+"_mcMatchId","I",20,"nFatJetSel"+label) )
@@ -782,26 +782,26 @@ class edgeFriends:
         ret["iFJ"].sort(key = lambda idx : fatjetsc[idx].pt, reverse = True)
 
         ################### Compute jet and fatjet variables
-        for jfloat in "pt eta phi mass btagCSV rawPt".split():
+        for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
             jetret[jfloat] = []
         if not isData:
             for jmc in "mcPt mcFlavour mcMatchId".split():
                 jetret[jmc] = []
         for idx in ret["iJ"]:
             jet = jetsc[idx] 
-            for jfloat in "pt eta phi mass btagCSV rawPt".split():
+            for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
                 jetret[jfloat].append( getattr(jet,jfloat) )
             if not isData:
                 for jmc in "mcPt mcFlavour mcMatchId".split():
                     jetret[jmc].append( getattr(jet,jmc) if not isData else -1.)
-        for fjfloat in "pt eta phi mass btagCSV prunedMass softDropMass tau1 tau2 tau3".split():
+        for fjfloat in "pt eta phi mass btagCSVV2 prunedMass softDropMass tau1 tau2 tau3".split():
             fatjetret[fjfloat] = []
         if not isData:
             for fjmc in "mcPt mcFlavour mcMatchId hadronFlavour".split():
                 fatjetret[fjmc] = []
         for idx in ret["iFJ"]:
             fatjet = fatjetsc[idx]
-            for fjfloat in "pt eta phi mass btagCSV prunedMass softDropMass tau1 tau2 tau3".split():
+            for fjfloat in "pt eta phi mass btagCSVV2 prunedMass softDropMass tau1 tau2 tau3".split():
                 fatjetret[fjfloat].append( getattr(fatjet,fjfloat) )
             if not isData:
                 for fjmc in "mcPt mcFlavour mcMatchId hadronFlavour".split():
@@ -877,7 +877,7 @@ class edgeFriends:
                 for _il,lep in enumerate(leplist):
                     if _il == _lmin: continue
                     for _ij,j in enumerate(jet2coll):
-                        if len(theBJets) == 1 and j.btagCSV >= self.btagMediumCut:
+                        if len(theBJets) == 1 and j.btagCSVV2 >= self.btagMediumCut:
                             continue
                         if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
                         jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
@@ -915,7 +915,7 @@ class edgeFriends:
             if abs(j.eta) > 2.4 or j.pt < 25.:
                 j._clean = False
                 continue
-            if j.pt < 25 and j.btagCSV < self.btagMediumCut: 
+            if j.pt < 25 and j.btagCSVV2 < self.btagMediumCut: 
                 j._clean = False
                 continue
             for l in lepst:
@@ -957,7 +957,7 @@ class edgeFriends:
         retlist = []
         for ijc,j in enumerate(coll1):
             if not j._clean: continue
-            bt = j.btagCSV
+            bt = j.btagCSVV2
             pt = j.pt
             if pt > 25 and bt > self.btagMediumCut: 
                 nb25 += 1
@@ -1038,7 +1038,9 @@ class edgeFriends:
         if len(jetsel) < 2: return -99.
         selectedjets = []
         for jeti in jetsel:
-            if abs(jeti.partonMotherId) == 24:
+            #if abs(jeti.partonMotherId) == 24:
+            #Atencion #Atencion #Atencion 
+            if 24 == 24:
                 jet = ROOT.TLorentzVector()
                 jet.SetPtEtaPhiM(jeti.pt, jeti.eta, jeti.phi, jeti.mass)
                 selectedjets.append(jet)
@@ -1230,7 +1232,7 @@ class edgeFriends:
 
         for jet in jets:
 
-            csv = jet.btagCSV
+            csv = jet.btagCSVV2
             mcFlavor = (jet.hadronFlavour if hasattr(jet, 'hadronFlavour') else jet.mcFlavour)
             eta = jet.eta
             pt = jet.pt
