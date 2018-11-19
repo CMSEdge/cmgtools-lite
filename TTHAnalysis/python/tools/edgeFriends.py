@@ -29,10 +29,10 @@ class edgeFriends:
         self.cleanJet = cleanJet
         
         ###################################### This variable is not defined
-        self.isMC = isMC
+        self.isMC = 1 # should be: isMC
         
         ###################################### Pile-up stuff should be included here
-        self.doPU("Run2017") 
+        self.setPU("Run2017") 
 
         ###################################### B-tagging stuff to be included here
         vector = ROOT.vector('string')()
@@ -353,12 +353,37 @@ class edgeFriends:
         t0 = time.time()
         ###### Atention: what do do here with is Data
         isData = True
-    
+   	
+	###### Variables to evaluate code
+	var_met_jecUp_pt = 1 # met_jecUp_pt
+	var_met_jecDown_pt = 1 # met_jecDown_pt
+	var_Flag_badMuonMoriond2017 = 1# Flag_badMuonMoriond2017
+	var_Flag_badCloneMuonMoriond2017 = 1 # flag_badCloneMoriond2017
+	var_badCloneMuonMoriond2017_maxPt = 1 # badCloneMuonMoriond2017_maxPt
+	var_badNotCloneMuonMoriond2017_maxPt = 1 # badNotCloneMuonMoriond2017_maxPt
+	var_met_shifted_UnclusteredEnUp_pt = 1 # met_shifted_UnclusteredEnUp_pt
+	var_met_shifted_UnclusteredEnDown_pt = 1 # met_shifted_UnclusteredEnDown_pt
+	var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
+	var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
+	var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
+	var_met_shifted_ElectronEnDown_pt = 1 # met_shifted_ElectronEnDown_pt
+	var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
+	var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
+	var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
+	var_LepGood_trkKink = 1 # LepGood_trkKink
+	var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
+	var_mZ1 = 1 # mZ1
+	var_mZ2 = 1 # mZ2	 
+
+	# New Variables changed
+	var_Jet_btagCSV = 1 # Jet_btagCSV
+
+
         ################## Get collections
         leps  =  [l for l in Collection(event,"LepGood","nLepGood")]
         jetsc =  [j for j in Collection(event,"Jet","nJet")]
         jetslc = [j for j in Collection(event,"Jet","nJet")]
-        fatjetsc =[fj for fj in Collection(event,"FatJet","nFatJet")]
+        fatjetsc =[fj for fj in Collection(event,"Jet","nJet")] # Should be: "FatJet", "nFatJet"
         if not isData: 
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
 
@@ -402,19 +427,19 @@ class edgeFriends:
         ################## MET stuff
         ret['met'] = met
         ret['met_phi'] = metphi 
-        ret['met_jecUp'] = event.met_jecUp_pt
-        ret['met_jecDn'] = event.met_jecDown_pt 
-        ret['met_shifted_MuonEnUp_pt'] = event.met_shifted_MuonEnUp_pt
-        ret['met_shifted_MuonEnDown_pt'] = event.met_shifted_MuonEnDown_pt 
-        ret['met_shifted_ElectronEnUp_pt'] = event.met_shifted_ElectronEnUp_pt
-        ret['met_shifted_ElectronEnDown_pt'] = event.met_shifted_ElectronEnDown_pt 
-        ret['met_shifted_UnclusteredEnUp_pt'] = event.met_shifted_UnclusteredEnUp_pt
-        ret['met_shifted_UnclusteredEnDown_pt'] = event.met_shifted_UnclusteredEnDown_pt 
+        ret['met_jecUp'] = var_met_jecUp_pt
+        ret['met_jecDn'] = var_met_jecDown_pt 
+        ret['met_shifted_MuonEnUp_pt'] = var_met_shifted_MuonEnUp_pt
+        ret['met_shifted_MuonEnDown_pt'] = var_met_shifted_MuonEnDown_pt 
+        ret['met_shifted_ElectronEnUp_pt'] = var_met_shifted_ElectronEnUp_pt
+        ret['met_shifted_ElectronEnDown_pt'] = var_met_shifted_ElectronEnDown_pt 
+        ret['met_shifted_UnclusteredEnUp_pt'] = var_met_shifted_UnclusteredEnUp_pt
+        ret['met_shifted_UnclusteredEnDown_pt'] = var_met_shifted_UnclusteredEnDown_pt 
         ret['genMet']     = -1
         ret['genMet_phi'] = -1
         ################## What is this
-        ret['mZ1'] = event.mZ1
-        ret['mZ2'] = event.mZ2
+        ret['mZ1'] = var_mZ1
+        ret['mZ2'] = var_mZ2
         ################## SUSY masses stuff
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
@@ -437,10 +462,10 @@ class edgeFriends:
             ret["badCloneMuonMoriond2017_maxPt"] = -1
 	    ret["badNotCloneMuonMoriond2017_maxPt"] = -1
         else:
-            ret["Flag_badMuonMoriond2017"] = event.Flag_badMuonMoriond2017
-	    ret["Flag_badCloneMuonMoriond2017"] = event.Flag_badCloneMuonMoriond2017
-            ret["badCloneMuonMoriond2017_maxPt"] = event.badCloneMuonMoriond2017_maxPt
-	    ret["badNotCloneMuonMoriond2017_maxPt"] = event.badNotCloneMuonMoriond2017_maxPt
+            ret["Flag_badMuonMoriond2017"] = var_Flag_badMuonMoriond2017
+	    ret["Flag_badCloneMuonMoriond2017"] = var_Flag_badCloneMuonMoriond2017
+            ret["badCloneMuonMoriond2017_maxPt"] = var_badCloneMuonMoriond2017_maxPt
+	    ret["badNotCloneMuonMoriond2017_maxPt"] = var_badNotCloneMuonMoriond2017_maxPt
         ################### Isotracks stuff
         #ret['nPFLep5'] = event.nPFLep5        
         #ret['nPFHad10'] = event.nPFHad10        
@@ -1073,12 +1098,15 @@ class edgeFriends:
     #################################################################################################################
 
     def smearJets(self, jetcol, syst):
+	
+	var_Jet_corr_JECUp = 1
+	var_Jet_corr_JECDown = 1
         for j in jetcol:
-            quot = getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
+            quot = 1 #getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
             if syst > 0: 
-                j.pt = j.pt*j.corr_JECUp / quot
+                j.pt = j.pt*var_Jet_corr_JECUp / quot
             else:
-                j.pt = j.pt*j.corr_JECDown /quot
+                j.pt = j.pt*var_Jet_corr_JECDown /quot
         return jetcol
     #################################################################################################################
 
@@ -1246,10 +1274,10 @@ class edgeFriends:
         if not hasattr(muon, 'isGlobalMuon'):
             return (muon.mediumId == 1)
         goodGlob = (muon.isGlobalMuon and 
-                    muon.globalTrackChi2 < 3 and
-                    muon.chi2LocalPosition < 12 and
-                    muon.trkKink < 20)
-        isMedium = (muon.innerTrackValidHitFraction > 0.8 and
+                    var_globalTrackChi2 < 3 and
+                    var_chi2LocalPosition < 12 and
+                    var_trkKink < 20)
+        isMedium = (var_innerTrackValidHitFraction > 0.8 and
                     muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
@@ -1288,10 +1316,10 @@ class edgeFriends:
         if not hasattr(muon, 'isGlobalMuon'):
             return (muon.mediumId == 1)
         goodGlob = (muon.isGlobalMuon and 
-                    muon.globalTrackChi2 < 3 and
-                    muon.chi2LocalPosition < 12 and
-                    muon.trkKink < 20)
-        isMedium = (muon.innerTrackValidHitFraction > 0.8 and
+                    var_globalTrackChi2 < 3 and
+                    var_chi2LocalPosition < 12 and
+                    var_trkKink < 20)
+        isMedium = (var_innerTrackValidHitFraction > 0.8 and
                     muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
