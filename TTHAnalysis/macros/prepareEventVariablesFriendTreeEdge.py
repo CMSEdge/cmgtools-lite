@@ -7,12 +7,11 @@ from time import sleep
 MODULES = []
 
  
-#from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgetight
-from CMGTools.TTHAnalysis.tools.edgeFriends import *
+from CMGTools.TTHAnalysis.tools.edgeFriends import edgeFriends, _susyEdgeTight
 
 
 MODULES.append( ('edgeFriends', edgeFriends("Edge",  
-                                lambda lep : _susyEdgeLoose(lep),
+                                lambda lep : _susyEdgeTight(lep),
                                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4)) ) )
 
 
@@ -222,6 +221,7 @@ def _runIt(myargs):
     print 'this is the status of sumgen', sumgen
     print "getting tree..", options.tree
     tb = fb.Get(options.tree)
+    print "getting tree cac..", options.tree
 
     if not tb: tb = fb.Get("tree") # new trees
     if options.vectorTree:

@@ -393,6 +393,7 @@ class edgeFriends:
         jetsc_jecUp = self.smearJets(jetsc_jecUp,  1.0)
         jetsc_jecDn = self.smearJets(jetsc_jecDn, -1.0)
 
+
         ################## Treatment of n of true events
         if not isData:
             ntrue = event.nTrueInt
@@ -401,6 +402,8 @@ class edgeFriends:
         (met, metphi)  = event.MET_pt, event.MET_phi
         metp4 = ROOT.TLorentzVector()
         metp4.SetPtEtaPhiM(met, 0, metphi, 0)
+        metp4obj = ROOT.TLorentzVector()
+        metp4obj.SetPtEtaPhiM(met, 0, metphi, 0)
 
         ################## Declare dictionaries
         ret = {}
@@ -539,7 +542,6 @@ class edgeFriends:
         ret['ortPt']    = iL1iL2[11]
         ret['dTheta']    = iL1iL2[12]
 
-
         ################### Now working with the 2 good leptons
         l1 = ROOT.TLorentzVector()
         l2 = ROOT.TLorentzVector()
@@ -568,7 +570,6 @@ class edgeFriends:
                 lcount += 1
         else:
             ret['nPairLep'] = 0
-
         ################### Variables needed for 4l control regions
         if len(leps) < 4: 
             ret['mllBestZ'] = -99; ret['mt2BestZ'] = -99; ret['ptBestZ'] = -99; ret['mllOtherZ'] = -99; ret['newMet'] = -99;ret['newMetPhi'] = -99;
@@ -1313,45 +1314,45 @@ class edgeFriends:
             return True                                                                                          
     #################################################################################################################
 
-    def newMediumMuonId(muon):
-        if not hasattr(muon, 'isGlobalMuon'):
-            return (muon.mediumId == 1)
-        goodGlob = (muon.isGlobalMuon and 
-                    var_globalTrackChi2 < 3 and
-                    var_chi2LocalPosition < 12 and
-                    var_trkKink < 20)
-        isMedium = (var_innerTrackValidHitFraction > 0.8 and
-                    muon.segmentComp > (0.303 if goodGlob else  0.451) )
-        return isMedium
-        #muon.segmentCompatibility < 0.49: return False
+def newMediumMuonId(muon):
+    if not hasattr(muon, 'isGlobalMuon'):
+        return (muon.mediumId == 1)
+    goodGlob = (muon.isGlobalMuon and 
+                var_globalTrackChi2 < 3 and
+                var_chi2LocalPosition < 12 and
+                var_trkKink < 20)
+    isMedium = (var_innerTrackValidHitFraction > 0.8 and
+                muon.segmentComp > (0.303 if goodGlob else  0.451) )
+    return isMedium
+    #muon.segmentCompatibility < 0.49: return False
     #################################################################################################################
  
-    def _susyEdgeTight(lep):
-        if lep.pt <= 5.: return False
-        eta = abs(lep.eta)
-        if eta          > 2.4: return False
-        if abs(lep.dxy) > 0.05: return False
-        if abs(lep.dz ) > 0.10: return False
-        if eta > 1.4 and eta < 1.6: return False
-        if abs(lep.pdgId) == 13:
-          ## old medium ID if lep.mediumMuonId != 1: return False
-          if not newMediumMuonId(lep): return False
-          if lep.miniPFRelIso_all > 0.2: return False
-        #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
-        if abs(lep.pdgId) == 11:
-          etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
-          if (etatest > 1.4442 and etatest < 1.566) : return False
-          if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-          
-          A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
-          B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
-          if lep.pt > 10.:
-              if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
-          else: return False
+def _susyEdgeTight(lep):
+    if lep.pt <= 5.: return False
+    eta = abs(lep.eta)
+    if eta          > 2.4: return False
+    if abs(lep.dxy) > 0.05: return False
+    if abs(lep.dz ) > 0.10: return False
+    if eta > 1.4 and eta < 1.6: return False
+    if abs(lep.pdgId) == 13:
+      ## old medium ID if lep.mediumMuonId != 1: return False
+      if not newMediumMuonId(lep): return False
+      if lep.miniPFRelIso_all > 0.2: return False
+    #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
+    if abs(lep.pdgId) == 11:
+      etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
+      if (etatest > 1.4442 and etatest < 1.566) : return False
+      if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
+         
+      A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+      B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+      if lep.pt > 10.:
+          if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
+      else: return False
 
-          if lep.miniPFRelIso_all > 0.1: return False
-        return True
-    #################################################################################################################
+      if lep.miniPFRelIso_all > 0.1: return False
+    return True
+#################################################################################################################
 
 
 
