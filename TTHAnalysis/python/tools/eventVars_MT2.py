@@ -11,9 +11,9 @@ def computeMT2(visaVec, visbVec, metVec):
     from ROOT.heppy import Davismt2
     davismt2 = Davismt2()    
 
-    metVector = array.array('d',[0.,metVec.px(), metVec.py()])
-    visaVector = array.array('d',[0.,visaVec.px(), visaVec.py()])
-    visbVector = array.array('d',[0.,visbVec.px(), visbVec.py()])
+    metVector = array.array('d',[0.,metVec.Px(), metVec.Py()])
+    visaVector = array.array('d',[0.,visaVec.Px(), visaVec.Py()])
+    visbVector = array.array('d',[0.,visbVec.Px(), visbVec.Py()])
 
     davismt2.set_momenta(visaVector,visbVector,metVector);
     davismt2.set_mn(0);
