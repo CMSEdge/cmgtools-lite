@@ -545,21 +545,20 @@ class edgeFriends:
         l2 = ROOT.TLorentzVector()
         ltlvs = [l1, l2]
         lepvectors = []
-        for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+        for lfloat in 'pt eta phi pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
             else:
                 lepret["Lep1_"+lfloat+self.label] = -42.
                 lepret["Lep2_"+lfloat+self.label] = -42.
-
         if ret['iL1T'] != -999 and ret['iL2T'] != -999:
             ret['nPairLep'] = 2
             lcount = 1
             for idx in [ret['iL1T'], ret['iL2T']]:
                 lep = leps[idx] 
-                for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
-                    if lfloat == 'mcMatchId' and isData:
+                for lfloat in 'pt eta phi pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+		    if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
@@ -794,14 +793,14 @@ class edgeFriends:
             if not isData:
                 for jmc in "mcPt mcFlavour mcMatchId".split():
                     jetret[jmc].append( getattr(jet,jmc) if not isData else -1.)
-        for fjfloat in "pt eta phi mass btagCSVV2 prunedMass softDropMass tau1 tau2 tau3".split():
+        for fjfloat in "pt eta phi mass btagCSVV2".split():
             fatjetret[fjfloat] = []
         if not isData:
             for fjmc in "mcPt mcFlavour mcMatchId hadronFlavour".split():
                 fatjetret[fjmc] = []
         for idx in ret["iFJ"]:
             fatjet = fatjetsc[idx]
-            for fjfloat in "pt eta phi mass btagCSVV2 prunedMass softDropMass tau1 tau2 tau3".split():
+            for fjfloat in "pt eta phi mass btagCSVV2".split():
                 fatjetret[fjfloat].append( getattr(fatjet,fjfloat) )
             if not isData:
                 for fjmc in "mcPt mcFlavour mcMatchId hadronFlavour".split():
@@ -834,7 +833,7 @@ class edgeFriends:
         ret['hardMjj'] = self.getHardMjj(theJets)
         ret['hardJJDphi'] = self.getHardMjj(theJets, True)
         ret['hardJJDR'] = self.getHardMjj(theJets, True, True)
-        et['j1MetDPhi'] = deltaPhi(metphi, theJets[0].phi) if len(theJets) > 0 else -99.
+        ret['j1MetDPhi'] = deltaPhi(metphi, theJets[0].phi) if len(theJets) > 0 else -99.
         ret['j2MetDPhi'] = deltaPhi(metphi, theJets[1].phi) if len(theJets) > 1 else -99.
          
         [wtbtag, wtbtagUp_heavy, wtbtagUp_light, wtbtagDown_heavy, wtbtagDown_light] = (self.getWeightBtag(theJets) if not isData else [1., 1., 1., 1., 1.])
@@ -1368,7 +1367,7 @@ if __name__ == '__main__':
         def __init__(self, name):
             Module.__init__(self,name,None)
             self.sf1 = edgeFriends("Edge", 
-                lambda lep : _susyEdgeTight(lep),
+                lambda lep : _susyEdgeLoose(lep),
                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4 and abs(jet.eta) > 2.4))
         def analyze(self,ev):
             print "\nrun %6d lumi %4d event %d: leps %d" % (ev.run, ev.luminosityBlock, ev.event, ev.nLepGood)
