@@ -155,12 +155,6 @@ class edgeFriends:
                     ("Flag_globalTightHalo2016Filter"+label, "I"),
                     ("Flag_badChargedHadronFilter"+label, "F"),
                     ("Flag_badMuonFilter"+label, "F"),
-                    ("Flag_badMuonMoriond2017"+label, "I"),
-                    ("Flag_badCloneMuonMoriond2017"+label, "I"),
-                    ("badCloneMuonMoriond2017_maxPt"+label, "F"),
-		    ("badNotCloneMuonMoriond2017_maxPt"+label, "F"),
-                    ("mZ1"+label, "F"),
-                    ("mZ2"+label, "F"),
                     ("nLepTight"+label, "I"),
                     ("nLepLoose"+label, "I"),
                     ("nJetSel"+label, "I"),
@@ -354,30 +348,23 @@ class edgeFriends:
         ###### Atention: what do do here with is Data
         isData = True
    	
-	###### Variables to evaluate code
-	var_met_jecUp_pt = 1 # met_jecUp_pt
-	var_met_jecDown_pt = 1 # met_jecDown_pt
-	var_Flag_badMuonMoriond2017 = 1# Flag_badMuonMoriond2017
-	var_Flag_badCloneMuonMoriond2017 = 1 # flag_badCloneMoriond2017
-	var_badCloneMuonMoriond2017_maxPt = 1 # badCloneMuonMoriond2017_maxPt
-	var_badNotCloneMuonMoriond2017_maxPt = 1 # badNotCloneMuonMoriond2017_maxPt
-	var_met_shifted_UnclusteredEnUp_pt = 1 # met_shifted_UnclusteredEnUp_pt
-	var_met_shifted_UnclusteredEnDown_pt = 1 # met_shifted_UnclusteredEnDown_pt
-	var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
-	var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
-	var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
-	var_met_shifted_ElectronEnDown_pt = 1 # met_shifted_ElectronEnDown_pt
-	var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
-	var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
-	var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
-	var_LepGood_trkKink = 1 # LepGood_trkKink
-	var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
-	var_mZ1 = 1 # mZ1
-	var_mZ2 = 1 # mZ2	 
+	    ###### Variables to evaluate code
+     	var_met_jecUp_pt = 1 # met_jecUp_pt
+    	var_met_jecDown_pt = 1 # met_jecDown_pt
+	    var_met_shifted_UnclusteredEnUp_pt = 1 # met_shifted_UnclusteredEnUp_pt
+	    var_met_shifted_UnclusteredEnDown_pt = 1 # met_shifted_UnclusteredEnDown_pt
+	    var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
+	    var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
+	    var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
+	    var_met_shifted_ElectronEnDown_pt = 1 # met_shifted_ElectronEnDown_pt
+	    var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
+	    var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
+	    var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
+	    var_LepGood_trkKink = 1 # LepGood_trkKink
+	    var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
 
-	# New Variables changed
-	var_Jet_btagCSV = 1 # Jet_btagCSV
-
+    	# New Variables changed
+	    var_Jet_btagCSV = 1 # Jet_btagCSV
 
         ################## Get collections
         leps  =  [l for l in Collection(event,"LepGood","nLepGood")]
@@ -440,9 +427,6 @@ class edgeFriends:
         ret['met_shifted_UnclusteredEnDown_pt'] = var_met_shifted_UnclusteredEnDown_pt 
         ret['genMet']     = -1
         ret['genMet_phi'] = -1
-        ################## What is this
-        ret['mZ1'] = var_mZ1
-        ret['mZ2'] = var_mZ2
         ################## SUSY masses stuff
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
@@ -459,16 +443,6 @@ class edgeFriends:
             ret['Flag_badMuonFilter']= event.Flag_BadPFMuonFilter
             ret["Flag_badChargedHadronFilter"] = event.Flag_BadChargedCandidateFilter
             ret["Flag_badMuonFilter"] = event.Flag_BadPFMuonFilter
-        if not isData:
-	    ret["Flag_badMuonMoriond2017"] = 1
-	    ret["Flag_badCloneMuonMoriond2017"] = 1
-            ret["badCloneMuonMoriond2017_maxPt"] = -1
-	    ret["badNotCloneMuonMoriond2017_maxPt"] = -1
-        else:
-            ret["Flag_badMuonMoriond2017"] = var_Flag_badMuonMoriond2017
-	    ret["Flag_badCloneMuonMoriond2017"] = var_Flag_badCloneMuonMoriond2017
-            ret["badCloneMuonMoriond2017_maxPt"] = var_badCloneMuonMoriond2017_maxPt
-	    ret["badNotCloneMuonMoriond2017_maxPt"] = var_badNotCloneMuonMoriond2017_maxPt
         ################### Isotracks stuff
         #ret['nPFLep5'] = event.nPFLep5        
         #ret['nPFHad10'] = event.nPFHad10        
@@ -560,7 +534,7 @@ class edgeFriends:
             for idx in [ret['iL1T'], ret['iL2T']]:
                 lep = leps[idx] 
                 for lfloat in 'pt eta phi pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
-		    if lfloat == 'mcMatchId' and isData:
+		            if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
@@ -1104,7 +1078,7 @@ class edgeFriends:
 	var_Jet_corr_JECUp = 1
 	var_Jet_corr_JECDown = 1
         for j in jetcol:
-            quot = 1 #getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
+            quot = 1.0-getattr(j, "rawFactor") #getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
             if syst > 0: 
                 j.pt = j.pt*var_Jet_corr_JECUp / quot
             else:
