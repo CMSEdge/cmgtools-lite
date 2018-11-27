@@ -124,11 +124,11 @@ class edgeFriends:
     def setPU(self, name):
 
         if name.find("Run2017") != -1:
-	   self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal.root", "READ")
+           self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal.root", "READ")
            self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up.root","READ")
            self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down.root","READ")
         else:    
-	   self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal_" + name + ".root", "READ")
+           self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal_" + name + ".root", "READ")
            self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up_" + name + ".root","READ")
            self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down_" + name + ".root","READ")
         self.puHist   = copy.deepcopy( self.puFile.Get('puw') )
@@ -242,33 +242,31 @@ class edgeFriends:
                     ("Lep1_pt"+label, "F"), 
                     ("Lep1_eta"+label, "F"), 
                     ("Lep1_phi"+label, "F"),
-                    ("Lep1_miniRelIso"+label, "F"),
-                    ("Lep1_relIso03"+label, "F"),
-                    ("Lep1_relIso04"+label, "F"),
+                    ("Lep1_miniPFRelIso_all"+label, "F"),
+                    ("Lep1_pfRelIso03_all"+label, "F"),
+                    ("Lep1_pfRelIso04_all"+label, "F"),
                     ("Lep1_dxy"+label, "F"),
                     ("Lep1_dz"+label, "F"),
                     ("Lep1_sip3d"+label, "F"),
                     ("Lep1_pdgId"+label, "I"), 
                     ("Lep1_tightCharge"+label, "F"), 
-                    ("Lep1_mvaIdFall17Iso"+label, "F"),
-                    ("Lep1_mvaIdFall17noIso"+label, "F"),
-                    ("Lep1_mvaIdSpring16GP"+label, "F"),
+                    ("Lep1_mvaFall17Iso"+label, "F"),
+                    ("Lep1_mvaFall17noIso"+label, "F"),
                     ("Lep1_mcMatchId"+label, "F"),
                     ("Lep1_minTauDR"+label, "F"),              
                     ("Lep2_pt"+label, "F"), 
                     ("Lep2_eta"+label, "F"),
                     ("Lep2_phi"+label, "F"),
-                    ("Lep2_miniRelIso"+label, "F"),
-                    ("Lep2_relIso03"+label, "F"),
-                    ("Lep2_relIso04"+label, "F"),
+                    ("Lep2_miniPFRelIso_all"+label, "F"),
+                    ("Lep2_pfRelIso03_all"+label, "F"),
+                    ("Lep2_pfRelIso04_all"+label, "F"),
                     ("Lep2_dxy"+label, "F"),
                     ("Lep2_dz"+label, "F"),
                     ("Lep2_sip3d"+label, "F"),
                     ("Lep2_pdgId"+label, "I"),
                     ("Lep2_tightCharge"+label, "F"),
-                    ("Lep2_mvaIdFall17Iso"+label, "F"),
-                    ("Lep2_mvaIdFall17noIso"+label, "F"),
-                    ("Lep2_mvaIdSpring16GP"+label, "F"),
+                    ("Lep2_mvaFall17Iso"+label, "F"),
+                    ("Lep2_mvaFall17noIso"+label, "F"),
                     ("Lep2_mcMatchId"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),      
                     ("PileupW"+label, "F"), 
@@ -348,23 +346,23 @@ class edgeFriends:
         ###### Atention: what do do here with is Data
         isData = True
    	
-	    ###### Variables to evaluate code
-     	var_met_jecUp_pt = 1 # met_jecUp_pt
-    	var_met_jecDown_pt = 1 # met_jecDown_pt
-	    var_met_shifted_UnclusteredEnUp_pt = 1 # met_shifted_UnclusteredEnUp_pt
-	    var_met_shifted_UnclusteredEnDown_pt = 1 # met_shifted_UnclusteredEnDown_pt
-	    var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
-	    var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
-	    var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
-	    var_met_shifted_ElectronEnDown_pt = 1 # met_shifted_ElectronEnDown_pt
-	    var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
-	    var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
-	    var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
-	    var_LepGood_trkKink = 1 # LepGood_trkKink
-	    var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
+        ###### Variables to evaluate code
+        var_met_jecUp_pt = 1 # met_jecUp_pt
+        var_met_jecDown_pt = 1 # met_jecDown_pt
+        var_met_shifted_UnclusteredEnUp_pt = 1 # met_shifted_UnclusteredEnUp_pt
+        var_met_shifted_UnclusteredEnDown_pt = 1 # met_shifted_UnclusteredEnDown_pt
+        var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
+        var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
+        var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
+        var_met_shifted_ElectronEnDown_pt = 1 # met_shifted_ElectronEnDown_pt
+        var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
+        var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
+        var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
+        var_LepGood_trkKink = 1 # LepGood_trkKink
+        var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
 
     	# New Variables changed
-	    var_Jet_btagCSV = 1 # Jet_btagCSV
+        var_Jet_btagCSV = 1 # Jet_btagCSV
 
         ################## Get collections
         leps  =  [l for l in Collection(event,"LepGood","nLepGood")]
@@ -521,7 +519,8 @@ class edgeFriends:
         l2 = ROOT.TLorentzVector()
         ltlvs = [l1, l2]
         lepvectors = []
-        for lfloat in 'pt eta phi pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
+        for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaFall17Iso mvaFall17noIso dxy dz sip3d pfRelIso03_all pfRelIso04_all tightCharge mcMatchId'.split():
+            
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
                 lepret["Lep2_"+lfloat+self.label] = -99
@@ -533,8 +532,9 @@ class edgeFriends:
             lcount = 1
             for idx in [ret['iL1T'], ret['iL2T']]:
                 lep = leps[idx] 
-                for lfloat in 'pt eta phi pdgId mvaIdFall17Iso mvaIdFall17noIso mvaIdSpring16GP dxy dz sip3d relIso03 relIso04 tightCharge mcMatchId'.split():
-		            if lfloat == 'mcMatchId' and isData:
+                for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaFall17Iso mvaFall17noIso dxy dz sip3d pfRelIso03_all pfRelIso04_all tightCharge mcMatchId'.split():
+                    
+                    if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
                     else:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
@@ -571,7 +571,8 @@ class edgeFriends:
                     if (abs((i+j).M() - 91.1876) < abs(bestmll - 91.1876)):
                         bestmll = (i+j).M()
                         best = i+j
-                        ptobj = ROOT.reco.Particle.LorentzVector(best.Pt()*cos(best.Phi()),best.Pt()*sin(best.Phi()),0,best.Pt())
+                        ptobj = ROOT.TLorentzVector()
+                        ptobj.SetPtEtaPhiM(best.Pt(), best.Eta(), best.Phi(), best.M())
                         newMetObj = metp4obj+ptobj
                         for k in lepVecs:
                             if k == i: continue
@@ -803,8 +804,8 @@ class edgeFriends:
         ret['dphiMjj_jecDn'] = self.getDPhiMjj(theJets_jecDn)
         
         ret['drMjj'] = self.getDRMjj(theJets)
-        ret['minMjj']  = self.getMinMjj (theJets)
-        ret['maxMjj']  = self.getMaxMjj (theJets)
+        ret['minMjj']  = self.getMinMjj(theJets)
+        ret['maxMjj']  = self.getMaxMjj(theJets)
         ret['hardMjj'] = self.getHardMjj(theJets)
         ret['hardJJDphi'] = self.getHardMjj(theJets, True)
         ret['hardJJDR'] = self.getHardMjj(theJets, True, True)
@@ -1075,8 +1076,8 @@ class edgeFriends:
 
     def smearJets(self, jetcol, syst):
 	
-	var_Jet_corr_JECUp = 1
-	var_Jet_corr_JECDown = 1
+        var_Jet_corr_JECUp = 1
+        var_Jet_corr_JECDown = 1
         for j in jetcol:
             quot = 1.0-getattr(j, "rawFactor") #getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
             if syst > 0: 
@@ -1342,7 +1343,7 @@ if __name__ == '__main__':
         def __init__(self, name):
             Module.__init__(self,name,None)
             self.sf1 = edgeFriends("Edge", 
-                lambda lep : _susyEdgeLoose(lep),
+                lambda lep : _susyEdgeTight(lep),
                 cleanJet = lambda lep,jet,dr : (jet.pt < 35 and dr < 0.4 and abs(jet.eta) > 2.4))
         def analyze(self,ev):
             print "\nrun %6d lumi %4d event %d: leps %d" % (ev.run, ev.luminosityBlock, ev.event, ev.nLepGood)
