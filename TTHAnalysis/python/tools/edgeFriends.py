@@ -161,6 +161,8 @@ class edgeFriends:
                     ("nJetSel_jecUp"+label, "I"),
                     ("nJetSel_jecDn"+label, "I"),
                     ("nFatJetSel"+label, "I"),
+                    ("nIsoTrack"+label, "I"),
+                    ("nHighPurityIsoTrack"+label, "I"),
                     ("rightMjj"+label, "F"),
                     ("bestMjj"+label, "F"),
                     ("minMjj"+label, "F"),
@@ -177,7 +179,9 @@ class edgeFriends:
                     ("nPairLep"+label, "I"),
                     ("iLT"+label,"I",20,"nLepTight"+label), 
                     ("iJ"+label,"I",20,"nJetSel"+label), 
-                    ("iFJ"+label,"I",20,"nFatJetSel"+label), 
+                    ("iFJ"+label,"I",20,"nFatJetSel"+label),
+                    ("iIT"+label,"I",20,"nIsoTrack"+label),
+                    ("iHPIT"+label,"I",20,"nHighPurityIsoTrack"+label),  
                     ("nLepGood20"+label, "I"),
                     ("nJet35"+label, "I"),
                     ("nJet35_jecUp"+label, "I"),
@@ -235,9 +239,6 @@ class edgeFriends:
                     ("MET_pt_unclustEnDown"+label, "F"),
                     ("GenMET_pt"+label, "F"),
                     ("GenMET_phi"+label,"F"),
-                    ("isoTrack_pt"+label, "F"),
-                    ("isoTrack_phi"+label,"F"),
-                    ("isoTrack_eta"+label, "F"),
                     ("lepsDPhi"+label, "F"),
                     ("Lep1_pt"+label, "F"), 
                     ("Lep1_eta"+label, "F"), 
@@ -322,6 +323,10 @@ class edgeFriends:
         for mass in self.susymasslist:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=mass)) )
 
+        ################## Selected isotracks
+        for itfloat in "pt eta phi dxy dz pfRelIso03_all miniPFRelIso_all pfRelIso03_chg miniPFRelIso_chg pdgId isPFcand".split():
+            biglist.append( ("IsoTrackSel"+label+"_"+itfloat,"F",20,"nIsoTrack"+label) )
+
         ################## Selected jets
         for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
             biglist.append( ("JetSel"+label+"_"+jfloat,"F",20,"nJetSel"+label) ) #if self.isMC:
@@ -368,6 +373,9 @@ class edgeFriends:
         if not isData: 
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
 
+        # Atencion: IsoTrack Collection
+        isotracks =  [i for i in Collection(event,"IsoTrack","nIsoTrack")]
+
         ################## Treatment of jets
         jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
         jetsc_jecDn = [j for j in Collection(event,"Jet","nJet")]        
@@ -392,6 +400,7 @@ class edgeFriends:
         fatjetret = {} 
         lepret  = {}
         trigret = {}
+        isotrackret = {}
 
         ################## Starting to fill the dictionaries
 
@@ -481,7 +490,8 @@ class edgeFriends:
         ret["iLT"] = []
         nLepLoose = 0
         for il,lep in enumerate(leps):
-            if not self._susyEdgeLoose(lep): 
+            # if not self._susyEdgeLoose(lep) Atencion
+            if not lep.softId: 
                 continue
             nLepLoose += 1
             if not self.tightLeptonSel(lep): 
@@ -622,6 +632,44 @@ class edgeFriends:
             ret['WmT'] = WmT
             ret['WZ_ll_MT2'] = WZ_ll_MT2
             ret['Z_ll_MT2'] = Z_ll_MT2
+
+
+        ################### IsoTrack variables
+        ret["iIT"] = []
+        nIsoTrack = 0
+        for it, track in enumerate(isotracks):
+            # All tracks are taken
+            ret["iIT"].append(it)
+            nIsoTrack += 1
+        ret["nIsoTrack"] = nIsoTrack
+        
+        ####### Sort IsoTracks by pt
+        ret["iIT"].sort(key = lambda idx : isotracks[idx].pt, reverse = True)
+        isotrackst = []
+        for it in ret["iIT"]:
+            if it >= 0:
+                isotrackst.append(isotracks[it])
+
+        ####### Definition of High Purity Tracks
+        ret["iHPIT"] = [] # High purity IsoTracks
+        nHighPurityIsoTrack = 0
+        for it, track in enumerate(isotrackst):
+            if not track.isHighPurityTrack:
+                continue
+            nHighPurityIsoTrack += 1
+            ret["iHPIT"].append(it)
+        ret["nHighPurityIsoTrack"] = nHighPurityIsoTrack
+
+        ################### Compute isotrack variables
+        for itfloat in "pt eta phi dxy dz pfRelIso03_all miniPFRelIso_all pfRelIso03_chg miniPFRelIso_chg pdgId isPFcand".split():
+            isotrackret[itfloat] = []
+
+        for idx in ret["iIT"]:
+            track = isotrackst[idx]
+            for itfloat in "pt eta phi dxy dz pfRelIso03_all miniPFRelIso_all pfRelIso03_chg miniPFRelIso_chg pdgId isPFcand".split():
+                isotrackret[itfloat].append( getattr(track, itfloat) )
+
+
 
         ################### Jet variables
         ret["iJ"] = []
@@ -883,6 +931,8 @@ class edgeFriends:
             fullret[k] = v
         for k,v in trigret.iteritems(): 
             fullret[k+self.label] = v
+        for k,v in isotrackret.iteritems():
+            fullret["IsoTrackSel%s_%s" % (self.label,k)] = v
         return fullret
     #################################################################################################################
 
