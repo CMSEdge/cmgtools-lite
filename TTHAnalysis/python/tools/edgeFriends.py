@@ -223,18 +223,18 @@ class edgeFriends:
                     ("mt2BestZ"+label, "F"),
                     ("metl1DPhi"+label, "F"),
                     ("metl2DPhi"+label, "F"),
-                    ("met"+label, "F"),
-                    ("met_phi"+label, "F"), 
-                    ("met_jecUp"+label, "F"),
-                    ("met_jecDn"+label, "F"),
+                    ("MET_pt"+label, "F"),
+                    ("MET_phi"+label, "F"), 
+                    ("MET_pt_jesTotalUp"+label, "F"),
+                    ("MET_pt_jesTotalDown"+label, "F"),
                     ("met_shifted_MuonEnUp_pt"+label, "F"),
                     ("met_shifted_MuonEnDown_pt"+label, "F"),
                     ("met_shifted_ElectronEnUp_pt"+label, "F"),
                     ("met_shifted_ElectronEnDown_pt"+label, "F"),
-                    ("met_shifted_UnclusteredEnUp_pt"+label, "F"),
-                    ("met_shifted_UnclusteredEnDown_pt"+label, "F"),
-                    ("genMet"+label, "F"),
-                    ("genMet_phi"+label,"F"),
+                    ("MET_pt_unclustEnUp"+label, "F"),
+                    ("MET_pt_unclustEnDown"+label, "F"),
+                    ("GenMET_pt"+label, "F"),
+                    ("GenMET_phi"+label,"F"),
                     ("isoTrack_pt"+label, "F"),
                     ("isoTrack_phi"+label,"F"),
                     ("isoTrack_eta"+label, "F"),
@@ -250,8 +250,8 @@ class edgeFriends:
                     ("Lep1_sip3d"+label, "F"),
                     ("Lep1_pdgId"+label, "I"), 
                     ("Lep1_tightCharge"+label, "F"), 
-                    ("Lep1_mvaFall17Iso"+label, "F"),
-                    ("Lep1_mvaFall17noIso"+label, "F"),
+                    ("Lep1_mvaFall17V1Iso"+label, "F"),
+                    ("Lep1_mvaFall17V1noIso"+label, "F"),
                     ("Lep1_mcMatchId"+label, "F"),
                     ("Lep1_minTauDR"+label, "F"),              
                     ("Lep2_pt"+label, "F"), 
@@ -265,8 +265,8 @@ class edgeFriends:
                     ("Lep2_sip3d"+label, "F"),
                     ("Lep2_pdgId"+label, "I"),
                     ("Lep2_tightCharge"+label, "F"),
-                    ("Lep2_mvaFall17Iso"+label, "F"),
-                    ("Lep2_mvaFall17noIso"+label, "F"),
+                    ("Lep2_mvaFall17V1Iso"+label, "F"),
+                    ("Lep2_mvaFall17V1noIso"+label, "F"),
                     ("Lep2_mcMatchId"+label, "F"),
                     ("Lep2_minTauDR"+label, "F"),      
                     ("PileupW"+label, "F"), 
@@ -330,7 +330,7 @@ class edgeFriends:
         biglist.append( ("JetSel"+label+"_mcMatchId","I",20,"nJetSel"+label) )
 
         ################## Selected Fat jets
-        for fjfloat in "pt eta phi mass btagCSVV2 prunedMass softDropMass tau1 tau2 tau3".split():
+        for fjfloat in "pt eta phi mass btagCSVV2 msoftdrop tau1 tau2 tau3".split():
             biglist.append( ("FatJetSel"+label+"_"+fjfloat,"F",20,"nFatJetSel"+label) ) #if self.isMC:
         biglist.append( ("FatJetSel"+label+"_mcPt",     "F",20,"nFatJetSel"+label) )
         biglist.append( ("FatJetSel"+label+"_mcMatchId","I",20,"nFatJetSel"+label) )
@@ -344,13 +344,9 @@ class edgeFriends:
     
         t0 = time.time()
         ###### Atention: what do do here with is Data
-        isData = True
+        isData = False # Atencion, needed to be fixed
    	
         ###### Variables to evaluate code
-        var_met_jecUp_pt = 1 # met_jecUp_pt
-        var_met_jecDown_pt = 1 # met_jecDown_pt
-        var_met_shifted_UnclusteredEnUp_pt = 1 # met_shifted_UnclusteredEnUp_pt
-        var_met_shifted_UnclusteredEnDown_pt = 1 # met_shifted_UnclusteredEnDown_pt
         var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
         var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
         var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
@@ -361,14 +357,14 @@ class edgeFriends:
         var_LepGood_trkKink = 1 # LepGood_trkKink
         var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
 
-    	# New Variables changed
-        var_Jet_btagCSV = 1 # Jet_btagCSV
+        ##### MC variables
+        var_mcPt = 10 # mcPt
 
         ################## Get collections
         leps  =  [l for l in Collection(event,"LepGood","nLepGood")]
         jetsc =  [j for j in Collection(event,"Jet","nJet")]
         jetslc = [j for j in Collection(event,"Jet","nJet")]
-        fatjetsc =[fj for fj in Collection(event,"Jet","nJet")] # Should be: "FatJet", "nFatJet"
+        fatjetsc =[fj for fj in Collection(event,"FatJet","nFatJet")] # Should be: "FatJet", "nFatJet"
         if not isData: 
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
 
@@ -381,7 +377,7 @@ class edgeFriends:
 
         ################## Treatment of n of true events
         if not isData:
-            ntrue = event.nTrueInt
+            ntrue = event.Pileup_nTrueInt
  
         ################## Treatment of MET
         (met, metphi)  = event.MET_pt, event.MET_phi
@@ -413,18 +409,19 @@ class edgeFriends:
         ret["PileupW_Up"] = puWtUp
         ret["PileupW_Dn"] = puWtDn
         ################## MET stuff
-        ret['met'] = met
-        ret['met_phi'] = metphi 
-        ret['met_jecUp'] = var_met_jecUp_pt
-        ret['met_jecDn'] = var_met_jecDown_pt 
+        ret['MET_pt'] = met
+        ret['MET_phi'] = metphi 
+        ret['MET_pt_jesTotalUp'] = event.MET_pt_jesTotalUp
+        ret['MET_pt_jesTotalDown'] = event.MET_pt_jesTotalDown
+        # Atencion: Not sure if necessary 
         ret['met_shifted_MuonEnUp_pt'] = var_met_shifted_MuonEnUp_pt
         ret['met_shifted_MuonEnDown_pt'] = var_met_shifted_MuonEnDown_pt 
         ret['met_shifted_ElectronEnUp_pt'] = var_met_shifted_ElectronEnUp_pt
         ret['met_shifted_ElectronEnDown_pt'] = var_met_shifted_ElectronEnDown_pt 
-        ret['met_shifted_UnclusteredEnUp_pt'] = var_met_shifted_UnclusteredEnUp_pt
-        ret['met_shifted_UnclusteredEnDown_pt'] = var_met_shifted_UnclusteredEnDown_pt 
-        ret['genMet']     = -1
-        ret['genMet_phi'] = -1
+        ret['MET_pt_unclustEnUp'] = event.MET_pt_unclustEnUp
+        ret['MET_pt_unclustEnDown'] = event.MET_pt_unclustEnDown
+        ret['GenMET_pt']     = -1
+        ret['GenMET_phi'] = -1
         ################## SUSY masses stuff
         for mass in self.susymasslist:
             ret[mass] = (-1 if not hasattr(event, mass) else getattr(event, mass) )
@@ -446,15 +443,15 @@ class edgeFriends:
         #ret['nPFHad10'] = event.nPFHad10        
 
         if not isData:
-            ret['nTrueInt'] = event.nTrueInt
-            ret['genMet']  = event.met_genPt
-            ret['genMet_phi'] = event.met_genPt
+            ret['nTrueInt'] = event.Pileup_nTrueInt
+            ret['GenMET_pt']  = event.GenMET_pt
+            ret['GenMET_phi'] = event.GenMET_phi
             ret['GENmassZZ']  = -1
             ret['GENptZZ']  = -1   
             vec = []
             ################### This is needed for ZZ NNLO/NLO k-factor which is provided as a function of gen diboson mass or pt
             for g, gen in enumerate(genparts):
-                if (gen.motherId !=23):
+                if (genparts[gen.genPartIdxMother].pdgId !=23): # Atencion, not sure if this is defined well
                     continue
                 else:
                     if (abs(gen.pdgId) == 11 or abs(gen.pdgId) == 13 or abs(gen.pdgId) == 15 or abs(gen.pdgId) == 12 or abs(gen.pdgId) == 14 or abs(gen.pdgId) == 16):
@@ -519,7 +516,8 @@ class edgeFriends:
         l2 = ROOT.TLorentzVector()
         ltlvs = [l1, l2]
         lepvectors = []
-        for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaFall17Iso mvaFall17noIso dxy dz sip3d pfRelIso03_all pfRelIso04_all tightCharge mcMatchId'.split():
+        for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaFall17V1Iso mvaFall17V1noIso dxy dz sip3d pfRelIso03_all pfRelIso04_all tightCharge'.split():
+            # Atencion, falta mcMatchId en los dos
             
             if lfloat == 'pdgId':
                 lepret["Lep1_"+lfloat+self.label] = -99
@@ -532,7 +530,7 @@ class edgeFriends:
             lcount = 1
             for idx in [ret['iL1T'], ret['iL2T']]:
                 lep = leps[idx] 
-                for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaFall17Iso mvaFall17noIso dxy dz sip3d pfRelIso03_all pfRelIso04_all tightCharge mcMatchId'.split():
+                for lfloat in 'pt eta phi miniPFRelIso_all pdgId mvaFall17V1Iso mvaFall17V1noIso dxy dz sip3d pfRelIso03_all pfRelIso04_all tightCharge'.split():
                     
                     if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
@@ -678,8 +676,8 @@ class edgeFriends:
             l1mt2 = ROOT.reco.Particle.LorentzVector(lepvectors[0].p4().Px(), lepvectors[0].p4().Py(),lepvectors[0].p4().Pz(),lepvectors[0].p4().Energy())
             l2mt2 = ROOT.reco.Particle.LorentzVector(lepvectors[1].p4().Px(), lepvectors[1].p4().Py(),lepvectors[1].p4().Pz(),lepvectors[1].p4().Energy())
             metp4 = ROOT.reco.Particle.LorentzVector(met*cos(metphi),met*sin(metphi),0,met)
-            metp4obj_jecUp = ROOT.reco.Particle.LorentzVector(ret['met_jecUp']*cos(metphi),ret['met_jecUp']*sin(metphi),0,ret['met_jecUp'])
-            metp4obj_jecDn = ROOT.reco.Particle.LorentzVector(ret['met_jecDn']*cos(metphi),ret['met_jecDn']*sin(metphi),0,ret['met_jecDn'])
+            metp4obj_jecUp = ROOT.reco.Particle.LorentzVector(ret['MET_pt_jesTotalUp']*cos(metphi),ret['MET_pt_jesTotalUp']*sin(metphi),0,ret['MET_pt_jesTotalUp'])
+            metp4obj_jecDn = ROOT.reco.Particle.LorentzVector(ret['MET_pt_jesTotalDown']*cos(metphi),ret['MET_pt_jesTotalDown']*sin(metphi),0,ret['MET_pt_jesTotalDown'])
             mT_lep1 = self.getMT(l1mt2.Pt(), metp4obj.Pt(), l1mt2.Phi(),  metp4obj.Phi())
             mT_lep2 = self.getMT(l2mt2.Pt(), metp4obj.Pt(), l2mt2.Phi(),  metp4obj.Phi())
             mT_dilep = self.getMT((l1mt2 + l2mt2).Pt(), metp4obj.Pt(), (l1mt2 + l2mt2).Phi(),  metp4obj.Phi())
@@ -756,30 +754,34 @@ class edgeFriends:
         ret["iJ"].sort(key = lambda idx : jetsc[idx].pt, reverse = True)
         ret["iFJ"].sort(key = lambda idx : fatjetsc[idx].pt, reverse = True)
 
-        ################### Compute jet and fatjet variables
+        ################### Compute jet and fatjet variables Atencion
         for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
             jetret[jfloat] = []
         if not isData:
-            for jmc in "mcPt mcFlavour mcMatchId".split():
+            for jmc in "".split():
+                #mcPt mcFlavour mcMatchId hadronFlavour
                 jetret[jmc] = []
         for idx in ret["iJ"]:
             jet = jetsc[idx] 
             for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
                 jetret[jfloat].append( getattr(jet,jfloat) )
             if not isData:
-                for jmc in "mcPt mcFlavour mcMatchId".split():
+                for jmc in "".split():
+                    #mcPt mcFlavour mcMatchId
                     jetret[jmc].append( getattr(jet,jmc) if not isData else -1.)
-        for fjfloat in "pt eta phi mass btagCSVV2".split():
+        for fjfloat in "pt eta phi mass btagCSVV2 tau1 tau2 tau3 msoftdrop".split():
             fatjetret[fjfloat] = []
         if not isData:
-            for fjmc in "mcPt mcFlavour mcMatchId hadronFlavour".split():
+            for fjmc in "".split(): 
+                #mcPt mcFlavour mcMatchId hadronFlavour
                 fatjetret[fjmc] = []
         for idx in ret["iFJ"]:
             fatjet = fatjetsc[idx]
-            for fjfloat in "pt eta phi mass btagCSVV2".split():
+            for fjfloat in "pt eta phi mass btagCSVV2 tau1 tau2 tau3 msoftdrop".split():
                 fatjetret[fjfloat].append( getattr(fatjet,fjfloat) )
             if not isData:
-                for fjmc in "mcPt mcFlavour mcMatchId hadronFlavour".split():
+                for fjmc in "".split(): 
+                    #mcPt mcFlavour mcMatchId hadronFlavour
                     fatjetret[fjmc].append( getattr(fatjet,fjmc) if not isData else -1.)
 
 
@@ -920,7 +922,9 @@ class edgeFriends:
         for j in coll1:
             if abs(j.eta) > 2.5 or j.pt < 20: continue # not central
             #if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
-            if j.mcPt > 8.:              continue # taken from RA5/7 people (ask Nacho)
+
+            # Atencion
+            if var_mcPt > 8.:              continue # taken from RA5/7 people (ask Nacho)
             if j.chHEF  > 0.1:            continue # charged franction > 0.1
             flag = False # both conditions have failed
         return flag
@@ -1076,14 +1080,12 @@ class edgeFriends:
 
     def smearJets(self, jetcol, syst):
 	
-        var_Jet_corr_JECUp = 1
-        var_Jet_corr_JECDown = 1
         for j in jetcol:
             quot = 1.0-getattr(j, "rawFactor") #getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
             if syst > 0: 
-                j.pt = j.pt*var_Jet_corr_JECUp / quot
+                j.pt = j.pt*getattr(j, "pt_jesTotalUp") / quot
             else:
-                j.pt = j.pt*var_Jet_corr_JECDown /quot
+                j.pt = j.pt*getattr(j, "pt_jesTotalDown") /quot
         return jetcol
     #################################################################################################################
 
@@ -1248,13 +1250,20 @@ class edgeFriends:
     #################################################################################################################
 
     def selfNewMediumMuonId(self, muon):
-        if not hasattr(muon, 'isGlobalMuon'):
+        
+        #Atencion 
+        var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
+        var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
+        var_LepGood_trkKink = 1 # LepGood_trkKink
+        var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
+
+        if not hasattr(muon, 'isGlobal'):
             return (muon.mediumId == 1)
-        goodGlob = (muon.isGlobalMuon and 
-                    var_globalTrackChi2 < 3 and
-                    var_chi2LocalPosition < 12 and
-                    var_trkKink < 20)
-        isMedium = (var_innerTrackValidHitFraction > 0.8 and
+        goodGlob = (muon.isGlobal and 
+                    var_LepGood_globalTrackChi2 < 3 and
+                    var_LepGood_chi2LocalPosition < 12 and
+                    var_LepGood_trkKink < 20)
+        isMedium = (var_LepGood_innerTrackValidHitFraction > 0.8 and
                     muon.segmentComp > (0.303 if goodGlob else  0.451) )
         return isMedium
         #muon.segmentCompatibility < 0.49: return False
@@ -1290,13 +1299,21 @@ class edgeFriends:
     #################################################################################################################
 
 def newMediumMuonId(muon):
-    if not hasattr(muon, 'isGlobalMuon'):
+
+    #Atencion 
+    var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
+    var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
+    var_LepGood_trkKink = 1 # LepGood_trkKink
+    var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
+
+
+    if not hasattr(muon, 'isGlobal'):
         return (muon.mediumId == 1)
-    goodGlob = (muon.isGlobalMuon and 
-                var_globalTrackChi2 < 3 and
-                var_chi2LocalPosition < 12 and
-                var_trkKink < 20)
-    isMedium = (var_innerTrackValidHitFraction > 0.8 and
+    goodGlob = (muon.isGlobal and 
+                var_LepGood_globalTrackChi2 < 3 and
+                var_LepGood_chi2LocalPosition < 12 and
+                var_LepGood_trkKink < 20)
+    isMedium = (var_LepGood_innerTrackValidHitFraction > 0.8 and
                 muon.segmentComp > (0.303 if goodGlob else  0.451) )
     return isMedium
     #muon.segmentCompatibility < 0.49: return False
