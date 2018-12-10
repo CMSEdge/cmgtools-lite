@@ -231,10 +231,6 @@ class edgeFriends:
                     ("MET_phi"+label, "F"), 
                     ("MET_pt_jesTotalUp"+label, "F"),
                     ("MET_pt_jesTotalDown"+label, "F"),
-                    ("met_shifted_MuonEnUp_pt"+label, "F"),
-                    ("met_shifted_MuonEnDown_pt"+label, "F"),
-                    ("met_shifted_ElectronEnUp_pt"+label, "F"),
-                    ("met_shifted_ElectronEnDown_pt"+label, "F"),
                     ("MET_pt_unclustEnUp"+label, "F"),
                     ("MET_pt_unclustEnDown"+label, "F"),
                     ("GenMET_pt"+label, "F"),
@@ -331,9 +327,8 @@ class edgeFriends:
         for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
             biglist.append( ("JetSel"+label+"_"+jfloat,"F",20,"nJetSel"+label) ) #if self.isMC:
         biglist.append( ("JetSel"+label+"_mcPt",     "F",20,"nJetSel"+label) )
-        biglist.append( ("JetSel"+label+"_mcFlavour","I",20,"nJetSel"+label) )
-        biglist.append( ("JetSel"+label+"_mcMatchId","I",20,"nJetSel"+label) )
-
+        biglist.append( ("JetSel"+label+"_mcPartonFlavour","I",20,"nJetSel"+label) )
+        biglist.append( ("JetSel"+label+"_genJetIdx","I",20,"nJetSel"+label) )
         ################## Selected Fat jets
         for fjfloat in "pt eta phi mass btagCSVV2 msoftdrop tau1 tau2 tau3".split():
             biglist.append( ("FatJetSel"+label+"_"+fjfloat,"F",20,"nFatJetSel"+label) ) #if self.isMC:
@@ -352,10 +347,6 @@ class edgeFriends:
         isData = False # Atencion, needed to be fixed
    	
         ###### Variables to evaluate code
-        var_met_shifted_MuonEnUp_pt = 1 # met_shifted_MuonEnUp_pt 
-        var_met_shifted_MuonEnDown_pt = 1 # met_shifted_MuonEnDown_pt
-        var_met_shifted_ElectronEnUp_pt = 1 # met_shifted_ElectronEnUp_pt
-        var_met_shifted_ElectronEnDown_pt = 1 # met_shifted_ElectronEnDown_pt
         var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
         var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
         var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
@@ -372,6 +363,7 @@ class edgeFriends:
         fatjetsc =[fj for fj in Collection(event,"FatJet","nFatJet")] # Should be: "FatJet", "nFatJet"
         if not isData: 
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
+            genjets = [j for j in Collection(event, "GenJet", "nGenJet")] # Atencion
 
         # Atencion: IsoTrack Collection
         isotracks =  [i for i in Collection(event,"IsoTrack","nIsoTrack")]
@@ -423,10 +415,6 @@ class edgeFriends:
         ret['MET_pt_jesTotalUp'] = event.MET_pt_jesTotalUp
         ret['MET_pt_jesTotalDown'] = event.MET_pt_jesTotalDown
         # Atencion: Not sure if necessary 
-        ret['met_shifted_MuonEnUp_pt'] = var_met_shifted_MuonEnUp_pt
-        ret['met_shifted_MuonEnDown_pt'] = var_met_shifted_MuonEnDown_pt 
-        ret['met_shifted_ElectronEnUp_pt'] = var_met_shifted_ElectronEnUp_pt
-        ret['met_shifted_ElectronEnDown_pt'] = var_met_shifted_ElectronEnDown_pt 
         ret['MET_pt_unclustEnUp'] = event.MET_pt_unclustEnUp
         ret['MET_pt_unclustEnDown'] = event.MET_pt_unclustEnDown
         ret['GenMET_pt']     = -1
@@ -491,7 +479,7 @@ class edgeFriends:
         nLepLoose = 0
         for il,lep in enumerate(leps):
             # if not self._susyEdgeLoose(lep) Atencion
-            if not lep.softId: 
+            if not self._susyEdgeLoose(lep): 
                 continue
             nLepLoose += 1
             if not self.tightLeptonSel(lep): 
@@ -801,22 +789,32 @@ class edgeFriends:
         ################### Sort jets by pt
         ret["iJ"].sort(key = lambda idx : jetsc[idx].pt, reverse = True)
         ret["iFJ"].sort(key = lambda idx : fatjetsc[idx].pt, reverse = True)
+        
 
         ################### Compute jet and fatjet variables Atencion
         for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
             jetret[jfloat] = []
         if not isData:
-            for jmc in "".split():
+            for jmc in "mcPt mcPartonFlavour genJetIdx".split():
                 #mcPt mcFlavour mcMatchId hadronFlavour
                 jetret[jmc] = []
         for idx in ret["iJ"]:
             jet = jetsc[idx] 
             for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
                 jetret[jfloat].append( getattr(jet,jfloat) )
-            if not isData:
-                for jmc in "".split():
+            if not isData: # Atencion
+                jetret["genJetIdx"].append( getattr(jet, "genJetIdx") if not isData else -1.)
+                if getattr(jet, "genJetIdx") == -1 or len(genjets)<=jet.genJetIdx:
+                    jetret["mcPartonFlavour"].append(-1)
+                    jetret["mcPt"].append(-1)
+                else:
+                    gjet = genjets[getattr(jet, "genJetIdx")] 
+                    jetret["mcPartonFlavour"].append( getattr(gjet, "partonFlavour") if not isData else -1)
+                    jetret["mcPt"].append( getattr(gjet, "pt") if not isData else -1.)
+
+                #for jmc in "mcPt mcFlavour hadronFlavour".split(): # Atencion: Esto es lo que habia antes
                     #mcPt mcFlavour mcMatchId
-                    jetret[jmc].append( getattr(jet,jmc) if not isData else -1.)
+                    #jetret[jmc].append( getattr(jet,jmc) if not isData else -1.)
         for fjfloat in "pt eta phi mass btagCSVV2 tau1 tau2 tau3 msoftdrop".split():
             fatjetret[fjfloat] = []
         if not isData:
@@ -974,6 +972,7 @@ class edgeFriends:
             #if j.mcMatchId != 0:              continue # its matched with a gen jet DeltaR < 0.3
 
             # Atencion
+            var_mcPt = 10.
             if var_mcPt > 8.:              continue # taken from RA5/7 people (ask Nacho)
             if j.chHEF  > 0.1:            continue # charged franction > 0.1
             flag = False # both conditions have failed
@@ -1320,25 +1319,53 @@ class edgeFriends:
     #################################################################################################################
 
     def _susyEdgeLoose(self, lep):
-            if lep.pt <= 10.: return False
-            if abs(lep.dxy) > 0.05: return False
-            if abs(lep.dz ) > 0.10: return False
-            if lep.sip3d > 8: return False
+            if lep.pt <= 5.: return False # Atencion before 10.
+            if abs(lep.dxy) > 0.2: return False
+            if abs(lep.dz ) > 0.5: return False
+            if lep.sip3d > 4: return False
             lepeta = abs(lep.eta)
             if lep.miniPFRelIso_all > 0.4: return False
             ## muons
             if abs(lep.pdgId) == 13:
-              if lepeta > 2.4: return False
-              #if lep.mediumMuonId != 1: return False
-              if not self.selfNewMediumMuonId(lep): return False
+                if lepeta > 2.4: return False
+                #if lep.mediumMuonId != 1: return False
+                if not lep.mediumId: return False
             ## electrons
             if abs(lep.pdgId) == 11:
-              if lepeta > 2.5: return False
-              if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-              A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
-              B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
-              if lep.pt > 10:
-                  if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
+                if lepeta > 2.4: return False
+                if (lep.convVeto == 0) or (lep.lostHits == 1): return False
+                
+                # Atencion Atencion Atencion:
+                if lepeta < 0.8:
+                    if lep.pt>5. and lep.pt<10.:
+                        if not lep.mvaFall17V1noIso > 0.488: return False
+                    if lep.pt>10. and lep.pt<25.:
+                        if not lep.mvaFall17V1noIso > (-0.788 + (0.148/15.)*(lep.pt -10.)): return False
+                    if lep.pt>=25.:
+                        if not lep.mvaFall17V1noIso > -0.64: return False
+
+                if lepeta > 0.8 and lepeta < 1.479:
+                    if lep.pt>5. and lep.pt<10.:
+                        if not lep.mvaFall17V1noIso > -0.045: return False
+                    if lep.pt>10. and lep.pt<25.:
+                        if not lep.mvaFall17V1noIso > (-0.85 + (0.075/15.)*(lep.pt -10.)): return False
+                    if lep.pt>=25.:
+                        if not lep.mvaFall17V1noIso > -0.775: return False
+
+                if lepeta > 1.479 and lepeta < 2.4:
+                    if lep.pt>5. and lep.pt<10.:
+                        if not lep.mvaFall17V1noIso > 0.176: return False
+                    if lep.pt>10. and lep.pt<25.:
+                        if not lep.mvaFall17V1noIso > (-0.81 + (0.077/15.)*(lep.pt -10.)): return False
+                    if lep.pt>=25.:
+                        if not lep.mvaFall17V1noIso > -0.733: return False
+
+              #  A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
+              #  B = -0.96+(-0.96+0.96)*(abs(lep.eta)>0.8)+(-0.95+0.96)*(abs(lep.eta)>1.479)    
+              #  if lep.pt > 10:
+                    # Atencion delete line below and decomment second line
+              #      if not lep.mvaFall17V1Iso: return False
+                    #if not lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) ): return False
 
               # if (lepeta < 0.8   and lep.mvaIdSpring15 < -0.70) : return False
               # if (lepeta > 0.8   and lepeta < 1.479 and lep.mvaIdSpring15 < -0.83) : return False
@@ -1375,24 +1402,47 @@ def _susyEdgeTight(lep):
     if eta          > 2.4: return False
     if abs(lep.dxy) > 0.05: return False
     if abs(lep.dz ) > 0.10: return False
+    if lep.sip3d > 4: return False
     if eta > 1.4 and eta < 1.6: return False
     if abs(lep.pdgId) == 13:
-      ## old medium ID if lep.mediumMuonId != 1: return False
-      if not newMediumMuonId(lep): return False
-      if lep.miniPFRelIso_all > 0.2: return False
+        ## old medium ID if lep.mediumMuonId != 1: return False
+        if not lep.mediumId: return False
+        if lep.miniPFRelIso_all > 0.2: return False
+        if not lep.tightId: return False # Atencion
     #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
     if abs(lep.pdgId) == 11:
-      etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
-      if (etatest > 1.4442 and etatest < 1.566) : return False
-      if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
-         
-      A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
-      B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
-      if lep.pt > 10.:
-          if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
-      else: return False
+        etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
+        if (etatest > 1.4442 and etatest < 1.566) : return False
+        if (lep.convVeto == 0) or (lep.lostHits == 1) : return False
+        if lep.pt < 10.: return False
 
-      if lep.miniPFRelIso_all > 0.1: return False
+        if etatest < 0.8:
+            if lep.pt<25:
+                if not lep.mvaFall17V1noIso > (0.2 + 0.032*(lep.pt -10.)): return False
+            if lep.pt>=25.:
+                if not lep.mvaFall17V1noIso > 0.68: return False
+
+        if etatest > 0.8 and etatest < 1.479:
+            if lep.pt<25.:                  
+                if not lep.mvaFall17V1noIso > (0.1 + 0.025*(lep.pt -10.)): return False
+            if lep.pt>=25.:
+                if not lep.mvaFall17V1noIso > 0.475: return False
+
+        if etatest > 1.479 and etatest < 2.4:
+            if lep.pt<25.:              
+                if not lep.mvaFall17V1noIso > (-0.1 + 0.028*(lep.pt -10.)): return False
+            if lep.pt>=25.:
+                if not lep.mvaFall17V1noIso > 0.32: return False
+ 
+        #A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
+        #B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
+        #if lep.pt > 10.:
+            # Atencion delete line below and decomment second line
+        #    if not lep.mvaFall17V1Iso: return False
+            #if not (lep.mvaIdSpring16GP > min( A , max( B , A+(B-A)/10*(lep.pt-15) ) )): return False
+        #else: return False
+
+        #if lep.miniPFRelIso_all > 0.1: return False
     return True
 #################################################################################################################
 
