@@ -394,6 +394,9 @@ class edgeFriends:
         trigret = {}
         isotrackret = {}
 
+        if event.event == 65831541:
+            print("Hello the event is here")
+
         ################## Starting to fill the dictionaries
 
         ################## Event stuff
@@ -493,6 +496,14 @@ class edgeFriends:
             if il >= 0: 
                 lepst.append(leps[il])
         
+        if event.event == 65831541:
+            print("**************************************************************")
+            print("**************************************************************")
+            print("**************************************************************") 
+            print("ret['iLT']", ret["iLT"])
+            print("nLepTight", ret["nLepTight"])
+            print("nLepLoose", ret["nLepLoose"])
+ 
         ################### Calculating two lepton variables for all elements of the collection
         iL1iL2 = self.getPairVariables(lepst, metp4)
         ret['iL1T'] = ret["iLT"][ iL1iL2[0] ] if (len(ret["iLT"]) >=1 and iL1iL2[0] != -999) else -999
@@ -540,6 +551,12 @@ class edgeFriends:
                 lcount += 1
         else:
             ret['nPairLep'] = 0
+
+
+        if event.event == 65831541: 
+            print(lepret)
+
+
         ################### Variables needed for 4l control regions
         if len(leps) < 4: 
             ret['mllBestZ'] = -99; ret['mt2BestZ'] = -99; ret['ptBestZ'] = -99; ret['mllOtherZ'] = -99; ret['newMet'] = -99;ret['newMetPhi'] = -99;
@@ -937,7 +954,7 @@ class edgeFriends:
     def setJetCollection(self, jetcoll, lepst):
         for j in jetcoll:
             j._clean = True
-            if abs(j.eta) > 2.4 or j.pt < 25.:
+            if abs(j.eta) > 2.4 or j.pt < 35.: # Marius change, previus 25 # Marius change, previus 25.
                 j._clean = False
                 continue
             if j.pt < 25 and j.btagCSVV2 < self.btagMediumCut: 
@@ -1322,7 +1339,7 @@ class edgeFriends:
             if lep.pt <= 5.: return False # Atencion before 10.
             if abs(lep.dxy) > 0.2: return False
             if abs(lep.dz ) > 0.5: return False
-            if lep.sip3d > 4: return False
+            if lep.sip3d > 8: return False
             lepeta = abs(lep.eta)
             if lep.miniPFRelIso_all > 0.4: return False
             ## muons
@@ -1397,25 +1414,25 @@ def newMediumMuonId(muon):
     #################################################################################################################
  
 def _susyEdgeTight(lep):
-    if lep.pt <= 5.: return False
+    if lep.pt < 20.: return False
     eta = abs(lep.eta)
     if eta          > 2.4: return False
     if abs(lep.dxy) > 0.05: return False
     if abs(lep.dz ) > 0.10: return False
-    if lep.sip3d > 4: return False
+    if lep.sip3d > 8: return False
     if eta > 1.4 and eta < 1.6: return False
     if abs(lep.pdgId) == 13:
         ## old medium ID if lep.mediumMuonId != 1: return False
         if not lep.mediumId: return False
-        if lep.miniPFRelIso_all > 0.2: return False
-        if not lep.tightId: return False # Atencion
-    #if abs(lep.pdgId) == 11 and (lep.tightId < 1 or (abs(lep.etaSc) > 1.4442 and abs(lep.etaSc) < 1.566)) : return False
+        if lep.miniPFRelIso_all >= 0.2: return False
+        ##if not lep.tightId: return False # Atencion
     if abs(lep.pdgId) == 11:
         etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
         if (etatest > 1.4442 and etatest < 1.566) : return False
-        if (lep.convVeto == 0) or (lep.lostHits == 1) : return False
-        if lep.pt < 10.: return False
 
+        if (lep.convVeto == 0) or (ord(lep.lostHits) > 0) : return False
+        #if lep.pt < 10.: return False
+        if lep.miniPFRelIso_all >= 0.1: return False
         if etatest < 0.8:
             if lep.pt<25:
                 if not lep.mvaFall17V1noIso > (0.2 + 0.032*(lep.pt -10.)): return False
@@ -1433,7 +1450,9 @@ def _susyEdgeTight(lep):
                 if not lep.mvaFall17V1noIso > (-0.1 + 0.028*(lep.pt -10.)): return False
             if lep.pt>=25.:
                 if not lep.mvaFall17V1noIso > 0.32: return False
- 
+
+
+
         #A = 0.77+(0.56-0.77)*(abs(lep.eta)>0.8)+(0.48-0.56)*(abs(lep.eta)>1.479)
         #B = 0.52+(0.11-0.52)*(abs(lep.eta)>0.8)+(-0.01-0.11)*(abs(lep.eta)>1.479)    
         #if lep.pt > 10.:
