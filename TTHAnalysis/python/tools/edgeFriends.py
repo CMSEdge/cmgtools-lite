@@ -161,8 +161,6 @@ class edgeFriends:
                     ("nJetSel_jecUp"+label, "I"),
                     ("nJetSel_jecDn"+label, "I"),
                     ("nFatJetSel"+label, "I"),
-                    ("nIsoTrack"+label, "I"),
-                    ("nHighPurityIsoTrack"+label, "I"),
                     ("rightMjj"+label, "F"),
                     ("bestMjj"+label, "F"),
                     ("minMjj"+label, "F"),
@@ -180,8 +178,6 @@ class edgeFriends:
                     ("iLT"+label,"I",20,"nLepTight"+label), 
                     ("iJ"+label,"I",20,"nJetSel"+label), 
                     ("iFJ"+label,"I",20,"nFatJetSel"+label),
-                    ("iIT"+label,"I",20,"nIsoTrack"+label),
-                    ("iHPIT"+label,"I",20,"nHighPurityIsoTrack"+label),  
                     ("nLepGood20"+label, "I"),
                     ("nJet35"+label, "I"),
                     ("nJet35_jecUp"+label, "I"),
@@ -318,10 +314,10 @@ class edgeFriends:
         ################## SUSY massess  
         for mass in self.susymasslist:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=mass)) )
-
-        ################## Selected isotracks
-        for itfloat in "pt eta phi dxy dz pfRelIso03_all miniPFRelIso_all pfRelIso03_chg miniPFRelIso_chg pdgId isPFcand".split():
-            biglist.append( ("IsoTrackSel"+label+"_"+itfloat,"F",20,"nIsoTrack"+label) )
+ 
+        ################## IsoTrack stuff
+        biglist.append(("nPFLep5"+label, 'I'))
+        biglist.append(("nPFHad10"+label, 'I'))
 
         ################## Selected jets
         for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
@@ -346,18 +342,13 @@ class edgeFriends:
         ###### Atention: what do do here with is Data
         isData = False # Atencion, needed to be fixed
    	
-        ###### Variables to evaluate code
-        var_Jet_CorrFactor_L1L2L3Res = 1 # Jet_CorrFactor_L1L2L3Res
-        var_LepGood_globalTrackChi2 = 1 # LepGood_globalTrackChi2
-        var_LepGood_chi2LocalPosition = 1 # LepGood_chi2LocalPosition
-        var_LepGood_trkKink = 1 # LepGood_trkKink
-        var_LepGood_innerTrackValidHitFraction = 1 # LepGood_innerTrackValidhitFraction
-
         ##### MC variables
         var_mcPt = 10 # mcPt
 
         ################## Get collections
         leps  =  [l for l in Collection(event,"LepGood","nLepGood")]
+        map( lambda x : setattr(x, 'doCorrections', False), leps ) # Deactivate the energy corrections on electrons
+
         jetsc =  [j for j in Collection(event,"Jet","nJet")]
         jetslc = [j for j in Collection(event,"Jet","nJet")]
         fatjetsc =[fj for fj in Collection(event,"FatJet","nFatJet")] # Should be: "FatJet", "nFatJet"
@@ -365,8 +356,6 @@ class edgeFriends:
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
             genjets = [j for j in Collection(event, "GenJet", "nGenJet")] # Atencion
 
-        # Atencion: IsoTrack Collection
-        isotracks =  [i for i in Collection(event,"IsoTrack","nIsoTrack")]
 
         ################## Treatment of jets
         jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
@@ -392,10 +381,6 @@ class edgeFriends:
         fatjetret = {} 
         lepret  = {}
         trigret = {}
-        isotrackret = {}
-
-        if event.event == 65831541:
-            print("Hello the event is here")
 
         ################## Starting to fill the dictionaries
 
@@ -438,9 +423,10 @@ class edgeFriends:
             ret['Flag_badMuonFilter']= event.Flag_BadPFMuonFilter
             ret["Flag_badChargedHadronFilter"] = event.Flag_BadChargedCandidateFilter
             ret["Flag_badMuonFilter"] = event.Flag_BadPFMuonFilter
+        
         ################### Isotracks stuff
-        #ret['nPFLep5'] = event.nPFLep5        
-        #ret['nPFHad10'] = event.nPFHad10        
+        ret['nPFLep5'] = event.nPFLep5        
+        ret['nPFHad10'] = event.nPFHad10        
 
         if not isData:
             ret['nTrueInt'] = event.Pileup_nTrueInt
@@ -496,13 +482,6 @@ class edgeFriends:
             if il >= 0: 
                 lepst.append(leps[il])
         
-        if event.event == 65831541:
-            print("**************************************************************")
-            print("**************************************************************")
-            print("**************************************************************") 
-            print("ret['iLT']", ret["iLT"])
-            print("nLepTight", ret["nLepTight"])
-            print("nLepLoose", ret["nLepLoose"])
  
         ################### Calculating two lepton variables for all elements of the collection
         iL1iL2 = self.getPairVariables(lepst, metp4)
@@ -543,6 +522,9 @@ class edgeFriends:
                     
                     if lfloat == 'mcMatchId' and isData:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = 1
+                    elif lfloat == 'pt' and abs(getattr(lep, 'pdgId')) == 11 and hasattr(lep, 'doCorrections') and lep.doCorrections == False and not getattr(lep, 'eCorr') == 0:
+                        lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)/getattr(lep, "eCorr") # if not corrections
+                        #lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat) # if corrections
                     else:
                         lepret["Lep"+str(lcount)+"_"+lfloat+self.label] = getattr(lep,lfloat)
                 lepvectors.append(lep)
@@ -637,42 +619,6 @@ class edgeFriends:
             ret['WmT'] = WmT
             ret['WZ_ll_MT2'] = WZ_ll_MT2
             ret['Z_ll_MT2'] = Z_ll_MT2
-
-
-        ################### IsoTrack variables
-        ret["iIT"] = []
-        nIsoTrack = 0
-        for it, track in enumerate(isotracks):
-            # All tracks are taken
-            ret["iIT"].append(it)
-            nIsoTrack += 1
-        ret["nIsoTrack"] = nIsoTrack
-        
-        ####### Sort IsoTracks by pt
-        ret["iIT"].sort(key = lambda idx : isotracks[idx].pt, reverse = True)
-        isotrackst = []
-        for it in ret["iIT"]:
-            if it >= 0:
-                isotrackst.append(isotracks[it])
-
-        ####### Definition of High Purity Tracks
-        ret["iHPIT"] = [] # High purity IsoTracks
-        nHighPurityIsoTrack = 0
-        for it, track in enumerate(isotrackst):
-            if not track.isHighPurityTrack:
-                continue
-            nHighPurityIsoTrack += 1
-            ret["iHPIT"].append(it)
-        ret["nHighPurityIsoTrack"] = nHighPurityIsoTrack
-
-        ################### Compute isotrack variables
-        for itfloat in "pt eta phi dxy dz pfRelIso03_all miniPFRelIso_all pfRelIso03_chg miniPFRelIso_chg pdgId isPFcand".split():
-            isotrackret[itfloat] = []
-
-        for idx in ret["iIT"]:
-            track = isotrackst[idx]
-            for itfloat in "pt eta phi dxy dz pfRelIso03_all miniPFRelIso_all pfRelIso03_chg miniPFRelIso_chg pdgId isPFcand".split():
-                isotrackret[itfloat].append( getattr(track, itfloat) )
 
 
 
@@ -946,15 +892,13 @@ class edgeFriends:
             fullret[k] = v
         for k,v in trigret.iteritems(): 
             fullret[k+self.label] = v
-        for k,v in isotrackret.iteritems():
-            fullret["IsoTrackSel%s_%s" % (self.label,k)] = v
         return fullret
     #################################################################################################################
 
     def setJetCollection(self, jetcoll, lepst):
         for j in jetcoll:
             j._clean = True
-            if abs(j.eta) > 2.4 or j.pt < 35.: # Marius change, previus 25 # Marius change, previus 25.
+            if abs(j.eta) > 2.4 or j.pt < 25.: # Marius change, previus 25 # Now changed to 25 again
                 j._clean = False
                 continue
             if j.pt < 25 and j.btagCSVV2 < self.btagMediumCut: 
@@ -1076,7 +1020,18 @@ class edgeFriends:
             [mll, jzb, dr, phi, metrec, zpt, dphi, d3D] = self.getMll_JZB(lepst[0].p4(), lepst[1].p4(), metp4)
             [parPt, ortPt] = self.getParOrtPt(lepst[0].p4(),lepst[1].p4())
             ret = (0, 1, mll, jzb, dr, phi, metrec, zpt, dphi, d3D, parPt, ortPt, lepst[0].p4().Theta() - lepst[1].p4().Theta())
-        return ret                                                                                                                        
+        return ret
+
+
+    #################################################################################################################
+
+    #def getMllandZptUncorrected(self, lepst):
+    #ret = (-99., -99.) # default values
+    #if len(lepst) >= 2:
+        # Compute new mll and zpt
+         
+
+    #return ret                                                                                                                        
     #################################################################################################################
 
     def getRightMjj(self, jetsel):
@@ -1149,9 +1104,11 @@ class edgeFriends:
         for j in jetcol:
             quot = 1.0-getattr(j, "rawFactor") #getattr(j, "CorrFactor_L1L2L3Res") if getattr(j, "CorrFactor_L1L2L3Res") > 0 else getattr(j, "CorrFactor_L1L2L3")
             if syst > 0: 
-                j.pt = j.pt*getattr(j, "pt_jesTotalUp") / quot
+                #j.pt = j.pt*getattr(j, "pt_jesTotalUp") / quot
+                j.pt = getattr(j, 'pt_jesTotalUp') # Atencion
             else:
-                j.pt = j.pt*getattr(j, "pt_jesTotalDown") /quot
+                #j.pt = j.pt*getattr(j, "pt_jesTotalDown") /quot
+                j.pt = getattr(j, 'pt_jesTotalDown')
         return jetcol
     #################################################################################################################
 
@@ -1336,7 +1293,11 @@ class edgeFriends:
     #################################################################################################################
 
     def _susyEdgeLoose(self, lep):
-            if lep.pt <= 5.: return False # Atencion before 10.
+            
+            leppt = lep.pt/lep.eCorr if not lep.eCorr == 0 and lep.doCorrections == False else lep.pt# If not energy corrections applied
+            #leppt = lep.pt # If energy corrections applied
+
+            if leppt <= 5.: return False # Atencion before 10.
             if abs(lep.dxy) > 0.2: return False
             if abs(lep.dz ) > 0.5: return False
             if lep.sip3d > 8: return False
@@ -1352,29 +1313,30 @@ class edgeFriends:
                 if lepeta > 2.4: return False
                 if (lep.convVeto == 0) or (lep.lostHits == 1): return False
                 
-                # Atencion Atencion Atencion:
+                # MVA definition:
+                lepeta = abs(lep.eta + lep.deltaEtaSC) # Using supercluster Eta for electrons
                 if lepeta < 0.8:
-                    if lep.pt>5. and lep.pt<10.:
+                    if leppt>5. and leppt<10.:
                         if not lep.mvaFall17V1noIso > 0.488: return False
-                    if lep.pt>10. and lep.pt<25.:
-                        if not lep.mvaFall17V1noIso > (-0.788 + (0.148/15.)*(lep.pt -10.)): return False
-                    if lep.pt>=25.:
+                    if leppt>10. and leppt<25.:
+                        if not lep.mvaFall17V1noIso > (-0.788 + (0.148/15.)*(leppt -10.)): return False
+                    if leppt>=25.:
                         if not lep.mvaFall17V1noIso > -0.64: return False
 
                 if lepeta > 0.8 and lepeta < 1.479:
-                    if lep.pt>5. and lep.pt<10.:
+                    if leppt>5. and leppt<10.:
                         if not lep.mvaFall17V1noIso > -0.045: return False
-                    if lep.pt>10. and lep.pt<25.:
-                        if not lep.mvaFall17V1noIso > (-0.85 + (0.075/15.)*(lep.pt -10.)): return False
-                    if lep.pt>=25.:
+                    if leppt>10. and leppt<25.:
+                        if not lep.mvaFall17V1noIso > (-0.85 + (0.075/15.)*(leppt -10.)): return False
+                    if leppt>=25.:
                         if not lep.mvaFall17V1noIso > -0.775: return False
 
                 if lepeta > 1.479 and lepeta < 2.4:
-                    if lep.pt>5. and lep.pt<10.:
+                    if leppt>5. and leppt<10.:
                         if not lep.mvaFall17V1noIso > 0.176: return False
-                    if lep.pt>10. and lep.pt<25.:
-                        if not lep.mvaFall17V1noIso > (-0.81 + (0.077/15.)*(lep.pt -10.)): return False
-                    if lep.pt>=25.:
+                    if leppt>10. and leppt<25.:
+                        if not lep.mvaFall17V1noIso > (-0.81 + (0.077/15.)*(leppt -10.)): return False
+                    if leppt>=25.:
                         if not lep.mvaFall17V1noIso > -0.733: return False
 
               #  A = -0.86+(-0.85+0.86)*(abs(lep.eta)>0.8)+(-0.81+0.86)*(abs(lep.eta)>1.479)
@@ -1414,7 +1376,11 @@ def newMediumMuonId(muon):
     #################################################################################################################
  
 def _susyEdgeTight(lep):
-    if lep.pt < 20.: return False
+
+    leppt = lep.pt/lep.eCorr if not lep.eCorr == 0 and lep.doCorrections == False else lep.pt# If not energy corrections applied 
+    #leppt = lep.pt # If energy corrections applied
+
+    if leppt < 20.: return False
     eta = abs(lep.eta)
     if eta          > 2.4: return False
     if abs(lep.dxy) > 0.05: return False
@@ -1427,28 +1393,30 @@ def _susyEdgeTight(lep):
         if lep.miniPFRelIso_all >= 0.2: return False
         ##if not lep.tightId: return False # Atencion
     if abs(lep.pdgId) == 11:
-        etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
+        # MVA definition:
+        etatest = abs(lep.eta + lep.deltaEtaSC) # Using supercluster Eta for electrons
+        #etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
         if (etatest > 1.4442 and etatest < 1.566) : return False
 
         if (lep.convVeto == 0) or (ord(lep.lostHits) > 0) : return False
-        #if lep.pt < 10.: return False
+        #if leppt < 10.: return False
         if lep.miniPFRelIso_all >= 0.1: return False
         if etatest < 0.8:
-            if lep.pt<25:
-                if not lep.mvaFall17V1noIso > (0.2 + 0.032*(lep.pt -10.)): return False
-            if lep.pt>=25.:
+            if leppt<25:
+                if not lep.mvaFall17V1noIso > (0.2 + 0.032*(leppt -10.)): return False
+            if leppt>=25.:
                 if not lep.mvaFall17V1noIso > 0.68: return False
 
         if etatest > 0.8 and etatest < 1.479:
-            if lep.pt<25.:                  
-                if not lep.mvaFall17V1noIso > (0.1 + 0.025*(lep.pt -10.)): return False
-            if lep.pt>=25.:
+            if leppt<25.:                  
+                if not lep.mvaFall17V1noIso > (0.1 + 0.025*(leppt -10.)): return False
+            if leppt>=25.:
                 if not lep.mvaFall17V1noIso > 0.475: return False
 
         if etatest > 1.479 and etatest < 2.4:
-            if lep.pt<25.:              
-                if not lep.mvaFall17V1noIso > (-0.1 + 0.028*(lep.pt -10.)): return False
-            if lep.pt>=25.:
+            if leppt<25.:              
+                if not lep.mvaFall17V1noIso > (-0.1 + 0.028*(leppt -10.)): return False
+            if leppt>=25.:
                 if not lep.mvaFall17V1noIso > 0.32: return False
 
 

@@ -104,6 +104,8 @@ class Object:
     def p4(self, pt = 0):
         ret = ROOT.TLorentzVector()
         if pt > 0: ret.SetPtEtaPhiM(pt     ,self.eta,self.phi,self.mass)
+        elif abs(self.pdgId) == 11 and hasattr(self, 'doCorrections') and self.doCorrections == False:
+            ret.SetPtEtaPhiM(self.pt/self.eCorr, self.eta, self.phi, self.mass)
         else     : ret.SetPtEtaPhiM(self.pt,self.eta,self.phi,self.mass)
         return ret
     def subObj(self,prefix):
