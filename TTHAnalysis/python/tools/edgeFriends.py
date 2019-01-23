@@ -908,6 +908,7 @@ class edgeFriends:
                 #lep = leps[l]
                 if deltaR(l,j) < 0.4:
                     j._clean = False
+            if j.jetId == 0: j._clean = False
         return jetcoll                                                
     #################################################################################################################
     ######## Atenttion how to do this.                                                                      
