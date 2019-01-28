@@ -57,8 +57,8 @@ class edgeFriends:
         self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
         self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
         self.f_btag_eff.Close()
-        self.btagMediumCut =  0.8838 
-        self.btagLooseCut  =  0.5803
+        self.btagMediumCut =  0.4941 #DeepCSV
+        self.btagLooseCut  =  0.1522 #DeepCSV
 
         ###################################### Scale factors for leptons
 
@@ -161,6 +161,7 @@ class edgeFriends:
                     ("nJetSel_jecUp"+label, "I"),
                     ("nJetSel_jecDn"+label, "I"),
                     ("nFatJetSel"+label, "I"),
+                    ("nEdgeIsoTracks"+label, "I"),
                     ("rightMjj"+label, "F"),
                     ("bestMjj"+label, "F"),
                     ("minMjj"+label, "F"),
@@ -314,19 +315,22 @@ class edgeFriends:
         ################## SUSY massess  
         for mass in self.susymasslist:
             biglist.append( ( '{tn}{lab}'.format(lab=label, tn=mass)) )
- 
+         
         ################## IsoTrack stuff
         biglist.append(("nPFLep5"+label, 'I'))
         biglist.append(("nPFHad10"+label, 'I'))
-
+        
+        for itfloat in "pt eta phi dxy dz pfRelIso03_chg pdgId".split():
+            biglist.append( ("EdgeIsoTracksSel"+label+"_"+itfloat,"F",20,"nEdgeIsoTracks"+label) )
+        
         ################## Selected jets
-        for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
+        for jfloat in "pt eta phi mass btagCSVV2 btagDeepB rawFactor".split():
             biglist.append( ("JetSel"+label+"_"+jfloat,"F",20,"nJetSel"+label) ) #if self.isMC:
         biglist.append( ("JetSel"+label+"_mcPt",     "F",20,"nJetSel"+label) )
         biglist.append( ("JetSel"+label+"_mcPartonFlavour","I",20,"nJetSel"+label) )
         biglist.append( ("JetSel"+label+"_genJetIdx","I",20,"nJetSel"+label) )
         ################## Selected Fat jets
-        for fjfloat in "pt eta phi mass btagCSVV2 msoftdrop tau1 tau2 tau3".split():
+        for fjfloat in "pt eta phi mass btagCSVV2 btagDeepB msoftdrop tau1 tau2 tau3".split():
             biglist.append( ("FatJetSel"+label+"_"+fjfloat,"F",20,"nFatJetSel"+label) ) #if self.isMC:
         biglist.append( ("FatJetSel"+label+"_mcPt",     "F",20,"nFatJetSel"+label) )
         biglist.append( ("FatJetSel"+label+"_mcMatchId","I",20,"nFatJetSel"+label) )
@@ -356,6 +360,8 @@ class edgeFriends:
             genparts = [g for g in Collection(event,"GenPart","nGenPart")]
             genjets = [j for j in Collection(event, "GenJet", "nGenJet")] # Atencion
 
+        edgeisotracks =  [i for i in Collection(event,"EdgeIsoTracks","nEdgeIsoTracks")]
+        
 
         ################## Treatment of jets
         jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
@@ -369,7 +375,7 @@ class edgeFriends:
             ntrue = event.Pileup_nTrueInt
  
         ################## Treatment of MET
-        (met, metphi)  = event.MET_pt, event.MET_phi
+        (met, metphi)  = event.METFixEE2017_pt, event.METFixEE2017_phi #METFixEE2017
         metp4 = ROOT.TLorentzVector()
         metp4.SetPtEtaPhiM(met, 0, metphi, 0)
         metp4obj = ROOT.TLorentzVector()
@@ -381,6 +387,7 @@ class edgeFriends:
         fatjetret = {} 
         lepret  = {}
         trigret = {}
+        edgeisotrackret = {}
 
         ################## Starting to fill the dictionaries
 
@@ -400,11 +407,11 @@ class edgeFriends:
         ################## MET stuff
         ret['MET_pt'] = met
         ret['MET_phi'] = metphi 
-        ret['MET_pt_jesTotalUp'] = event.MET_pt_jesTotalUp
-        ret['MET_pt_jesTotalDown'] = event.MET_pt_jesTotalDown
+        ret['MET_pt_jesTotalUp'] = event.METFixEE2017_pt_jesTotalUp
+        ret['MET_pt_jesTotalDown'] = event.METFixEE2017_pt_jesTotalDown
         # Atencion: Not sure if necessary 
-        ret['MET_pt_unclustEnUp'] = event.MET_pt_unclustEnUp
-        ret['MET_pt_unclustEnDown'] = event.MET_pt_unclustEnDown
+        ret['MET_pt_unclustEnUp'] = event.METFixEE2017_pt_unclustEnUp
+        ret['MET_pt_unclustEnDown'] = event.METFixEE2017_pt_unclustEnDown
         ret['GenMET_pt']     = -1
         ret['GenMET_phi'] = -1
         ################## SUSY masses stuff
@@ -534,9 +541,6 @@ class edgeFriends:
         else:
             ret['nPairLep'] = 0
 
-
-        if event.event == 65831541: 
-            print(lepret)
 
 
         ################### Variables needed for 4l control regions
@@ -755,7 +759,7 @@ class edgeFriends:
         
 
         ################### Compute jet and fatjet variables Atencion
-        for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
+        for jfloat in "pt eta phi mass btagCSVV2 btagDeepB rawFactor".split():
             jetret[jfloat] = []
         if not isData:
             for jmc in "mcPt mcPartonFlavour genJetIdx".split():
@@ -763,7 +767,7 @@ class edgeFriends:
                 jetret[jmc] = []
         for idx in ret["iJ"]:
             jet = jetsc[idx] 
-            for jfloat in "pt eta phi mass btagCSVV2 rawFactor".split():
+            for jfloat in "pt eta phi mass btagCSVV2 btagDeepB rawFactor".split():
                 jetret[jfloat].append( getattr(jet,jfloat) )
             if not isData: # Atencion
                 jetret["genJetIdx"].append( getattr(jet, "genJetIdx") if not isData else -1.)
@@ -793,6 +797,15 @@ class edgeFriends:
                     #mcPt mcFlavour mcMatchId hadronFlavour
                     fatjetret[fjmc].append( getattr(fatjet,fjmc) if not isData else -1.)
 
+        
+        ################### Compute isotrack variables
+        ret["nEdgeIsoTracks"] = event.nEdgeIsoTracks
+        for itfloat in "pt eta phi dz dxy pfRelIso03_chg pdgId".split():
+            edgeisotrackret[itfloat] = []
+        for  it, track in enumerate(edgeisotracks):
+            for itfloat in "pt eta phi dz dxy pfRelIso03_chg pdgId".split():
+                edgeisotrackret[itfloat].append( getattr(track, itfloat) )
+        
 
         ################### Compute the recoil of the jets
         totalRecoil = ROOT.TLorentzVector()
@@ -863,7 +876,7 @@ class edgeFriends:
                 for _il,lep in enumerate(leplist):
                     if _il == _lmin: continue
                     for _ij,j in enumerate(jet2coll):
-                        if len(theBJets) == 1 and j.btagCSVV2 >= self.btagMediumCut:
+                        if len(theBJets) == 1 and j.btagDeepB >= self.btagMediumCut:
                             continue
                         if (len(theBJets) == 0 or len(theBJets) >= 2) and _ij == _jmin: continue
                         jet.SetPtEtaPhiM(j.pt, j.eta, j.phi, j.mass)           
@@ -892,6 +905,10 @@ class edgeFriends:
             fullret[k] = v
         for k,v in trigret.iteritems(): 
             fullret[k+self.label] = v
+        
+        for k,v in edgeisotrackret.iteritems():
+            fullret["EdgeIsoTracksSel%s_%s" % (self.label,k)] = v
+        
         return fullret
     #################################################################################################################
 
@@ -901,7 +918,7 @@ class edgeFriends:
             if abs(j.eta) > 2.4 or j.pt < 25.: # Marius change, previus 25 # Now changed to 25 again
                 j._clean = False
                 continue
-            if j.pt < 25 and j.btagCSVV2 < self.btagMediumCut: 
+            if j.pt < 25 and j.btagDeepB < self.btagMediumCut: 
                 j._clean = False
                 continue
             for l in lepst:
@@ -947,7 +964,7 @@ class edgeFriends:
         retlist = []
         for ijc,j in enumerate(coll1):
             if not j._clean: continue
-            bt = j.btagCSVV2
+            bt = j.btagDeepB
             pt = j.pt
             if pt > 25 and bt > self.btagMediumCut: 
                 nb25 += 1
@@ -1233,7 +1250,7 @@ class edgeFriends:
 
         for jet in jets:
 
-            csv = jet.btagCSVV2
+            csv = jet.btagDeepB
             mcFlavor = (jet.hadronFlavour if hasattr(jet, 'hadronFlavour') else jet.mcFlavour)
             eta = jet.eta
             pt = jet.pt
