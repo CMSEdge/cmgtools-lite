@@ -7,6 +7,7 @@
 import time
 import copy
 import math
+import os
 from CMGTools.TTHAnalysis.treeReAnalyzer import *
 from CMGTools.TTHAnalysis.tools.eventVars_MT2 import *
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
@@ -32,27 +33,27 @@ class edgeFriends:
         self.isMC = 1 # should be: isMC
         
         ###################################### Pile-up stuff should be included here
-        self.setPU("Run2017") 
+        #self.setPU("Run2017") 
 
         ###################################### B-tagging stuff to be included here
         vector = ROOT.vector('string')()
         vector.push_back("up")
-        vector.push_back("down")
-        self.calib = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/user/p/pablom/public/btaggingweights/CSVv2_94XSF_V1_B_F.csv")
+        vector.push_back("down") 
+        self.calib = ROOT.BTagCalibration("csvv2",os.environ['CMSSW_BASE'] + "/btaggingweights/CSVv2_94XSF_V1_B_F.csv")
         self.reader_heavy = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_heavy.load(self.calib, 0, "comb") #0 means b-jets
         self.reader_c = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_c.load(self.calib, 1, "comb") #0 means b-jets
         self.reader_light = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_light.load(self.calib, 2, "incl") #0 means b-jets
-        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", "/afs/cern.ch/work/s/sesanche/public/stuffForMoriond/fastsim_csvv2_ttbar_26_1_2017.csv")
+        self.calibFASTSIM = ROOT.BTagCalibration("csvv2", os.environ['CMSSW_BASE'] + "/btaggingweights/fastsim_csvv2_ttbar_26_1_2017.csv")
         self.reader_heavy_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_heavy_FASTSIM.load(self.calibFASTSIM, 0, "fastsim") #0 means b-jets
         self.reader_c_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_c_FASTSIM.load(self.calibFASTSIM, 1, "fastsim") #0 means b-jets
         self.reader_light_FASTSIM = ROOT.BTagCalibrationReader(1, "central", vector) #1 means medium point
         self.reader_light_FASTSIM.load(self.calibFASTSIM, 2, "fastsim") #0 means b-jets
-        self.f_btag_eff      = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root")
+        self.f_btag_eff      = ROOT.TFile(os.environ['CMSSW_BASE'] + "/btaggingweights/btageff__ttbar_powheg_pythia8_25ns_Moriond17.root")
         self.h_btag_eff_b    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_b"   ))
         self.h_btag_eff_c    = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_c"   ))
         self.h_btag_eff_udsg = copy.deepcopy(self.f_btag_eff.Get("h2_BTaggingEff_csv_med_Eff_udsg"))
@@ -121,23 +122,24 @@ class edgeFriends:
                              'HLT_HT_isUnprescaled']
     #################################################################################################################
     
-    def setPU(self, name):
-
-        if name.find("Run2017") != -1:
-           self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal.root", "READ")
-           self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up.root","READ")
-           self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down.root","READ")
-        else:    
-           self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal_" + name + ".root", "READ")
-           self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up_" + name + ".root","READ")
-           self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down_" + name + ".root","READ")
-        self.puHist   = copy.deepcopy( self.puFile.Get('puw') )
-        self.puHistUp = copy.deepcopy( self.puFileUp.Get('puw') )
-        self.puHistDn = copy.deepcopy( self.puFileDn.Get('puw') )
-        self.puFile.Close()
-        self.puFileUp.Close()
-        self.puFileDn.Close()
-    #################################################################################################################
+#    def setPU(self, name):
+#
+    #     if name.find("Run2017") != -1:
+    #        self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal.root", "READ")
+    #        self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up.root","READ")
+    #        self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down.root","READ")
+    #     else:    
+    #        self.puFile = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_nominal_" + name + ".root", "READ")
+    #        self.puFileUp = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_up_" + name + ".root","READ")
+    #        self.puFileDn = ROOT.TFile("/afs/cern.ch/user/p/pablom/public/pileupreweighting/weights_down_" + name + ".root","READ")
+    #     self.puHist   = copy.deepcopy( self.puFile.Get('puw') )
+    #     self.puHistUp = copy.deepcopy( self.puFileUp.Get('puw') )
+    #     self.puHistDn = copy.deepcopy( self.puFileDn.Get('puw') )
+    #     self.puFile.Close()
+    #     self.puFileUp.Close()
+    #     self.puFileDn.Close()
+    # ################################################################################################################
+    #
 
     def listBranches(self):
         label = self.label
@@ -398,12 +400,9 @@ class edgeFriends:
         ret['nVert'] = event.PV_npvs
         ret['nTrueInt'] = -1   
         ret['genWeight'] = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
-        puWt   = self.puHist  .GetBinContent(self.puHist  .FindBin(ntrue)) if not isData else 1.
-        puWtUp = self.puHistUp.GetBinContent(self.puHistUp.FindBin(ntrue)) if not isData else 1.
-        puWtDn = self.puHistDn.GetBinContent(self.puHistDn.FindBin(ntrue)) if not isData else 1.
-        ret["PileupW"]    = puWt
-        ret["PileupW_Up"] = puWtUp
-        ret["PileupW_Dn"] = puWtDn
+        ret["PileupW"]    = event.puWeight
+        ret["PileupW_Up"] = event.puWeightUp
+        ret["PileupW_Dn"] = event.puWeightDown
         ################## MET stuff
         ret['MET_pt'] = met
         ret['MET_phi'] = metphi 
