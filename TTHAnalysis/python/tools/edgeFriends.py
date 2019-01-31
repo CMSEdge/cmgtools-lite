@@ -345,8 +345,7 @@ class edgeFriends:
     def __call__(self,event):
     
         t0 = time.time()
-        ###### Atention: what do do here with is Data
-        isData = False # Atencion, needed to be fixed
+        isData = event.isData
    	
         ##### MC variables
         var_mcPt = 10 # mcPt
@@ -368,8 +367,8 @@ class edgeFriends:
         ################## Treatment of jets
         jetsc_jecUp = [j for j in Collection(event,"Jet","nJet")]
         jetsc_jecDn = [j for j in Collection(event,"Jet","nJet")]        
-        jetsc_jecUp = self.smearJets(jetsc_jecUp,  1.0)
-        jetsc_jecDn = self.smearJets(jetsc_jecDn, -1.0)
+        jetsc_jecUp = [] if isData else self.smearJets(jetsc_jecUp,  1.0)
+        jetsc_jecDn = [] if isData else self.smearJets(jetsc_jecDn, -1.0)
 
 
         ################## Treatment of n of true events
@@ -400,17 +399,17 @@ class edgeFriends:
         ret['nVert'] = event.PV_npvs
         ret['nTrueInt'] = -1   
         ret['genWeight'] = ( 1. if not hasattr(event, 'genWeight'         ) else getattr(event, 'genWeight') )
-        ret["PileupW"]    = event.puWeight
-        ret["PileupW_Up"] = event.puWeightUp
-        ret["PileupW_Dn"] = event.puWeightDown
+        ret["PileupW"]    = 1 if isData else event.puWeight
+        ret["PileupW_Up"] = 1 if isData else event.puWeightUp
+        ret["PileupW_Dn"] = 1 if isData else event.puWeightDown
         ################## MET stuff
         ret['MET_pt'] = met
         ret['MET_phi'] = metphi 
-        ret['MET_pt_jesTotalUp'] = event.METFixEE2017_pt_jesTotalUp
-        ret['MET_pt_jesTotalDown'] = event.METFixEE2017_pt_jesTotalDown
+        ret['MET_pt_jesTotalUp']   = 0 if isData else event.METFixEE2017_pt_jesTotalUp
+        ret['MET_pt_jesTotalDown'] = 0 if isData else event.METFixEE2017_pt_jesTotalDown
         # Atencion: Not sure if necessary 
-        ret['MET_pt_unclustEnUp'] = event.METFixEE2017_pt_unclustEnUp
-        ret['MET_pt_unclustEnDown'] = event.METFixEE2017_pt_unclustEnDown
+        ret['MET_pt_unclustEnUp']   = 0 if isData else event.METFixEE2017_pt_unclustEnUp
+        ret['MET_pt_unclustEnDown'] = 0 if isData else event.METFixEE2017_pt_unclustEnDown
         ret['GenMET_pt']     = -1
         ret['GenMET_phi'] = -1
         ################## SUSY masses stuff
@@ -1415,7 +1414,7 @@ def _susyEdgeTight(lep):
         #etatest = (abs(lep.etaSc) if hasattr(lep, 'etaSc') else abs(lep.eta))
         if (etatest > 1.4442 and etatest < 1.566) : return False
 
-        if (lep.convVeto == 0) or (ord(lep.lostHits) > 0) : return False
+        if (lep.convVeto == 0) or (lep.lostHits > 0) : return False
         #if leppt < 10.: return False
         if lep.miniPFRelIso_all >= 0.1: return False
         if etatest < 0.8:
