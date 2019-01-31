@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os, re, types, sys, subprocess
+import time
 from collections import defaultdict
 if "--tra2" in sys.argv:
     print "Will use the new experimental version of treeReAnalyzer"
@@ -13,6 +14,15 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 MODULES = []
 
+def getrunningjobs():
+    jobs = subprocess.check_output(["qstat"])    
+    count = 0
+    for lin in jobs.split('\n')[2:]:
+        if 'R' in lin.split()  : count = count + 1
+        elif 'Q' in lin.split(): count = count + 1
+    print 'now %d jobs are running or waiting'%count
+    return count
+        
 class VariableProducer(Module):
     def __init__(self,name,booker,modules):
         Module.__init__(self,name,booker)
@@ -89,6 +99,7 @@ parser.add_option("--env",   dest="env",     type="string", default="lxbatch", h
 parser.add_option("--run",   dest="runner",     type="string", default="lxbatch_runner.sh", help="Give the runner script (default: lxbatch_runner.sh)");
 parser.add_option("--bk",   dest="bookkeeping",  action="store_true", default=False, help="If given the command used to run the friend tree will be stored");
 parser.add_option("--tra2",  dest="useTRAv2", action="store_true", default=False, help="Use the new experimental version of treeReAnalyzer");
+parser.add_option("--maxjobs",  dest="maxjobs", type="int", default=-1, help="Number of jobs that will run simultaneously. It will wait for the others to finish");
 (options, args) = parser.parse_args()
 
 
@@ -214,7 +225,6 @@ for D in sorted(glob(args[0]+"/*")):
     fname    = "%s/%s/%s_Events.root" % (D,options.tree,options.tree)
     print "%s/%s/Events.root" % (D,options.tree)
     if (not os.path.exists(fname)) and (os.path.exists("%s/%s/Events.root" % (D,options.tree)) ):
-        print 'we are here'
         treename = "Events"
         fname    = "%s/%s/Events.root" % (D,options.tree)
 
@@ -407,7 +417,13 @@ if options.queue:
                 cmd = "echo \"{base} -d {data} {post}\" | {super} {writelog}".format(super=super, writelog=writelog, base=basecmd, data=name, chunk=chunk, post=friendPost)
         print cmd
         if not options.pretend:
-            os.system(cmd)
+            if options.maxjobs > 0:
+                while getrunningjobs() > options.maxjobs:
+                    print 'More than %d jobs are running. Waiting 10 s'%options.maxjobs
+                    time.sleep(10)
+                os.system(cmd)
+            else:
+                os.system(cmd)
 
     exit()
 
