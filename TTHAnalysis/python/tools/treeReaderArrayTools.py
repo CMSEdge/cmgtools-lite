@@ -43,7 +43,9 @@ def readBranch(tree, branchName):
     if branchName in tree._ttras: 
         return tree._ttras[branchName]
     elif branchName in tree._ttrvs: 
-        return tree._ttrvs[branchName].Get()[0]
+        ret = tree._ttrvs[branchName].Get()
+        if len(ret) == 0: return 0
+        else: return [0]
     else:
         branch = tree.GetBranch(branchName)
         if not branch: raise RuntimeError, "Unknown branch %s" % branchName
@@ -54,7 +56,11 @@ def readBranch(tree, branchName):
         if leaf.GetLen() == 1 and not bool(leaf.GetLeafCount()): 
             _vr = _makeValueReader(tree, typ, branchName)
             tree.gotoEntry(tree.entry,forceCall=True) # force calling SetEntry as a new ValueReader was created
-            ret = _vr.Get()[0]
+            ret = _vr.Get()
+            if len(ret) == 0:
+                return 0
+            else: 
+                ret = ret[0]
             return ord(ret) if type(ret)==str else ret
         else:
             _ar = _makeArrayReader(tree, typ, branchName)
@@ -65,7 +71,7 @@ def readBranch(tree, branchName):
 ####### PRIVATE IMPLEMENTATION PART #######
 
 _rootType2Python = { 'Int_t':int, 'Long_t':long, 'UInt_t': "unsigned int",  'ULong_t':long, 'ULong64_t':"unsigned long long",
-                     'Float_t':float, 'Double_t':float , 'UChar_t': "unsigned char", 'Bool_t' : bool}
+                     'Float_t':float, 'Double_t':float , 'UChar_t': "unsigned char", 'Bool_t' : bool, 'Char_t' : "char"}
 
 def _makeArrayReader(tree, typ, nam):
     if not tree._ttreereader._isClean: _remakeAllReaders(tree)

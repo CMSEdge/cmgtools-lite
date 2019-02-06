@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os, re, types, sys, subprocess
 import time
+import select
 from collections import defaultdict
 if "--tra2" in sys.argv:
     print "Will use the new experimental version of treeReAnalyzer"
@@ -419,8 +420,17 @@ if options.queue:
         if not options.pretend:
             if options.maxjobs > 0:
                 while getrunningjobs() > options.maxjobs:
-                    print 'More than %d jobs are running. Waiting 10 s'%options.maxjobs
-                    time.sleep(10)
+                    print 'More than %d jobs are running. Waiting 10 s. You can modify the number of maxjobs'%options.maxjobs
+                    i, o, e = select.select( [sys.stdin], [], [], 10 )
+                    if i: 
+                        try:
+                            newMax = int(sys.stdin.readline().strip())
+                            print 'Now number of max jobs is set to %d'%newMax
+                            options.maxjobs = newMax
+                            
+                        except ValueError:
+                            print 'Wrong input' 
+                            
                 os.system(cmd)
             else:
                 os.system(cmd)
