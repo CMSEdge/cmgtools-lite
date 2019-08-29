@@ -348,7 +348,7 @@ if options.queue:
     elif options.env == "oviedo":
         if options.queue != "":
             options.queue = "batch" 
-        super  = "qsub -q {queue} -N happyTreeFriend".format(queue = options.queue)
+        super  = "qsub -N happyTreeFriend"
         runner = "lxbatch_runner.sh"
         theoutput = theoutput.replace('/pool/ciencias/','/pool/cienciasrw/')
     else: # Use lxbatch by default
@@ -406,7 +406,7 @@ if options.queue:
         if chunk != -1:
             if options.logdir: writelog = "-o {logdir}/{data}_{chunk}.out -e {logdir}/{data}_{chunk}.err".format(logdir=logdir, data=name, chunk=chunk)
             cmd = "{super} {writelog} {base} -d {data} -c {chunk} {post}".format(super=super, writelog=writelog, base=basecmd, data=name, chunk=chunk, post=friendPost)
-            if options.queue == "batch":
+            if options.queue == "batch" and options.env != 'oviedo':
                 cmd = "echo \"{base} -d {data} -c {chunk} {post}\" | {super} {writelog}".format(super=super, writelog=writelog, base=basecmd, data=name, chunk=chunk, post=friendPost)
             if fs:
                 cmd += " --fineSplit %d --subChunk %d" % (fs[1], fs[0])
@@ -414,7 +414,7 @@ if options.queue:
             if options.logdir: writelog = "-o {logdir}/{data}.out -e {logdir}/{data}.err".format(logdir=logdir, data=name)
             cmd = "{super} {writelog} {base} -d {data} {post}".format(super=super, writelog=writelog, base=basecmd, data=name, chunk=chunk, post=friendPost)
 
-            if options.queue == "batch":
+            if options.queue == "batch" and options.env != 'oviedo':
                 cmd = "echo \"{base} -d {data} {post}\" | {super} {writelog}".format(super=super, writelog=writelog, base=basecmd, data=name, chunk=chunk, post=friendPost)
         print cmd
         if not options.pretend:
@@ -499,6 +499,7 @@ def _runIt(myargs):
                 if re.match(pat,m):
                     toRun[m] = True
         modulesToRun = [ (m,v) for (m,v) in MODULES if m in toRun ]
+
     el = EventLoop([ VariableProducer(options.treeDir,booker,modulesToRun), ])
     el.loop([tb], eventRange=range)
     booker.done()

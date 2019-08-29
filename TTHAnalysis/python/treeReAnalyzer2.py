@@ -109,7 +109,7 @@ class EventLoop:
                 if maxEvents > 0 and i >= maxEvents-1: break
                 e = Event(tree,i)
                 if cut != None:
-                    evno = e.event # force some eval of a plain branch (apparently this is needed)
+                    evno = e.year # force some eval of a plain branch (apparently this is needed)
                     cutres = e.eval(cut)
                     if not cutres: continue
                 ret = True

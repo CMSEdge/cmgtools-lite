@@ -45,7 +45,7 @@ def readBranch(tree, branchName):
     elif branchName in tree._ttrvs: 
         ret = tree._ttrvs[branchName].Get()
         if len(ret) == 0: return 0
-        else: return [0]
+        else: return ret[0]
     else:
         branch = tree.GetBranch(branchName)
         if not branch: raise RuntimeError, "Unknown branch %s" % branchName
