@@ -153,11 +153,11 @@ class Triggers:
             ret['%s_%s'%(self.label, chan)] = fires
         filters = True
         for filt in self.filterList:
-            if not getattr(event, filt + '_Edge' ):
-                print 'we dont have filter', filt
+            if not getattr(event, filt):
+                #print 'we dont have filter', filt
                 filters = False
         if event.isData: 
-            ret[self.filters] = filters and event.Flag_eeBadScFilter_Edge
+            ret[self.filters] = filters and event.Flag_eeBadScFilter
         else :
             ret[self.filters] = filters
         return ret
