@@ -134,7 +134,7 @@ class Triggers:
             'Flag_HBHENoiseFilter',
             'Flag_HBHENoiseIsoFilter',
             'Flag_EcalDeadCellTriggerPrimitiveFilter',
-            'Flag_badMuonFilter',
+            'Flag_BadPFMuonFilter',
             'Flag_ecalBadCalibFilter',
             # 'Flag_eeBadScFilter' # data only (hardcoded below) 
         ]
